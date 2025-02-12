@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Portfolio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: url('Me.jpg') no-repeat center center fixed;
+            background-size: 80%;
+            background-position: center;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: -1;
+        }
+
+        a {
+            color: #bb86fc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #3700b3;
+        }
+
+        header, footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: #a0a0a0;
+        }
+
+        nav {
+            margin-top: 15px;
+        }
+
+        nav a {
+            margin: 0 15px;
+            font-size: 1.1em;
+        }
+
+        section {
+            padding: 50px 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        footer p {
+            color: #a0a0a0;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #bb86fc;
+            color: #121212;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .card i {
+            font-size: 2em;
+            margin-right: 15px;
+            color: #bb86fc;
+        }
+
+        .card .card-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .card .card-content h3 {
+            flex-grow: 1;
+        }
+
+        .more-info {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .contact-info {
+            margin-top: 30px;
+        }
+
+        .contact-info p {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .contact-info a {
+            font-size: 1.2em;
+            color: #bb86fc;
+        }
+
+        .contact-info a:hover {
+            color: #3700b3;
+        }
+
+        .images {
+    display: flex;
+    justify-content: flex-start; 
+    gap: 5px; 
+    margin-top: 20px;
+}
+
+        .images img {
+            width: 25%; 
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-right: 1px;
+        }
+
+        .images img:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Michael Weichenberger</h1>
+        <p>App Developer Swift/Kotlin | SwiftUI Enthusiast | Firebase Experte</p>
+        <nav>
+            <a href="#about">Über mich</a>
+            <a href="#projects">Projekte</a>
+            <a href="#contact">Kontakt</a>
+        </nav>
+    </header>
+
+    <section id="about">
+        <h2>Über mich</h2>
+        <div class="card">
+            <p>Ich bin ein leidenschaftlicher Entwickler mit Schwerpunkt auf SwiftUI und Firebase. Doch meine Reise begann nicht in der Welt des Codes, sondern im Bauwesen. Ursprünglich war ich als Maler u. Lackierer tätig, wo ich ein Auge für Details und kreative Lösungen entwickelte. Mit der Zeit entdeckte ich meine Begeisterung für Technologie und begann, mich intensiv mit App-Entwicklung auseinanderzusetzen.</p>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2>Projekte</h2>
+
+        <!-- Family Cloud App -->
+        <div class="card">
+            <div class="card-content">
+                <i class="fas fa-cloud"></i>
+                <h3>Family Cloud App</h3>
+            </div>
+            <p>Eine SwiftUI-App, die Firebase nutzt, um Fotos sicher in der Cloud zu speichern und mit der Familie zu teilen. Benutzer können Ordner erstellen und Bilder verwalten.</p>
+            <button class="btn" onclick="toggleInfo('project1')">Mehr erfahren</button>
+            <div class="more-info" id="project1">
+                <p>Die Family Cloud App ermöglicht es, Fotos in Ordnern zu speichern und diese mit anderen Familienmitgliedern zu teilen. Die App verwendet Firebase zur Datenspeicherung und bietet eine benutzerfreundliche Oberfläche zum Verwalten von Fotos und Ordnern.</p>
+                <div class="images">
+                    <img src="AnmeldungScreen.png" alt="Cloud App Image 1">
+                    <img src="OrnderScreen.png" alt="Cloud App Image 2">
+                    <img src="BilderScreen.png" alt="Cloud App Image 1">
+                    <img src="BilderDetailScreen.png" alt="Cloud App Image 2">
+                </div>
+                <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                <a href="https://github.com/Michael-Weichenberger/family-Cloud-App" target="_blank" class="github-link">family-Cloud-App auf GitHub</a>
+            </div>
+        </div>
+
+        <!-- CV App -->
+        <div class="card">
+            <div class="card-content">
+                <i class="fas fa-address-card"></i>
+                <h3>CV App</h3>
+            </div>
+            <p>Eine App, die meinen Lebenslauf darstellt und gleichzeitig mein erster Swift Code war.</p>
+            <button class="btn" onclick="toggleInfo('project2')">Mehr erfahren</button>
+            <div class="more-info" id="project2">
+                <p>Diese App zeigt meinen Lebenslauf auf einem mobilen Gerät an. Sie war mein erster Versuch in Swift und ein wichtiger Meilenstein in meiner App-Entwicklungskarriere.</p>
+                <div class="images">
+                    <img src="HomescreenCVapp.png" alt="CV App Image 1">
+                    <img src="ÜberMichCVapp.png" alt="CV App Image 2">
+                </div>
+                <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                <a href="https://github.com/Michael-Weichenberger/Lebenslauf-App" target="_blank" class="github-link">CV App auf GitHub</a>
+            </div>
+        </div>
+
+        <!-- Pop-M -->
+        <div class="card">
+            <div class="card-content">
+                <i class="fas fa-laptop-code"></i>
+                <h3>Pop-M</h3>
+            </div>
+            <p>Mein erster HTML-Versuch.</p>
+            <button class="btn" onclick="toggleInfo('project3')">Mehr erfahren</button>
+            <div class="more-info" id="project3">
+                <h3>Pop Musik Web App</h3>
+                <p>Dies ist eine einfache Webanwendung für einen Popmusik-Channel namens "Pop-M". Die Anwendung umfasst Informationen über das Projekt, eine "Über uns"-Seite sowie eine Startseite, die die neuesten Popstars und deren Musik zeigt.</p>
+                <div class="images">
+                    <img src="PopM1.png" alt="Pop-M Image 1">
+                    <img src="PopM.png" alt="Pop-M Image 2">
+                </div>
+                <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                <a href="https://github.com/Michael-Weichenberger/Pop-M" target="_blank" class="github-link">Pop-M auf GitHub</a>
+            </div>
+        </div>
+
+        <!-- We-Cook -->
+        <div class="card">
+            <div class="card-content">
+                <i class="fas fa-utensils"></i>
+                <h3>WeCook</h3>
+            </div>
+            <p>Eine Rezept-App in Kotlin.</p>
+            <button class="btn" onclick="toggleInfo('project4')">Mehr erfahren</button>
+            <div class="more-info" id="project4">
+                <p>WeCook ist eine Android-App, mit der du neue Rezepte entdecken, nach Rezepten suchen und deine Favoriten für später speichern kannst. Die App nutzt die Spoonacular API, um eine breite Palette von Rezepten anzubieten und dir dabei zu helfen, neue kulinarische Inspirationen zu finden.</p>
+                <div class="images">
+                    <img src="List_Screenshot.png" alt="We-Cook Image 1">
+                    <img src="Detail_Screenshot.png" alt="We-Cook Image 2">
+                </div>
+                <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                <a href="https://github.com/Michael-Weichenberger/We-Cook-" target="_blank" class="github-link">WeCook auf GitHub</a>
+            </div>
+        </div>
+
+        <!-- Quotes App -->
+        <div class="card">
+            <div class="card-content">
+                <i class="fas fa-home"></i>
+                <h3>Qoutesapp</h3>
+            </div>
+            <p>Eine App mit Zitaten in Swift .</p>
+            <button class="btn" onclick="toggleInfo('project5')">Mehr erfahren</button>
+            <div class="more-info" id="project5">
+                <p>Diese iOS-App präsentiert inspirierende, motivierende und andere Zitate vor wechselnden Hintergrundbildern. Benutzer können Zitate nach Kategorien filtern, neue zufällige Zitate anzeigen lassen und ihre Lieblingszitate als Favoriten markieren. </p>
+                <div class="images">
+                    <img src="Qoutes1.png" alt="Qoutesapp Image 1">
+                    <img src="Qoutes2.png" alt="Qoutesapp Image 2">
+                    <img src="qoutes3.png" alt="Qoutesapp Image 2">
+                </div>
+                <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                <a href="https://github.com/Michael-Weichenberger/QoutesApp" target="_blank" class="github-link">Qoutes-App auf GitHub</a>
+            </div>
+        </div>
+
+    
+        
+            <!-- MusikPlayer -->
+            <div class="card">
+                <div class="card-content">
+                    <i class="fas fa-headphones"></i>
+                    <h3>MusikPlayer</h3>
+                </div>
+                <p>Eine Musikplayer-App in Swift.</p>
+                <button class="btn" onclick="toggleInfo('project6')">Mehr erfahren</button>
+                <div class="more-info" id="project6">
+                    <p>MusikPlayer ist eine einfache Musikplayer-App, die mit Swift entwickelt wurde. Sie unterstützt das Abspielen von Musik und bietet grundlegende Funktionen wie Play, Pause und Lautstärkeregelung.</p>
+                    <div class="images">
+                        <img src="MusicAppTop10.png" alt="MusikPlayer Image 1">
+                        <img src="MusicappSearch.png" alt="MusikPlayer Image 2">
+                        <img src="MusicAppDetail.png" alt="MusikPlayer Image 2">
+                    </div>
+                    <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                    <a href="https://github.com/Michael-Weichenberger/MusikPlayer" target="_blank" class="github-link">MusikPlayer auf GitHub</a>
+                </div>
+            </div>
+
+
+             <!-- Portfolio Website -->
+             <div class="card">
+                <div class="card-content">
+                    <i class="fas fa-headphones"></i>
+                    <h3>Portfolio Website </h3>
+                </div>
+                <p>Auch diese Website wurde von mir selbst erstellt.</p>
+                <button class="btn" onclick="toggleInfo('project7')">Mehr erfahren</button>
+                <div class="more-info" id="project7">
+                    <p>Eine Website um zu zeigen wer ich bin und was ich bisher alles schon erreicht habe in meiner kurzen aber sehr intensiven Zeit in der IT Branche.</p>
+                    <div class="images">
+                        <img src="Portfolio.png" alt="Portfolio Image 1">
+                        <img src="Portfolio2.png" alt="Portfolio Image 2">
+                    </div>
+                    <p>Für den Code und weitere Details besuche bitte das GitHub-Repository:</p>
+                    <a href="https://github.com/Michael-Weichenberger/MusikPlayer" target="_blank" class="github-link">Portfolio auf GitHub</a>
+                </div>
+            </div>
+
+    </section>
+
+    <section id="contact" class="contact-info">
+        <h2>Kontakt</h2>
+        <p>Du kannst mich über folgende Kanäle erreichen:</p>
+        <p><a href="mailto:mhdweichenberger@gmail.com">Email: mhdweichenberger@gmail.com</a></p>
+        <p><a href="https://github.com/Michael-Weichenberger" target="_blank">Zu meinem Github Profil geht es hier.</a></p>
+        <p><a href="https://www.linkedin.com/in/michael-weichenberger-50b0b0291/" target="_blank">Zu meinem linkedin Profil geht es hier.</a></p>
+        <p><a href="https://www.xing.com/profile/michael_weichenberger010287/web_profiles?expandNeffi=true" target="_blank">Zu meinem xing Profil geht es hier.</a></p>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Michael Weichenberger</p>
+    </footer>
+
+    <script>
+        function toggleInfo(projectId) {
+            var moreInfo = document.getElementById(projectId);
+            if (moreInfo.style.display === "none" || moreInfo.style.display === "") {
+                moreInfo.style.display = "block";
+            } else {
+                moreInfo.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
