@@ -52,14 +52,17 @@ header, footer {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
+/* Header */
 header h1 {
     font-size: 6vw;  /* Dynamische Schriftgröße basierend auf der Viewport-Breite */
     margin-bottom: 20px;
     color: #d0bf9d;
-    white-space: nowrap;  /* Verhindert Umbrüche innerhalb des Textes */
+    white-space: normal;  /* Ermöglicht das Umbruch des Textes */
     overflow: hidden;     /* Verhindert, dass der Text überläuft */
     text-overflow: ellipsis; /* Zeigt "..." an, wenn der Text abgeschnitten wird */
     padding: 0 10px;      /* Polsterung hinzufügen, um den Text von den Rändern zu entfernen */
+    word-wrap: break-word; /* Ermöglicht das Umbrechen von langen Wörtern, falls nötig */
+    text-align: center;   /* Zentriert den Text */
 }
 
 header p {
