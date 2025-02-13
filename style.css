@@ -1,11 +1,18 @@
-/* Google Fonts - Roboto */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Apple SF Pro Font */
+@font-face {
+    font-family: "SF Pro";
+    src: url("SFPro.woff2") format("woff2"),
+         url("SFPro.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 body {
@@ -30,12 +37,12 @@ body::before {
 
 /* Links */
 a {
-    color: #bb86fc;
+    color: #d0bf9d;
     text-decoration: none;
 }
 
 a:hover {
-    color: #9b4dff;
+    color: #000;
 }
 
 /* Header und Footer */
@@ -49,7 +56,8 @@ header, footer {
 header h1 {
     font-size: 4em;
     margin-bottom: 20px;
-    color: #bb86fc;
+    color: #d0bf9d;
+  
 }
 
 header p {
@@ -71,7 +79,7 @@ nav a {
 }
 
 nav a:hover {
-    background-color: #9b4dff;
+    background-color: #d0bf9d;
     color: #fff;
 }
 
@@ -125,7 +133,7 @@ section.about-me {
 .card i {
     font-size: 2em;
     margin-right: 15px;
-    color: #bb86fc;
+    color: #d0bf9d;
 }
 
 .card .card-content {
@@ -142,8 +150,8 @@ section.about-me {
     display: inline-block;
     margin-top: 20px;
     padding: 12px 25px;
-    background-color: #bb86fc;
-    color: #fff;
+    background-color: #d0bf9d;
+    color: #000;
     border-radius: 25px;
     text-align: center;
     font-size: 1.2em;
@@ -154,14 +162,14 @@ section.about-me {
 }
 
 .btn:hover {
-    background-color: #9b4dff;
+    background-color: #d0bf9d;
     transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn:active {
     transform: scale(0.95);
-    background-color: #7a3fc8;
+    background-color: #d0bf9d;
 }
 
 /* Mehr Informationen */
@@ -184,11 +192,11 @@ section.about-me {
 
 .contact-info a {
     font-size: 1.2em;
-    color: #bb86fc;
+    color: #d0bf9d;
 }
 
 .contact-info a:hover {
-    color: #9b4dff;
+    color: #d0bf9d;
 }
 
 /* Bilder */
