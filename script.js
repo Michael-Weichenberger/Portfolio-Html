@@ -1,8 +1,1 @@
-function toggleInfo(projectId) {
-    var moreInfo = document.getElementById(projectId);
-    if (moreInfo.style.display === "none" || moreInfo.style.display === "") {
-        moreInfo.style.display = "block";
-    } else {
-        moreInfo.style.display = "none";
-    }
-}
+function toggleInfo(l){var e=document.getElementById(l);"none"===e.style.display||""===e.style.display?e.style.display="block":e.style.display="none"}
