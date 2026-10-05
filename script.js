@@ -81,7 +81,8 @@ function triggerCleanAutomation(event) {
         message: `Gewünschte Position / Rolle: ${role}`
     };
 
-    emailjs.send('service_cqvu0vn', 'iu8nyif', templateParams)
+    // Korrigierte Template-ID eingesetzt
+    emailjs.send('service_cqvu0vn', 'template_fzcue9c', templateParams)
         .then(() => {
             if (formElement && successState && successDesc) {
                 formElement.style.display = 'none';
