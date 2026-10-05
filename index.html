@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Michael Weichenberger | IT-Support, Systemadministration & Cloud</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- EmailJS SDK & Init -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init({
+                publicKey: "yp4kKratoM3VsQhBg",
+            });
+        })();
+    </script>
+</head>
+<body class="intro-active">
+
+<!-- KINETIC CURSOR -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- INTRO SPLASH -->
+<div id="intro-splash">
+    <div class="splash-content" style="max-width: 900px; width: 100%; margin: 0 auto; padding: 0 20px;">
+        <div class="studio-tag" style="white-space: nowrap; font-size: clamp(0.65rem, 1.2vw, 0.85rem); letter-spacing: 1px;">IT-Support • Systemadministration • SaaS Onboarding</div>
+        <h1 class="mega-title text-gradient" style="margin-bottom: 12px;">Michael Weichenberger</h1>
+        <p style="font-size: 1.25rem; color: var(--text-muted); font-weight: 400;">Technisches Fundament trifft auf jahrelange Praxis- und Admin-Kompetenz</p>
+        <button id="enter-portfolio-btn" class="btn-studio hover-target">
+            <span>System initialisieren</span>
+            <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+        </button>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<div id="fixed-nav-bar">
+    <div class="nav-logo-wrapper" style="width: 40px;"></div>
+    <nav class="top-nav-links">
+        <a href="#about">Profil</a>
+        <a href="#skills">Kompetenzen</a>
+        <a href="#projects">Projekte</a>
+        <a href="#credentials">Zertifikate</a>
+        <a href="#hire-me">Remote Roles</a>
+        <a href="#contact">Kontakt</a>
+    </nav>
+</div>
+
+<!-- HERO SECTION -->
+<div class="container">
+    <header class="hero reveal" style="padding-top: 90px;">
+        <div class="hero-grid" style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: center;">
+            <div class="hero-text-content">
+                <h1 class="mega-title" style="font-size: clamp(2.5rem, 4.5vw, 4.5rem);"><span class="text-gradient">IT-Support & Admin.</span><br><span class="text-gradient">Systeme, die laufen.</span></h1>
+                <span class="hero-subtitle-badge text-gradient" style="margin: 15px 0;">Remote & Hybrid (Augsburg & Umgebung / DACH)</span>
+                <p style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px;">Souveräner technischer Support, Active Directory und Betriebssystem-Management. Ich verbinde tiefes Know-how in Windows & macOS mit echter Hands-on-Praxis aus Unternehmens-Projekten.</p>
+            </div>
+            <div class="hero-image-wrapper" style="text-align: center;">
+                <img src="assets/bewerbungsfoto Kopie.png" alt="Michael Weichenberger" class="hero-avatar" style="width: 100%; max-width: 260px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            </div>
+        </div>
+        <div class="quick-facts" style="margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <div class="fact-item"><i class="fas fa-certificate"></i><span>Zertifiziert</span><p>Google IT Support, Project Management & AI</p></div>
+            <div class="fact-item"><i class="fas fa-network-wired"></i><span>Admin-Praxis</span><p>Active Directory, Rechtevergabe & Laptop-Management</p></div>
+            <div class="fact-item"><i class="fas fa-laptop-code"></i><span>Multi-OS</span><p>Windows 10/11 & macOS Profi-Setup</p></div>
+        </div>
+    </header>
+</div>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="about-section reveal">
+    <div class="about-text" style="max-width: 800px; margin: 0 auto; padding: 0 24px;">
+        <h2 class="text-gradient" style="font-size: 2.75rem; margin-bottom: 25px;">Vom Betriebssystem bis zur Nutzer-Verwaltung.</h2>
+        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">Wer heute im Support oder in der Administration arbeitet, braucht tiefes Systemwissen. Bei der Dörfer GmbH habe ich die komplette IT-Steuerung, den Webauftritt sowie die Rechtevergabe und Absicherung der Firmen-Laptops eigenverantwortlich übernommen.</p>
+        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.6;">Egal ob Windows 10/11, macOS (auf dem ich unter anderem ambitionierte Projekte wie meinen persönlichen Assistenten Jarvis entwickle), Active Directory oder Office-Applikationen – ich verstehe, wie Netzwerke, Berechtigungen und Betriebssysteme von Grund auf funktionieren.</p>
+    </div>
+</section>
+
+<!-- SKILLS SECTION -->
+<section id="skills" class="list-section reveal">
+    <h2 class="section-title">Kernkompetenzen & System-Stack.</h2>
+    <div class="clean-list">
+        <div class="list-item"><i class="fas fa-desktop list-icon"></i><div><div class="list-title">OS Administration & Support (Windows & macOS)</div><div class="list-desc">Tiefgehendes Know-how in Windows 10/11 und macOS, Installation, Konfiguration, App-Ökosysteme (inkl. MS Office / Word).</div></div></div>
+        <div class="list-item"><i class="fas fa-id-card-clip list-icon"></i><div><div class="list-title">Active Directory & Benutzerverwaltung</div><div class="list-desc">Strukturierte Rechtevergabe, Gruppenrichtlinien, Zugriffskontrollen und Berechtigungsmanagement für Unternehmensstrukturen.</div></div></div>
+        <div class="list-item"><i class="fas fa-headset list-icon"></i><div><div class="list-title">Technical Support & Troubleshooting</div><div class="list-desc">Strukturierte Fehleranalyse im 1st- & 2nd-Level Support, Incident Management und praxisnahe Problemlösung.</div></div></div>
+        <div class="list-item"><i class="fas fa-users-gear list-icon"></i><div><div class="list-title">SaaS Onboarding & Customer Success</div><div class="list-desc">Betreuung von Geschäftskunden und Privatkunden, Anwenderschulung und reibungslose System-Einführung.</div></div></div>
+        <div class="list-item"><i class="fas fa-server list-icon"></i><div><div class="list-title">Infrastruktur & Web-Management</div><div class="list-desc">Linux/Windows Server, Webhosting, Plesk, DNS, TLS/SSL-Management und Sicherheits-Setup (bekannt aus Praxisprojekten).</div></div></div>
+    </div>
+</section>
+
+<!-- PROJECTS SECTION -->
+<section id="projects" class="projects-section reveal">
+    <h2 class="section-title" style="text-align: center; margin-bottom: 80px;">Praxis & Umgesetzte Systeme.</h2>
+
+    <!-- Projekt 1 -->
+    <div class="project-row">
+        <div class="project-visual-overlap tilt-card">
+            <img src="assets/Dörfer_Website_Partner_Macbook.png" alt="Dörfer GmbH MacBook" class="device-back">
+        </div>
+        <div class="project-info">
+            <h3>Dörfer GmbH IT-Infrastruktur</h3>
+            <div class="tech-tags"><span>Rechtevergabe</span> <span>Laptop-Admin</span> <span>Web-Infrastruktur</span></div>
+            <p>Eigenständige Administration der Firmen-Laptops, gezielte Rechtevergabe für Chefs und Team, Web-Infrastruktur, Absicherung und technischer Support.</p>
+            <a href="https://www.doerfer-gmbh.de" target="_blank" class="link-btn-text">Zur Live-Website <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+
+    <!-- Projekt 2 -->
+    <div class="project-row">
+        <div class="project-visual-overlap tilt-card">
+            <img src="assets/KI_Lernapp_Welcomescreen.png" alt="KI Lernapp iPhone" class="device-front-phone">
+        </div>
+        <div class="project-info">
+            <h3>KI-Lern-App & Cloud-Architektur</h3>
+            <div class="tech-tags"><span>SwiftUI</span> <span>Firebase</span> <span>OCR Integration</span></div>
+            <p>Entwicklung einer mobilen Plattform mit Cloud-User-Management und implementierter OCR-Texterkennung zur automatisierten Workflow-Verarbeitung.</p>
+            <a href="https://github.com/Michael-Weichenberger/KILernapp" target="_blank" class="link-btn-text">Source Code ansehen <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+
+    <!-- Projekt 3 -->
+    <div class="project-row">
+        <div class="project-visual-overlap tilt-card">
+            <img src="assets/Portfolio_IMac.png" alt="Portfolio iMac" class="device-back">
+        </div>
+        <div class="project-info">
+            <h3>High-Performance Web-Engineering</h3>
+            <div class="tech-tags"><span>Frontend Architecture</span> <span>UI/UX</span> <span>Automation</span></div>
+            <p>Konzeption und Umsetzung dieser Plattform – optimiert für Performance, klares Design und integrierte Prozess-Automatisierungen.</p>
+            <a href="https://github.com/Michael-Weichenberger/Portfolio-Html" target="_blank" class="link-btn-text">Source Code ansehen <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- HIRE ME & EMAILJS AUTOMATION -->
+<section id="hire-me" class="list-section reveal" style="background: linear-gradient(180deg, var(--bg-pure) 0%, var(--bg-secondary) 100%); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 24px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <span class="studio-tag" style="margin-bottom: 12px; display: inline-block;">Available for Opportunities</span>
+            <h2 class="text-gradient" style="font-size: 2.25rem; margin-bottom: 12px;">Remote- & Hybrid-Rollen anfragen.</h2>
+            <p style="font-size: 1.05rem; color: var(--text-muted); max-width: 550px; margin: 0 auto;">
+                Suchen Sie Verstärkung für IT-Support, Systemadministration oder IT-Operations? Senden Sie mir direkt eine Nachricht.
+            </p>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.015); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.4);">
+            <form id="auto-hire-form" onsubmit="triggerCleanAutomation(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">Ihr Name / Unternehmen</label>
+                        <input type="text" id="hr-company" required placeholder="z.B. TechCorp GmbH" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">E-Mail-Adresse</label>
+                        <input type="email" id="hr-email" required placeholder="recruiter@unternehmen.de" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">Gewünschte Position / Rolle</label>
+                    <input type="text" id="hr-role" required placeholder="z.B. IT Support Specialist, Systemadministrator..." style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+                </div>
+
+                <button type="submit" class="btn-studio hover-target" style="width: 100%; justify-content: center; margin-top: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);">
+                    <span id="btn-text">Direktes Gespräch anfragen</span>
+                    <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
+                </button>
+            </form>
+
+            <div id="success-state" style="display: none; text-align: center; padding: 15px 0;">
+                <div style="width: 45px; height: 45px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: #fff; font-size: 1.1rem;">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 style="font-size: 1.35rem; margin-bottom: 8px; color: #fff;">Vielen Dank für das Interesse.</h3>
+                <p id="success-desc" style="color: var(--text-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto; line-height: 1.5;"></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CREDENTIALS SECTION -->
+<section id="credentials" class="list-section reveal" style="background: var(--bg-secondary);">
+    <h2 class="section-title">Offizielle Zertifikate & Qualifikationen.</h2>
+    <div class="credentials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+
+        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <img src="assets/google-it-support-professional-certificate.png" alt="Google IT Support" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <span class="cred-meta">Coursera • Jul 2026</span>
+            <div class="cred-title">Google IT Support Professional</div>
+            <div class="cred-desc">Ca. 100+ Stunden IT-Infrastruktur & Support.</div>
+        </div>
+
+        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <img src="assets/google-project-management-professional-certificate.png" alt="Google Project Management" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <span class="cred-meta">Coursera • Aug 2026</span>
+            <div class="cred-title">Google Project Management</div>
+            <div class="cred-desc">Ca. 140+ Stunden agile & klassische PM-Praxis.</div>
+        </div>
+
+        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <img src="assets/Google AI.jpg" alt="Google AI Professional" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <span class="cred-meta">Coursera • Aug 2026</span>
+            <div class="cred-title">Google AI Professional</div>
+            <div class="cred-desc">Ca. 80+ Stunden praxisorientierte KI-Module.</div>
+        </div>
+
+        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <img src="assets/Softwareentwickler Syntax Zertifikat.jpg" alt="Syntax Institut" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <span class="cred-meta">Syntax Institut • Dez 2024</span>
+            <div class="cred-title">Software-Entwickler (Kotlin & Swift)</div>
+            <div class="cred-desc">2.300 Unterrichtseinheiten Intensivausbildung.</div>
+        </div>
+
+    </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="contact-section reveal">
+    <div class="container">
+        <h2 class="mega-title"><span class="text-gradient">Lass uns sprechen.</span></h2>
+        <p style="color: var(--text-muted); margin-top: 10px; font-size: 1.2rem;">Ob Remote oder Hybrid in Augsburg und Umgebung – ich freue mich auf Ihre Nachricht.</p>
+        <div class="social-links" style="margin-top: 30px;">
+            <a href="mailto:mhdweichenberger@gmail.com" class="social-link"><i class="fas fa-envelope"></i> E-Mail</a>
+            <a href="https://github.com/Michael-Weichenberger" target="_blank" class="social-link"><i class="fab fa-github"></i> GitHub</a>
+            <a href="https://linkedin.com/in/michael-weichenberger-50b0b0291" target="_blank" class="social-link"><i class="fab fa-linkedin"></i> LinkedIn</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 Michael Weichenberger | IT-Support & Systemadministration</p>
+    <details style="display: inline-block; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 10px;">
+        <summary style="list-style: none; outline: none;">Impressum</summary>
+        <div style="margin-top: 10px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.7); line-height: 1.4;">
+            <strong>Angaben gemäß § 5 DDG:</strong><br>
+            Michael Weichenberger<br>
+            Deuringerstraße 1<br>
+            86462 Langweid am Lech<br><br>
+            <strong>Kontakt:</strong><br>
+            E-Mail: mhdweichenberger@gmail.com
+        </div>
+    </details>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

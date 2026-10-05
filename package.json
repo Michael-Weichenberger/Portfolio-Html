@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-html-main",
+  "version": "1.0.0",
+  "description": "Willkommen auf meiner Portfolio-Website! Hier präsentiere ich eine Auswahl meiner Projekte im Bereich App-Entwicklung und Webdesign.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
