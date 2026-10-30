@@ -3,273 +3,747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Michael Weichenberger | IT-Support, Systemadministration & Cloud</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>MW IT-SERVICES | Webdesign & Digitale Prozesse für Handwerk & Mittelstand | Augsburg & DE</title>
+    <meta name="description" content="Ihr Partner für Handwerksbetriebe & KMU in Langweid, Augsburg, München & deutschlandweit: Verkaufsstarke Websites, lokales SEO und smarte Büro-Digitalisierung.">
+    <meta name="keywords" content="Webdesign Handwerk Augsburg, Digitale Prozesse Mittelstand München, Website erstellen lassen Handwerker Ingolstadt, SEO Handwerk, IT-Services Langweid am Lech, Michael Weichenberger, Bürodigitalisierung Handwerk">
+    <meta name="author" content="Michael Weichenberger – MW IT-SERVICES">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="theme-color" content="#F7F5F0">
+    <link rel="canonical" href="https://mw-itservices.de/">
+
+    <!-- Geo-Tags für extremes Local SEO -->
+    <meta name="geo.region" content="DE-BY">
+    <meta name="geo.placename" content="Langweid am Lech, Augsburg">
+    <meta name="geo.position" content="48.4900;10.8539">
+    <meta name="ICBM" content="48.4900, 10.8539">
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:url" content="https://mw-itservices.de/">
+    <meta property="og:site_name" content="MW IT-SERVICES | Michael Weichenberger">
+    <meta property="og:title" content="MW IT-SERVICES | Webdesign & Digitale Prozesse für Handwerk & KMU">
+    <meta property="og:description" content="Weniger Büro-Chaos. Mehr Top-Aufträge. Verkaufsstarke Websites, regionale Google-Sichtbarkeit und smarte Prozesse für den Mittelstand.">
+
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- EmailJS SDK & Init -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function(){
-            emailjs.init({
-                publicKey: "yp4kKratoM3VsQhBg",
-            });
-        })();
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "ProfessionalService",
+                    "@id": "https://mw-itservices.de/#organization",
+                    "name": "MW IT-SERVICES – Michael Weichenberger",
+                    "url": "https://mw-itservices.de/",
+                    "email": "info@mw-itservices.de",
+                    "telephone": "+4915292610572",
+                    "priceRange": "€€",
+                    "description": "Spezialist für Handwerksbetriebe und Mittelstand im Raum Augsburg, Langweid am Lech, München, Ingolstadt, Nürnberg, Stuttgart und deutschlandweit.",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "Deuringerstrasse 1",
+                        "postalCode": "86462",
+                        "addressLocality": "Langweid am Lech",
+                        "addressRegion": "Bayern",
+                        "addressCountry": "DE"
+                    },
+                    "geo": {
+                        "@type": "GeoCoordinates",
+                        "latitude": 48.4900,
+                        "longitude": 10.8539
+                    },
+                    "areaServed": [
+                        { "@type": "City", "name": "Langweid am Lech" },
+                        { "@type": "City", "name": "Augsburg" },
+                        { "@type": "City", "name": "München" },
+                        { "@type": "City", "name": "Ingolstadt" },
+                        { "@type": "City", "name": "Nürnberg" },
+                        { "@type": "City", "name": "Stuttgart" },
+                        { "@type": "City", "name": "Ulm" },
+                        { "@type": "Country", "name": "Deutschland" }
+                    ]
+                }
+            ]
+        }
     </script>
 </head>
-<body class="intro-active">
+<body>
 
-<!-- KINETIC CURSOR -->
-<div class="cursor-dot" id="cursor-dot"></div>
-<div class="cursor-ring" id="cursor-ring"></div>
+<!-- LOKALE SVG-ICON-BIBLIOTHEK -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;" aria-hidden="true">
+    <symbol id="i-calendar" viewBox="0 0 448 512"><path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm329 105c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L329 297z"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 448 512"><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></symbol>
+    <symbol id="i-medal" viewBox="0 0 512 512"><path d="M223.75 130.75L154.62 15.54A31.997 31.997 0 0 0 127.18 0H16.03C3.08 0-4.5 14.57 2.92 25.18l111.27 158.96c29.72-27.77 67.52-46.83 109.56-53.39zM495.97 0H384.82c-11.24 0-21.66 5.9-27.44 15.54l-69.13 115.21c42.04 6.56 79.84 25.62 109.56 53.38L509.08 25.18C516.5 14.57 508.92 0 495.97 0zM256 160c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176zm92.52 157.26l-37.93 36.96 8.97 52.22c1.6 9.36-8.26 16.51-16.65 12.09L256 393.88l-46.9 24.65c-8.4 4.45-18.25-2.74-16.65-12.09l8.97-52.22-37.93-36.96c-6.82-6.64-3.05-18.23 6.35-19.59l52.43-7.64 23.43-47.52c4.21-8.55 16.4-8.55 20.61 0l23.43 47.52 52.43 7.64c9.4 1.36 13.17 12.95 6.35 19.59z"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 384 512"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 320 512"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 448 512"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 448 512"><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 576 512"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></symbol>
+    <symbol id="i-network" viewBox="0 0 640 512"><path d="M256 64H384v64H256V64zM240 0c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h48v32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96v32H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48H240c26.5 0 48-21.5 48-48V368c0-26.5-21.5-48-48-48H192V288H448v32H400c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48H560c26.5 0 48-21.5 48-48V368c0-26.5-21.5-48-48-48H512V288h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H352V192h48c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48H240zM96 448V384H224v64H96zm320-64H544v64H416V384z"/></symbol>
+    <symbol id="i-user-shield" viewBox="0 0 640 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H322.8c-3.1-8.8-3.7-18.4-1.4-27.8l15-60.1c2.8-11.3 8.6-21.5 16.8-29.7l40.3-40.3c-32.1-31-75.7-50.1-123.9-50.1H178.3zm435.5-68.3c-15.6-15.6-40.9-15.6-56.6 0l-29.4 29.4 71 71 29.4-29.4c15.6-15.6 15.6-40.9 0-56.6l-14.4-14.4zM375.9 417c-4.1 4.1-7 9.2-8.4 14.9l-15 60.1c-1.4 5.5 .2 11.2 4.2 15.2s9.7 5.6 15.2 4.2l60.1-15c5.6-1.4 10.8-4.3 14.9-8.4L576.1 358.7l-71-71L375.9 417z"/></symbol>
+    <symbol id="i-envelope" viewBox="0 0 512 512"><path d="M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 576 512"><path d="M234.7 42.7L197 56.8c-3 1.1-5 4-5 7.2s2 6.1 5 7.2l37.7 14.1L248.8 123c1.1 3 4 5 7.2 5s6.1-2 7.2-5l14.1-37.7L315 71.2c3-1.1 5-4 5-7.2s-2-6.1-5-7.2L277.3 42.7 263.2 5c-1.1-3-4-5-7.2-5s-6.1 2-7.2 5L234.7 42.7zM46.1 395.4c-18.7 18.7-18.7 49.1 0 67.9l34.6 34.6c18.7 18.7 49.1 18.7 67.9 0L529.9 116.5c18.7-18.7 18.7-49.1 0-67.9L495.3 14.1c-18.7-18.7-49.1-18.7-67.9 0L46.1 395.4zM484.6 82.6l-105 105-23.3-23.3 105-105 23.3 23.3z"/></symbol>
+    <symbol id="i-user-check" viewBox="0 0 640 512"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM625 177L497 305c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L591 143c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 512 512"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></symbol>
+    <symbol id="i-external" viewBox="0 0 512 512"><path d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 448 512"><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 512 512"><path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0z"/></symbol>
+    <symbol id="i-spinner" viewBox="0 0 512 512"><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></symbol>
+</svg>
 
-<!-- INTRO SPLASH -->
-<div id="intro-splash">
-    <div class="splash-content" style="max-width: 900px; width: 100%; margin: 0 auto; padding: 0 20px;">
-        <div class="studio-tag" style="white-space: nowrap; font-size: clamp(0.65rem, 1.2vw, 0.85rem); letter-spacing: 1px;">IT-Support • Systemadministration • SaaS Onboarding</div>
-        <h1 class="mega-title text-gradient" style="margin-bottom: 12px;">Michael Weichenberger</h1>
-        <p style="font-size: 1.25rem; color: var(--text-muted); font-weight: 400;">Technisches Fundament trifft auf jahrelange Praxis- und Admin-Kompetenz</p>
-        <button id="enter-portfolio-btn" class="btn-studio hover-target">
-            <span>System initialisieren</span>
-            <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
-        </button>
+<!-- SCHWEBENDE NAVBAR -->
+<header id="fixed-nav-bar">
+    <div class="nav-container">
+        <a href="#" class="nav-logo-link" aria-label="MW IT-SERVICES Startseite">
+            <img src="assets/mw-it-services-logo-kupfer-holz.png.jpeg"
+                 onerror="if(!this.dataset.f1){this.dataset.f1='1';this.src='mw-it-services-logo-kupfer-holz.png.jpeg';}else if(!this.dataset.f2){this.dataset.f2='1';this.src='assets/mw-it-services-logo-kupfer-holz.png';}"
+                 alt="MW IT-SERVICES Logo"
+                 class="nav-logo-icon">
+            <div class="nav-logo-text">
+                <span class="nav-brand-name">Michael Weichenberger</span>
+                <span class="nav-brand-sub">Digitale Prozesse & Web-Engineering</span>
+            </div>
+        </a>
+
+        <nav class="top-nav-links" aria-label="Hauptnavigation">
+            <a href="#services">Leistungen & Preise</a>
+            <a href="#expertise">Profil & Praxis</a>
+            <a href="#calculator">Ersparnis-Rechner</a>
+            <a href="#projects">Referenzen</a>
+            <a href="#region-faq">Region & FAQ</a>
+        </nav>
+
+        <div class="nav-right-actions">
+            <button class="btn-nav-cta" onclick="openBooking('Erstgespräch & Potenzialanalyse')" aria-label="Erstgespräch vereinbaren">
+                <svg class="ico"><use href="#i-calendar"/></svg> <span>Erstgespräch vereinbaren</span>
+            </button>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menü öffnen" aria-expanded="false" id="mobile-menu-toggle">
+                <svg class="ico"><use href="#i-bars"/></svg>
+            </button>
+        </div>
     </div>
-</div>
+</header>
 
-<!-- NAVBAR -->
-<div id="fixed-nav-bar">
-    <div class="nav-logo-wrapper" style="width: 40px;"></div>
-    <nav class="top-nav-links">
-        <a href="#about">Profil</a>
-        <a href="#skills">Kompetenzen</a>
-        <a href="#hire-me">Kontakt</a>
-        <a href="#projects">Projekte</a>
-        <a href="#credentials">Zertifikate</a>
-    </nav>
-</div>
+<!-- MOBILES NAVIGATIONSMENÜ -->
+<nav id="mobile-nav-drawer" aria-label="Mobile Navigation">
+    <a href="#services" onclick="closeMobileMenu()">Leistungen & Preise</a>
+    <a href="#expertise" onclick="closeMobileMenu()">Profil & Praxis</a>
+    <a href="#calculator" onclick="closeMobileMenu()">Ersparnis-Rechner</a>
+    <a href="#projects" onclick="closeMobileMenu()">Referenzen</a>
+    <a href="#credentials" onclick="closeMobileMenu()">Zertifikate</a>
+    <a href="#region-faq" onclick="closeMobileMenu()">Region Augsburg & FAQ</a>
+</nav>
 
-<!-- HERO SECTION -->
-<div class="container">
-    <header class="hero reveal" style="padding-top: 90px;">
-        <div class="hero-grid" style="display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: center;">
-            <div class="hero-text-content">
-                <h1 class="mega-title" style="font-size: clamp(2.5rem, 4.5vw, 4.5rem);"><span class="text-gradient">IT-Support & Admin.</span><br><span class="text-gradient">Systeme, die laufen.</span></h1>
-                <span class="hero-subtitle-badge text-gradient" style="margin: 15px 0;">Remote & Hybrid (Augsburg & Umgebung / DACH)</span>
-                <p style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px;">Souveräner technischer Support, Active Directory und Betriebssystem-Management. Ich verbinde tiefes Know-how in Windows & macOS mit echter Hands-on-Praxis aus Unternehmens-Projekten.</p>
+<main>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <img src="assets/mw-it-services-logo-kupfer-holz.png.jpeg"
+             onerror="if(!this.dataset.f1){this.dataset.f1='1';this.src='mw-it-services-logo-kupfer-holz.png.jpeg';}else if(!this.dataset.f2){this.dataset.f2='1';this.src='assets/mw-it-services-logo-kupfer-holz.png';}"
+             alt=""
+             aria-hidden="true"
+             fetchpriority="high"
+             class="hero-bg-logo">
 
-                <!-- RECRUITER SPEED-CTA IM HERO -->
-                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <a href="#hire-me" class="btn-studio hover-target" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);">
-                        <span>Direkt Gespräch anfragen</span>
-                        <i class="fas fa-arrow-down" style="font-size: 0.8rem;"></i>
-                    </a>
+        <div class="container">
+            <div class="hero-inner">
+                <div class="b2b-badge">
+                    <svg class="ico"><use href="#i-medal"/></svg> Digitalpartner für Handwerk & Mittelstand • Augsburg, München & Bundesweit
+                </div>
+                <h1 class="mega-title">
+                    Weniger Büro-Chaos. Mehr Top-Aufträge.<br>
+                    <span class="text-gradient-copper">Digitalisierung, die sich sofort rechnet.</span>
+                </h1>
+                <p class="hero-subtext">
+                    Ich verbinde echte Handwerkspraxis mit moderner Softwareentwicklung und Systemintegration. Das Ergebnis: Verkaufsstarke Websites, die im Raum Augsburg, München und deutschlandweit automatisch Kunden sowie Fachkräfte gewinnen – und smarte digitale Prozesse, die Ihnen jede Woche Stunden an lästiger Büroarbeit abnehmen.
+                </p>
+                <div class="hero-actions">
+                    <a href="#services" class="btn-primary-b2b">Pakete & Preise ansehen <svg class="ico"><use href="#i-arrow-down"/></svg></a>
+                    <button type="button" onclick="openBooking('Unverbindliche Potenzialanalyse')" class="btn-secondary-b2b">Kostenlose Potenzialanalyse</button>
+                </div>
+                <div class="hero-trust-bar">
+                    <span><svg class="ico"><use href="#i-check-circle"/></svg> 100% Fokus auf Handwerk & KMU</span>
+                    <span><svg class="ico"><use href="#i-check-circle"/></svg> Vor Ort in Augsburg, München & bundesweit</span>
+                    <span><svg class="ico"><use href="#i-check-circle"/></svg> Fester Ansprechpartner statt Agentur-Chaos</span>
                 </div>
             </div>
-            <div class="hero-image-wrapper" style="text-align: center;">
-                <img src="assets/bewerbungsfoto Kopie.png" alt="Michael Weichenberger" class="hero-avatar" style="width: 100%; max-width: 260px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        </div>
+    </section>
+
+    <!-- BLACK FRIDAY SPECIAL – VAULT-ANGEBOT -->
+    <section class="bf-spotlight-section">
+        <div class="container">
+            <div class="bf-spotlight-card reveal" tabindex="0" role="button" onclick="openBooking('Black Friday Deal: Bestseller-Paket (479 € + 199 €/mtl.)')" onkeydown="handleCardKey(event, 'Black Friday Deal: Bestseller-Paket (479 € + 199 €/mtl.)')">
+                <div class="bf-absolute-badge">
+                    <svg class="ico"><use href="#i-bolt"/></svg> 20% BLACK FRIDAY SPECIAL • EXKLUSIVES JAHRES-ANGEBOT
+                </div>
+                <div class="bf-content">
+                    <span class="bf-eyebrow">Das ultimative Handwerker-Upgrade zum Sparpreis</span>
+                    <h2 class="bf-title">Bestseller-Paket (Web + Pflege & SEO)</h2>
+                    <p class="bf-text">Sichern Sie sich unser meistgewähltes Kombi-Paket für Ihren Betrieb zum exklusiven Black Friday Tarif. Volle digitale Entlastung bei maximaler regionaler Sichtbarkeit auf Google.</p>
+                    <div class="bf-chips">
+                        <div class="bf-chip"><svg class="ico"><use href="#i-check"/></svg> Inkl. kompletter Landingpage</div>
+                        <div class="bf-chip"><svg class="ico"><use href="#i-check"/></svg> Nur 479 € einmalig (statt 599 €)</div>
+                        <div class="bf-chip"><svg class="ico"><use href="#i-check"/></svg> Nur 199 € / Mtl. (erste 6 Monate)</div>
+                    </div>
+                </div>
+                <div class="bf-side">
+                    <span class="bf-side-label">Black Friday Tarif</span>
+                    <div class="bf-price-row">
+                        <span class="bf-price-old">599 €</span>
+                        <span class="bf-price-new">479 €</span>
+                    </div>
+                    <span class="bf-price-note">
+                        einmalig + 199 € / Mtl. (erste 6 Monate)<br>
+                        <small>danach regulär 250 € / Mtl. • 12 Monate Laufzeit<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                    </span>
+                    <span class="btn-row-action" aria-hidden="true">Deal sichern <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+                </div>
             </div>
         </div>
-        <div class="quick-facts" style="margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-            <div class="fact-item"><i class="fas fa-certificate"></i><span>Zertifiziert</span><p>Google IT Support, Project Management & AI</p></div>
-            <div class="fact-item"><i class="fas fa-network-wired"></i><span>Admin-Praxis</span><p>Active Directory, Rechtevergabe & Laptop-Management</p></div>
-            <div class="fact-item"><i class="fas fa-laptop-code"></i><span>Multi-OS</span><p>Windows 10/11 & macOS Profi-Setup</p></div>
-        </div>
-    </header>
-</div>
+    </section>
 
-<!-- ABOUT SECTION -->
-<section id="about" class="about-section reveal">
-    <div class="about-text" style="max-width: 800px; margin: 0 auto; padding: 0 24px;">
-        <h2 class="text-gradient" style="font-size: 2.75rem; margin-bottom: 25px;">Vom Betriebssystem bis zur Nutzer-Verwaltung.</h2>
-        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">Wer heute im Support oder in der Administration arbeitet, braucht tiefes Systemwissen. Bei der Dörfer GmbH habe ich die komplette IT-Steuerung, den Webauftritt sowie die Rechtevergabe und Absicherung der Firmen-Laptops eigenverantwortlich übernommen.</p>
-        <p style="font-size: 1.2rem; color: var(--text-muted); line-height: 1.6;">Egal ob Windows 10/11, macOS (auf dem ich unter anderem ambitionierte Projekte wie meinen persönlichen Assistenten Jarvis entwickle), Active Directory oder Office-Applikationen – ich verstehe, wie Netzwerke, Berechtigungen und Betriebssysteme von Grund auf funktionieren.</p>
-    </div>
-</section>
+    <!-- 1. B2B LEISTUNGS-KATALOG – MASTER-TABELLE -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header-left reveal">
+                <span class="section-tag">LEISTUNGSSPEKTRUM & KALKULATION</span>
+                <h2>Transparente B2B-Lösungspakete.</h2>
+                <p>Klare Leistungsumfänge ohne versteckte Kosten – entwickelt für Fachbetriebe in Augsburg, München, Süddeutschland und bundesweit, die digital wachsen und ihr Büro spürbar entlasten wollen.</p>
+            </div>
 
-<!-- SKILLS SECTION -->
-<section id="skills" class="list-section reveal">
-    <h2 class="section-title">Kernkompetenzen & System-Stack.</h2>
-    <div class="clean-list">
-        <div class="list-item"><i class="fas fa-desktop list-icon"></i><div><div class="list-title">OS Administration & Support (Windows & macOS)</div><div class="list-desc">Tiefgehendes Know-how in Windows 10/11 und macOS, Installation, Konfiguration, App-Ökosysteme (inkl. MS Office / Word).</div></div></div>
-        <div class="list-item"><i class="fas fa-id-card-clip list-icon"></i><div><div class="list-title">Active Directory & Benutzerverwaltung</div><div class="list-desc">Strukturierte Rechtevergabe, Gruppenrichtlinien, Zugriffskontrollen und Berechtigungsmanagement für Unternehmensstrukturen.</div></div></div>
-        <div class="list-item"><i class="fas fa-headset list-icon"></i><div><div class="list-title">Technical Support & Troubleshooting</div><div class="list-desc">Strukturierte Fehleranalyse im 1st- & 2nd-Level Support, Incident Management und praxisnahe Problemlösung.</div></div></div>
-        <div class="list-item"><i class="fas fa-users-gear list-icon"></i><div><div class="list-title">SaaS Onboarding & Customer Success</div><div class="list-desc">Betreuung von Geschäftskunden und Privatkunden, Anwenderschulung und reibungslose System-Einführung.</div></div></div>
-        <div class="list-item"><i class="fas fa-server list-icon"></i><div><div class="list-title">Infrastruktur & Web-Management</div><div class="list-desc">Linux/Windows Server, Webhosting, Plesk, DNS, TLS/SSL-Management und Sicherheits-Setup (bekannt aus Praxisprojekten).</div></div></div>
-    </div>
-</section>
-
-<!-- HIRE ME & EMAILJS AUTOMATION -->
-<section id="hire-me" class="list-section reveal" style="background: linear-gradient(180deg, var(--bg-pure) 0%, var(--bg-secondary) 100%); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
-    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 24px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <span class="studio-tag" style="margin-bottom: 12px; display: inline-block;">Available for Opportunities</span>
-            <h2 class="text-gradient" style="font-size: 2.25rem; margin-bottom: 12px;">Remote- & Hybrid-Rollen anfragen.</h2>
-            <p style="font-size: 1.05rem; color: var(--text-muted); max-width: 550px; margin: 0 auto;">
-                Suchen Sie Verstärkung für IT-Support, Systemadministration oder IT-Operations? Senden Sie mir direkt eine Nachricht.
-            </p>
-        </div>
-
-        <div style="background: rgba(255, 255, 255, 0.015); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.4);">
-            <form id="auto-hire-form" onsubmit="triggerCleanAutomation(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                    <div>
-                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">Ihr Name / Unternehmen</label>
-                        <input type="text" id="hr-company" required placeholder="z.B. TechCorp GmbH" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+            <div class="matrix-container">
+                <!-- ROW 1 -->
+                <div class="matrix-row reveal" tabindex="0" role="button" onclick="openBooking('Digital Starter (Landingpage) - ab 599 €')" onkeydown="handleCardKey(event, 'Digital Starter (Landingpage) - ab 599 €')">
+                    <div class="matrix-main">
+                        <div class="matrix-header">
+                            <span class="matrix-category">KOMPAKT-EINSTIEG & KUNDENGEWINNUNG</span>
+                            <h3>Digital Starter (High-Conversion Landingpage)</h3>
+                        </div>
+                        <p class="matrix-desc">Der schnelle, professionelle Webauftritt für kleinere Fachbetriebe oder gezielte Kampagnen (z. B. Neukunden- oder Azubi-Gewinnung). Verkaufsstark betextet, extrem schnell und auf allen Smartphones perfekt bedienbar.</p>
+                        <div class="matrix-modules">
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Verkaufsstarker One-Pager</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Perfekt für Smartphone & Desktop</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Direktes Kunden-Anfrageformular</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> DSGVO-konformes & SEO-Setup</div>
+                        </div>
                     </div>
-                    <div>
-                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">E-Mail-Adresse</label>
-                        <input type="email" id="hr-email" required placeholder="recruiter@unternehmen.de" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+                    <div class="matrix-side">
+                        <div class="price-display">
+                            <span class="price-label">Projekt-Investition</span>
+                            <div class="price-amount"><span>ab</span> 599 €</div>
+                            <span class="price-period">
+                                einmalig (schlüsselfertiges Setup)
+                                <small>Keine laufende Vertragsbindung<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                            </span>
+                        </div>
+                        <span class="btn-row-action" aria-hidden="true">Paket anfragen <svg class="ico"><use href="#i-chevron-right"/></svg></span>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">Gewünschte Position / Rolle</label>
-                    <input type="text" id="hr-role" required placeholder="z.B. IT Support Specialist, Systemadministrator..." style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 0.9rem; outline: none;">
+                <!-- ROW 2 (FEATURED) -->
+                <div class="matrix-row featured-row reveal" tabindex="0" role="button" onclick="openBooking('Kombiniertes Bestseller-Paket - 599 € + 250 €/mtl.')" onkeydown="handleCardKey(event, 'Kombiniertes Bestseller-Paket - 599 € + 250 €/mtl.')">
+                    <div class="b2b-featured-badge"><svg class="ico"><use href="#i-star"/></svg> MEISTGEWÄHLTES PAKET IM HANDWERK</div>
+                    <div class="matrix-main">
+                        <div class="matrix-header">
+                            <span class="matrix-category">RUNDUM-SORGLOS-KOMBINATION</span>
+                            <h3>Kombiniertes Bestseller-Paket (Web + Pflege & SEO)</h3>
+                        </div>
+                        <p class="matrix-desc">Sie erhalten die komplette Digital Starter Landingpage inklusive laufender technischer Betreuung und regionaler Google-Optimierung zum Vorzugspreis. Sie arbeiten auf der Baustelle – ich halte Ihnen digital den Rücken frei.</p>
+                        <div class="matrix-modules">
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Inkl. kompletter Landingpage</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Regionale Google Maps & SEO-Pflege</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Wöchentliche Backups & Sicherheits-Updates</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Änderungen auf Zuruf inklusive</div>
+                        </div>
+                    </div>
+                    <div class="matrix-side">
+                        <div class="price-display">
+                            <span class="price-label">Regulärer Kombi-Tarif</span>
+                            <div class="price-amount"><span>ab</span> 599 €</div>
+                            <span class="price-period">
+                                einmalig + ab 250 € / Mtl. (Pflege & SEO)
+                                <small>Inkl. Updates, Backups & Support<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                            </span>
+                        </div>
+                        <span class="btn-row-action" aria-hidden="true">Bestseller sichern <svg class="ico"><use href="#i-chevron-right"/></svg></span>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-studio hover-target" style="width: 100%; justify-content: center; margin-top: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);">
-                    <span id="btn-text">Direktes Gespräch anfragen</span>
-                    <i class="fas fa-arrow-right" style="font-size: 0.8rem;"></i>
-                </button>
+                <!-- ROW 3 -->
+                <div class="matrix-row reveal" tabindex="0" role="button" onclick="openBooking('Web-Relaunch (Multi-Page) - ab 1.490 €')" onkeydown="handleCardKey(event, 'Web-Relaunch (Multi-Page) - ab 1.490 €')">
+                    <div class="matrix-main">
+                        <div class="matrix-header">
+                            <span class="matrix-category">FÜR ETABLIERTE MEISTER- & MITTELSTANDSBETRIEBE</span>
+                            <h3>Web-Relaunch (Mehrseitige Unternehmens-Website)</h3>
+                        </div>
+                        <p class="matrix-desc">Das digitale Aushängeschild für gewachsene Betriebe: Präsentieren Sie sämtliche Gewerke, Referenzen und Ihren Betrieb so hochwertig, dass Sie Wunsch-Aufträge und qualifizierte Gesellen anziehen.</p>
+                        <div class="matrix-modules">
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Mehrseitige Struktur (Leistungen, Referenzen, Über uns)</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Schlanker Bewerberprozess für Fachkräfte</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Tiefgehende Google-Suchmaschinenoptimierung</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> High-Speed Hosting-Anbindung & SSL</div>
+                        </div>
+                    </div>
+                    <div class="matrix-side">
+                        <div class="price-display">
+                            <span class="price-label">Projekt-Investition</span>
+                            <div class="price-amount"><span>ab</span> 1.490 €</div>
+                            <span class="price-period">
+                                einmalig (kompletter Multi-Page Relaunch)
+                                <small>Individueller Umfang nach Betriebsgröße<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                            </span>
+                        </div>
+                        <span class="btn-row-action" aria-hidden="true">Projekt besprechen <svg class="ico"><use href="#i-chevron-right"/></svg></span>
+                    </div>
+                </div>
+
+                <!-- ROW 4 -->
+                <div class="matrix-row reveal" tabindex="0" role="button" onclick="openBooking('Local Care & SEO (Abo) - ab 399 €/mtl.')" onkeydown="handleCardKey(event, 'Local Care & SEO (Abo) - ab 399 €/mtl.')">
+                    <div class="matrix-main">
+                        <div class="matrix-header">
+                            <span class="matrix-category">LAUFENDE BETREUUNG & SICHTBARKEIT</span>
+                            <h3>Local Care & SEO (Regionale Präsenz)</h3>
+                        </div>
+                        <p class="matrix-desc">Ideal für bestehende Websites: Ich sorge Monat für Monat dafür, dass Ihr Betrieb in Ihrer Stadt und Ihrem Einzugsgebiet (z. B. Raum Augsburg oder München) bei Google hervorragend aufgestellt ist und technisch zu 100 % abgesichert bleibt.</p>
+                        <div class="matrix-modules">
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Ausbau Ihrer lokalen Suchmaschinen-Positionen</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Technische Wartung, Backups & Ausfallschutz</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Transparenter Monatsbericht</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Reine Technik-Wartung separat ab 99 €/mtl.</div>
+                        </div>
+                    </div>
+                    <div class="matrix-side">
+                        <div class="price-display">
+                            <span class="price-label">Laufende Betreuung</span>
+                            <div class="price-amount"><span>ab</span> 399 €</div>
+                            <span class="price-period">
+                                monatlich (inkl. SEO & Systempflege)
+                                <small>Reine Technik-Wartung separat ab 99 € / Mtl.<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                            </span>
+                        </div>
+                        <span class="btn-row-action" aria-hidden="true">Betreuung anfragen <svg class="ico"><use href="#i-chevron-right"/></svg></span>
+                    </div>
+                </div>
+
+                <!-- ROW 5 -->
+                <div class="matrix-row reveal" tabindex="0" role="button" onclick="openBooking('Smarte Prozesse & Schnittstellen - ab 1.190 €')" onkeydown="handleCardKey(event, 'Smarte Prozesse & Schnittstellen - ab 1.190 €')">
+                    <div class="matrix-main">
+                        <div class="matrix-header">
+                            <span class="matrix-category">BÜRO-ENTLASTUNG & PROZESS-DIGITALISIERUNG</span>
+                            <h3>Smarte Prozesse & Schnittstellen</h3>
+                        </div>
+                        <p class="matrix-desc">Schluss mit Zettelwirtschaft, manuellem Abtippen und endlosen Büro-Abenden. Wir digitalisieren Ihre Formulare und verbinden Ihre Website nahtlos mit Ihrer bestehenden Software.</p>
+                        <div class="matrix-modules">
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Interaktive & digitale Kundenformulare</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Automatische E-Mail- & Termin-Workflows</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Reibungslose Anbindung an Ihre Software via API</div>
+                            <div class="module-tag"><svg class="ico"><use href="#i-check"/></svg> Persönliche Einweisung Ihres Teams</div>
+                        </div>
+                    </div>
+                    <div class="matrix-side">
+                        <div class="price-display">
+                            <span class="price-label">Projektbasis</span>
+                            <div class="price-amount"><span>ab</span> 1.190 €</div>
+                            <span class="price-period">
+                                einmalig (komplette Workflow-Einrichtung)
+                                <small>Einzel-Workflows bereits ab 800 €<br>Alle Preise zzgl. gesetzl. MwSt.</small>
+                            </span>
+                        </div>
+                        <span class="btn-row-action" aria-hidden="true">Prozess-Analyse anfordern <svg class="ico"><use href="#i-chevron-right"/></svg></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE WORKFLOW-PIPELINE -->
+            <div class="live-pipeline-box reveal">
+                <div class="pipeline-header">
+                    <div class="pipeline-title">
+                        <svg class="ico"><use href="#i-network"/></svg> Live-Visualisierung: Automatisierter Anfrage-Workflow
+                    </div>
+                    <span class="pipeline-badge"><svg class="ico"><use href="#i-user-shield"/></svg> Mit menschlicher Endkontrolle</span>
+                </div>
+                <p class="pipeline-sub">So verarbeitet Ihr Betrieb einkommende Anfragen mit smarten Formularen, automatischen Schnittstellen und sicherer Freigabe durch Sie:</p>
+
+                <div class="pipeline-steps-grid">
+                    <div class="p-step" id="p-step-1" onclick="setPipelineStep(1)" onmouseenter="setPipelineStep(1)">
+                        <div class="p-step-icon-box"><svg class="ico"><use href="#i-envelope"/></svg></div>
+                        <div class="p-step-num">SCHRITT 1</div>
+                        <div class="p-step-title">Anfrage geht ein</div>
+                        <div class="p-step-desc">Formular, E-Mail oder WhatsApp – alles landet zentral.</div>
+                    </div>
+
+                    <div class="p-step-connector" aria-hidden="true"></div>
+
+                    <div class="p-step" id="p-step-2" onclick="setPipelineStep(2)" onmouseenter="setPipelineStep(2)">
+                        <div class="p-step-icon-box"><svg class="ico"><use href="#i-wand"/></svg></div>
+                        <div class="p-step-num">SCHRITT 2</div>
+                        <div class="p-step-title">Smarte Vorqualifizierung</div>
+                        <div class="p-step-desc">Das System erfasst alle Parameter und bereitet die Daten perfekt vor.</div>
+                    </div>
+
+                    <div class="p-step-connector" aria-hidden="true"></div>
+
+                    <div class="p-step active" id="p-step-3" onclick="setPipelineStep(3)" onmouseenter="setPipelineStep(3)">
+                        <div class="p-step-icon-box"><svg class="ico"><use href="#i-user-check"/></svg></div>
+                        <div class="p-step-num">SCHRITT 3</div>
+                        <div class="p-step-title">Prüfung durch Mensch</div>
+                        <div class="p-step-desc">Sie prüfen, passen an und geben mit einem Klick frei.</div>
+                    </div>
+
+                    <div class="p-step-connector" aria-hidden="true"></div>
+
+                    <div class="p-step" id="p-step-4" onclick="setPipelineStep(4)" onmouseenter="setPipelineStep(4)">
+                        <div class="p-step-icon-box"><svg class="ico"><use href="#i-plane"/></svg></div>
+                        <div class="p-step-num">SCHRITT 4</div>
+                        <div class="p-step-title">Versand & Ablage</div>
+                        <div class="p-step-desc">Angebot geht raus, Dokumente werden sauber archiviert.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. EXPERTISE & PROFIL -->
+    <section id="expertise" class="about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content reveal">
+                    <span class="section-tag">WARUM HANDWERKSBETRIEBE MIT MIR ARBEITEN</span>
+                    <h2>Echte Praxis im Handwerk.<br>Fundierte Expertise in IT & Software.</h2>
+                    <p>In den meisten Betrieben geht täglich wertvolle Zeit durch unstrukturierte Kundenanfragen, Zettelwirtschaft und veraltete Systeme verloren. Weil ich selbst aus dem Handwerk komme, weiß ich genau, wie der Alltag zwischen Baustelle, Kunden und Büro wirklich aussieht.</p>
+                    <p>Als Systemintegrator und Softwareentwickler mit Sitz in Langweid am Lech (bei Augsburg) übersetze ich komplexe Technik in einfache, verlässliche Werkzeuge. Kein Agentur-Chinesisch, keine überflüssigen Spielereien – sondern Lösungen, die sich ab Tag 1 für Ihren Betrieb rechnen.</p>
+
+                    <div class="about-key-facts">
+                        <div class="key-fact">
+                            <strong>Direkter Draht</strong>
+                            <span>Sie sprechen immer direkt mit dem Entwickler & IT-Experten.</span>
+                        </div>
+                        <div class="key-fact">
+                            <strong>Praxiserprobt</strong>
+                            <span>Lösungen, die auch im hektischen Betriebsalltag funktionieren.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-column reveal">
+                    <div class="timeline-box">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div>
+                                <div class="timeline-title">1. Praktisches Handwerks-Fundament</div>
+                                <div class="timeline-desc">Eigene Erfahrung im Handwerk: Verständnis für echte Betriebsabläufe vor Ort, Kundenkontakt und pragmatisches Anpacken.</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div>
+                                <div class="timeline-title">2. Softwareentwicklung & Systemintegration</div>
+                                <div class="timeline-desc">2.300 UE Intensivausbildung am Syntax Institut (Kotlin & Swift) sowie offizielle Google-Zertifizierungen in Project Management, IT Support & AI.</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div>
+                                <div class="timeline-title">3. Web-Engineering & Prozess-Automation</div>
+                                <div class="timeline-desc">Schlüsselfertige Entwicklung verkaufsstarker Unternehmensseiten und automatisierter Büro-Workflows für den deutschen Mittelstand.</div>
+                            </div>
+                        </div>
+
+                        <!-- INTERAKTIVE PROFIL-KARTE -->
+                        <div class="interactive-profile-card" tabindex="0" role="button" onclick="openBooking('Persönliches Gespräch mit Michael Weichenberger')" onkeydown="handleCardKey(event, 'Persönliches Gespräch mit Michael Weichenberger')">
+                            <div class="ipc-left">
+                                <div class="ipc-avatar-wrap">
+                                    <img src="assets/michael-weichenberger-ki-projektleiter.PNG" loading="lazy" decoding="async" alt="Michael Weichenberger - IT-Systemintegrator aus Langweid bei Augsburg">
+                                </div>
+                                <div class="ipc-info">
+                                    <span class="ipc-name">Michael Weichenberger</span>
+                                    <span class="ipc-role">IT-Systemintegrator & Web-Entwickler</span>
+                                    <span class="ipc-status-text"><span class="ipc-status-dot-green"></span> Direkt erreichbar – Ohne Umwege</span>
+                                </div>
+                            </div>
+                            <div class="ipc-action">
+                                <span class="ipc-btn">Kontakt <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. B2B ROI RECHNER -->
+    <section id="calculator" class="calculator-section">
+        <div class="container">
+            <div class="section-header-center reveal">
+                <span class="section-tag">KAUFMÄNNISCHER EFFIZIENZ-RECHNER</span>
+                <h2>Wie viel Büro-Zeit sparen Sie realistisch?</h2>
+                <p>Berechnen Sie auf Basis konservativer Erfahrungswerte, wie schnell sich eine Automatisierung und Digitalisierung in Ihrem Betrieb rechnet.</p>
+            </div>
+
+            <div class="calc-box reveal">
+                <div class="calc-slider-group">
+                    <div class="calc-label">
+                        <label for="calc-hours">Wöchentlicher Zeitaufwand im gesamten Betrieb für Routine-Büroarbeit (Anfragen, Angebote, E-Mails, Belege)</label>
+                        <span id="hours-val" class="calc-value">12 Std. / Woche</span>
+                    </div>
+                    <input type="range" id="calc-hours" min="3" max="40" value="12" oninput="updateCalculator()">
+                </div>
+
+                <div class="calc-slider-group">
+                    <div class="calc-label">
+                        <label for="calc-rate">Kalkulatorischer interner Stundensatz (Chef / Meister / Bürofachkraft)</label>
+                        <span id="rate-val" class="calc-value">55 € / Stunde</span>
+                    </div>
+                    <input type="range" id="calc-rate" min="35" max="95" step="5" value="55" oninput="updateCalculator()">
+                </div>
+
+                <div class="calc-results-grid">
+                    <div>
+                        <div id="res-hours" class="calc-stat-num">31 Std.</div>
+                        <div class="calc-stat-label">Potenziell freigespielte Zeit / Monat</div>
+                    </div>
+                    <div>
+                        <div id="res-money" class="calc-stat-num">1.705 €</div>
+                        <div class="calc-stat-label">Mögl. monetärer Gegenwert / Monat</div>
+                    </div>
+                    <div>
+                        <div id="res-amort" class="calc-stat-num">~ 3 Wochen</div>
+                        <div class="calc-stat-label">Geschätzte Amortisation</div>
+                    </div>
+                </div>
+                <div class="calc-cta">
+                    <button type="button" class="btn-primary-b2b" onclick="openBooking('Individuelle Zeitersparnis-Analyse')">
+                        Jetzt Einsparpotenzial für meinen Betrieb prüfen <svg class="ico"><use href="#i-arrow-right"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. PROJEKTE & REFERENZEN -->
+    <section id="projects" class="projects-section">
+        <div class="container">
+            <div class="section-header-center reveal">
+                <span class="section-tag">REFERENZEN & ARBEITSPROBEN</span>
+                <h2>Ausgewählte Praxisprojekte.</h2>
+                <p>Einblicke in echte Kundensysteme, intelligente Workflow-Dashboards und performante Web-Architekturen.</p>
+            </div>
+
+            <div class="projects-grid-3 reveal">
+                <!-- Platz 1 -->
+                <div class="project-card" tabindex="0" role="button" onclick="openBooking('Demo-Anfrage: Digitaler Anfrage-Prozess')" onkeydown="handleCardKey(event, 'Demo-Anfrage: Digitaler Anfrage-Prozess')">
+                    <div class="project-img-box">
+                        <img src="assets/ki-angebotsassistent-workflow-dashboard.png.jpeg"
+                             onerror="this.onerror=null;this.src='assets/ki-angebotsassistent-workflow-dashboard.png';"
+                             loading="lazy"
+                             decoding="async"
+                             alt="Dashboard Anfrage-Prozess für Handwerksbetriebe">
+                    </div>
+                    <div class="project-content">
+                        <div class="matrix-category">Prozess-Digitalisierung</div>
+                        <h3>Smarter Anfrage- & Angebots-Workflow</h3>
+                        <p>Digitale Schnittstellen-Architektur für Fachbetriebe: Eingehende Kundenanfragen werden strukturiert erfasst, kategorisiert und für die Angebotserstellung optimal vorbereitet.</p>
+                        <span class="project-link">Live-Demo anfragen <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+                    </div>
+                </div>
+
+                <div class="project-card" tabindex="0" role="button" onclick="openBooking('Anfrage: Interaktiver Kunden-Rechner / Website')" onkeydown="handleCardKey(event, 'Anfrage: Interaktiver Kunden-Rechner / Website')">
+                    <div class="project-img-box">
+                        <img src="assets/mw-it-services-startseite-vorschau.png"
+                             loading="lazy"
+                             decoding="async"
+                             alt="Interaktive B2B-Plattform und Kalkulationssystem">
+                    </div>
+                    <div class="project-content">
+                        <div class="matrix-category">Web-Engineering & Eigenentwicklung</div>
+                        <h3>Interaktives B2B-Anfrage- & Kalkulationssystem</h3>
+                        <p>Von Grund auf selbst entwickelte Web-Architektur: Extrem schnelle Ladezeiten, interaktiver ROI-Kundenrechner und direktes Anfragesystem.</p>
+                        <span class="project-link">Ähnliches System anfragen <svg class="ico"><use href="#i-arrow-right"/></svg></span>
+                    </div>
+                </div>
+                <!-- Platz 3 -->
+                <div class="project-card" tabindex="0" role="button" onclick="window.open('https://www.doerfer-gmbh.de', '_blank', 'noopener,noreferrer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.open('https://www.doerfer-gmbh.de','_blank','noopener,noreferrer');}">
+                    <div class="project-img-box">
+                        <img src="assets/doerfer-gmbh-it-management-webauftritt.png"
+                             loading="lazy"
+                             decoding="async"
+                             alt="Dörfer GmbH Webauftritt und IT-Management">
+                    </div>
+                    <div class="project-content">
+                        <div class="matrix-category">Mittelstands-IT & Webauftritt</div>
+                        <h3>Dörfer GmbH – IT & Web-Management</h3>
+                        <p>Strukturierte Verwaltung der Firmen-Endgeräte, Rechtevergabe, Absicherung der Web-Infrastruktur und laufender technischer Support.</p>
+                        <span class="project-link">Live-System ansehen <svg class="ico"><use href="#i-external"/></svg></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. ZERTIFIKATE -->
+    <section id="credentials" class="credentials-section">
+        <div class="container">
+            <div class="section-header-center reveal">
+                <span class="section-tag">GEPRÜFTE QUALIFIKATIONEN</span>
+                <h2>Fundiertes Wissen. Schwarz auf Weiß.</h2>
+                <p>Sie arbeiten mit einem nachweislich zertifizierten Spezialisten für Projektleitung, IT-Sicherheit und Softwareentwicklung.</p>
+            </div>
+
+            <div class="credentials-grid reveal">
+                <div class="cred-card">
+                    <div class="cred-img-wrapper"><img src="assets/google-project-management-professional-certificate.png" loading="lazy" decoding="async" alt="Google Project Management Zertifikat"></div>
+                    <span class="cred-meta">COURSERA / GOOGLE</span>
+                    <div class="cred-title">Google Project Management</div>
+                    <p class="cred-desc">Strukturierte Projektsteuerung und verlässliche Zeitpläne.</p>
+                </div>
+                <div class="cred-card">
+                    <div class="cred-img-wrapper"><img src="assets/Google AI.jpg" loading="lazy" decoding="async" alt="Google AI Professional Zertifikat"></div>
+                    <span class="cred-meta">COURSERA / GOOGLE</span>
+                    <div class="cred-title">Google AI Professional</div>
+                    <p class="cred-desc">Zertifizierte Praxis-Workflows zur modernen Digitalisierung.</p>
+                </div>
+                <div class="cred-card">
+                    <div class="cred-img-wrapper"><img src="assets/Softwareentwickler Syntax Zertifikat.jpg" loading="lazy" decoding="async" alt="Syntax Institut Softwareentwickler Zertifikat"></div>
+                    <span class="cred-meta">SYNTAX INSTITUT</span>
+                    <div class="cred-title">Softwareentwickler (2.300 UE)</div>
+                    <p class="cred-desc">Tiefe Ausbildung in moderner Software-Architektur.</p>
+                </div>
+                <div class="cred-card">
+                    <div class="cred-img-wrapper"><img src="assets/google-it-support-professional-certificate.png" loading="lazy" decoding="async" alt="Google IT Support Professional Zertifikat"></div>
+                    <span class="cred-meta">COURSERA / GOOGLE</span>
+                    <div class="cred-title">Google IT Support Professional</div>
+                    <p class="cred-desc">Solides Fundament in IT-Sicherheit und Netzwerken.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. REGIONALES EINZUGSGEBIET & METROPOLREGIONEN + SEO FAQ -->
+    <section id="region-faq" class="seo-region-section">
+        <div class="container">
+            <div class="seo-grid-2">
+                <div class="region-card reveal">
+                    <span class="section-tag">REGIONAL VERWURZELT • BUNDESWEIT AKTIV</span>
+                    <h3>Ihr Partner im Raum Augsburg, Langweid, Süddeutschland & bundesweit.</h3>
+                    <p>Von meinem Standort in <strong>86462 Langweid am Lech</strong> aus betreue ich Handwerksbetriebe, Meisterbetriebe und mittelständische Unternehmen im gesamten Großraum <strong>Augsburg und Umland</strong> auf Wunsch auch persönlich vor Ort.</p>
+                    <p>Darüber hinaus realisieren wir verkaufsstarke Websites, lokales SEO und smarte Digitalisierungen für Betriebe in den Wirtschaftszentren <strong>München, Ingolstadt, Nürnberg, Stuttgart und Ulm</strong> sowie über schlanke digitale Prozesse in <strong>ganz Deutschland</strong>.</p>
+
+                    <span class="region-sublabel">Direktes Einzugsgebiet (Raum Augsburg, Lech & Umland)</span>
+                    <div class="city-tags" aria-label="Regionales Einzugsgebiet Raum Augsburg">
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Langweid am Lech</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Augsburg</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Gersthofen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Neusäß</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Meitingen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Friedberg</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Königsbrunn</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Stadtbergen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Bobingen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Schwabmünchen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Wertingen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Aichach</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Donauwörth</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Mering</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Kissing</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Diedorf</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Dasing</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Biberbach</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Gablingen</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Rain am Lech</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Landsberg am Lech</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Dachau</span>
+                        <span class="city-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Fürstenfeldbruck</span>
+                    </div>
+
+                    <span class="region-sublabel">Überregionale Schwerpunkt-Städte & Bundesweit</span>
+                    <div class="city-tags" aria-label="Überregionale Schwerpunkt-Städte">
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> München</span>
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Ingolstadt</span>
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Nürnberg</span>
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Stuttgart</span>
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Ulm</span>
+                        <span class="city-tag metro-tag"><svg class="ico"><use href="#i-map-pin"/></svg> Deutschlandweit (Remote)</span>
+                    </div>
+                </div>
+
+                <div class="reveal">
+                    <span class="section-tag">HÄUFIGE FRAGEN AUS DER PRAXIS</span>
+                    <h2 class="faq-heading">Klartext vorab.</h2>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <h3><svg class="ico"><use href="#i-check-circle"/></svg> Arbeiten Sie nur in Augsburg oder deutschlandweit?</h3>
+                            <p>Beides! Im Raum Langweid, Augsburg und Umland komme ich gerne direkt zu Ihnen in den Betrieb. Für Betriebe in München, Ingolstadt, Nürnberg, Stuttgart und bundesweit arbeiten wir per Telefon, Video-Call oder nach Absprache vor Ort – 100 % unkompliziert.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h3><svg class="ico"><use href="#i-check-circle"/></svg> Wie viel Zeit muss ich als Chef investieren?</h3>
+                            <p>Nur rund 30 bis 45 Minuten für unser Erstgespräch. Texte, Struktur, Design, Server-Technik und Google-Einrichtung übernehme ich komplett schlüsselfertig für Sie.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h3><svg class="ico"><use href="#i-check-circle"/></svg> Warum braucht Ihre Seite keinen lästigen Cookie-Banner?</h3>
+                            <p>Weil keine Werbe- oder Analyse-Tracker und keine extern geladenen Google Fonts eingesetzt werden. Das macht die Seite blitzschnell, ressourcenschonend und reduziert unnötige Datenübermittlungen.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- BOOKING DRAWER / MODAL -->
+<div id="booking-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+        <div>
+            <button type="button" class="modal-close" onclick="closeBooking()" aria-label="Schließen">×</button>
+
+            <!-- HIER GEÄNDERT: Wrapper ID für sauberes Ausblenden bei Erfolg -->
+            <div id="modal-header-area">
+                <span class="section-tag">DIREKTKONTAKT & ERSTGESPRÄCH</span>
+                <h2 id="modal-title">Projekt oder Paket anfragen</h2>
+                <p class="modal-lead">Schildern Sie kurz Ihr Anliegen. Ich melde mich schnellstmöglich persönlich bei Ihnen.</p>
+            </div>
+
+            <form id="booking-form" onsubmit="submitBooking(event)">
+                <input type="text" id="hp-website" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;">
+                <div class="form-group"><label for="pkg-input">Gewähltes Thema / Paket</label><input type="text" id="pkg-input" readonly></div>
+                <div class="form-group"><label for="client-name">Ihr Name & Betrieb *</label><input type="text" id="client-name" required maxlength="120" placeholder="z.B. Zimmerei Müller GmbH"></div>
+                <div class="form-group"><label for="client-email">E-Mail-Adresse *</label><input type="email" id="client-email" required maxlength="120" placeholder="ihre-adresse@betrieb.de"></div>
+                <div class="form-group"><label for="client-phone">Telefonnummer *</label><input type="tel" id="client-phone" required maxlength="40" placeholder="z.B. 0176 / 123456"></div>
+                <div class="form-group"><label for="client-msg">Was möchten Sie erreichen? (Optional)</label><textarea id="client-msg" rows="3" maxlength="1000" placeholder="Wünsche, Ziele..."></textarea></div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="privacy-check" required>
+                    <label for="privacy-check">Ich stimme der Verarbeitung meiner Angaben zur Bearbeitung der Anfrage gemäß <a href="/datenschutz.html">Datenschutzerklärung</a> zu. *</label>
+                </div>
+                <button type="submit" id="submit-btn" class="btn-primary-b2b btn-block"><span id="submit-btn-text">Jetzt unverbindlich anfragen</span></button>
             </form>
-
-            <div id="success-state" style="display: none; text-align: center; padding: 15px 0;">
-                <div style="width: 45px; height: 45px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: #fff; font-size: 1.1rem;">
-                    <i class="fas fa-check"></i>
-                </div>
-                <h3 style="font-size: 1.35rem; margin-bottom: 8px; color: #fff;">Vielen Dank für das Interesse.</h3>
-                <p id="success-desc" style="color: var(--text-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto; line-height: 1.5;"></p>
+            <div id="booking-success" role="status" aria-live="polite" tabindex="-1" style="display: none; text-align: center; padding: 35px 0;">
+                <div style="font-size: 2.8rem; color: var(--copper-mid); margin-bottom: 12px;"><svg class="ico"><use href="#i-check-circle"/></svg></div>
+                <h3 style="font-size: 1.3rem; margin-bottom: 8px;">Anfrage erfolgreich gesendet!</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Vielen Dank für Ihr Vertrauen. Ich melde mich schnellstmöglich persönlich bei Ihnen.</p>
             </div>
         </div>
+        <div class="modal-secure"><svg class="ico"><use href="#i-lock"/></svg> Verschlüsselter Versand über EmailJS • Datenschutzhinweise beachten</div>
     </div>
-</section>
-
-<!-- PROJECTS SECTION -->
-<section id="projects" class="projects-section reveal">
-    <h2 class="section-title" style="text-align: center; margin-bottom: 80px;">Praxis & Umgesetzte Systeme.</h2>
-
-    <!-- Projekt 1 -->
-    <div class="project-row">
-        <div class="project-visual-overlap tilt-card">
-            <img src="assets/Dörfer_Website_Partner_Macbook.png" alt="Dörfer GmbH MacBook" class="device-back">
-        </div>
-        <div class="project-info">
-            <h3>Dörfer GmbH IT-Infrastruktur</h3>
-            <div class="tech-tags"><span>Rechtevergabe</span> <span>Laptop-Admin</span> <span>Web-Infrastruktur</span></div>
-            <p>Eigenständige Administration der Firmen-Laptops, gezielte Rechtevergabe für Chefs und Team, Web-Infrastruktur, Absicherung und technischer Support.</p>
-            <a href="https://www.doerfer-gmbh.de" target="_blank" class="link-btn-text">Zur Live-Website <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-
-    <!-- Projekt 2 -->
-    <div class="project-row">
-        <div class="project-visual-overlap tilt-card">
-            <img src="assets/KI_Lernapp_Welcomescreen.png" alt="KI Lernapp iPhone" class="device-front-phone">
-        </div>
-        <div class="project-info">
-            <h3>KI-Lern-App & Cloud-Architektur</h3>
-            <div class="tech-tags"><span>SwiftUI</span> <span>Firebase</span> <span>OCR Integration</span></div>
-            <p>Entwicklung einer mobilen Plattform mit Cloud-User-Management und implementierter OCR-Texterkennung zur automatisierten Workflow-Verarbeitung.</p>
-            <a href="https://github.com/Michael-Weichenberger/KILernapp" target="_blank" class="link-btn-text">Source Code ansehen <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-
-    <!-- Projekt 3 -->
-    <div class="project-row">
-        <div class="project-visual-overlap tilt-card">
-            <img src="assets/Portfolio_IMac.png" alt="Portfolio iMac" class="device-back">
-        </div>
-        <div class="project-info">
-            <h3>High-Performance Web-Engineering</h3>
-            <div class="tech-tags"><span>Frontend Architecture</span> <span>UI/UX</span> <span>Automation</span></div>
-            <p>Konzeption und Umsetzung dieser Plattform – optimiert für Performance, klares Design und integrierte Prozess-Automatisierungen.</p>
-            <a href="https://github.com/Michael-Weichenberger/Portfolio-Html" target="_blank" class="link-btn-text">Source Code ansehen <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </div>
-</section>
-
-<!-- CREDENTIALS SECTION -->
-<section id="credentials" class="list-section reveal" style="background: var(--bg-secondary);">
-    <h2 class="section-title">Offizielle Zertifikate & Qualifikationen.</h2>
-    <div class="credentials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px;">
-
-        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                <img src="assets/google-it-support-professional-certificate.png" alt="Google IT Support" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <span class="cred-meta">Coursera • Jul 2026</span>
-            <div class="cred-title">Google IT Support Professional</div>
-            <div class="cred-desc">Ca. 100+ Stunden IT-Infrastruktur & Support.</div>
-        </div>
-
-        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                <img src="assets/google-project-management-professional-certificate.png" alt="Google Project Management" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <span class="cred-meta">Coursera • Aug 2026</span>
-            <div class="cred-title">Google Project Management</div>
-            <div class="cred-desc">Ca. 140+ Stunden agile & klassische PM-Praxis.</div>
-        </div>
-
-        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                <img src="assets/Google AI.jpg" alt="Google AI Professional" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <span class="cred-meta">Coursera • Aug 2026</span>
-            <div class="cred-title">Google AI Professional</div>
-            <div class="cred-desc">Ca. 80+ Stunden praxisorientierte KI-Module.</div>
-        </div>
-
-        <div class="cred-card" style="background: var(--bg-pure); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <div style="width: 90px; height: 90px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                <img src="assets/Softwareentwickler Syntax Zertifikat.jpg" alt="Syntax Institut" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <span class="cred-meta">Syntax Institut • Dez 2024</span>
-            <div class="cred-title">Software-Entwickler (Kotlin & Swift)</div>
-            <div class="cred-desc">2.300 Unterrichtseinheiten Intensivausbildung.</div>
-        </div>
-
-    </div>
-</section>
-
-<!-- CONTACT SECTION -->
-<section id="contact" class="contact-section reveal">
-    <div class="container">
-        <h2 class="mega-title"><span class="text-gradient">Lass uns sprechen.</span></h2>
-        <p style="color: var(--text-muted); margin-top: 10px; font-size: 1.2rem;">Ob Remote oder Hybrid in Augsburg und Umgebung – ich freue mich auf Ihre Nachricht.</p>
-        <div class="social-links" style="margin-top: 30px;">
-            <a href="mailto:mhdweichenberger@gmail.com" class="social-link"><i class="fas fa-envelope"></i> E-Mail</a>
-            <a href="https://github.com/Michael-Weichenberger" target="_blank" class="social-link"><i class="fab fa-github"></i> GitHub</a>
-            <a href="https://linkedin.com/in/michael-weichenberger-50b0b0291" target="_blank" class="social-link"><i class="fab fa-linkedin"></i> LinkedIn</a>
-        </div>
-    </div>
-</section>
+</div>
 
 <!-- FOOTER -->
 <footer>
-    <p>&copy; 2026 Michael Weichenberger | IT-Support & Systemadministration</p>
-    <div style="margin-top: 10px; display: flex; gap: 15px; justify-content: center; font-size: 0.75rem;">
-        <details style="cursor: pointer; color: rgba(255,255,255,0.4);">
-            <summary style="list-style: none; outline: none;">Impressum</summary>
-            <div style="margin-top: 10px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.7); line-height: 1.4;">
-                <strong>Angaben gemäß § 5 DDG:</strong><br>
-                Michael Weichenberger<br>
-                Deuringerstraße 1<br>
-                86462 Langweid am Lech<br><br>
-                <strong>Kontakt:</strong><br>
-                E-Mail: mhdweichenberger@gmail.com
-            </div>
-        </details>
-        <details style="cursor: pointer; color: rgba(255,255,255,0.4);">
-            <summary style="list-style: none; outline: none;">Datenschutz</summary>
-            <div style="margin-top: 10px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.7); line-height: 1.4;">
-                <strong>Datenschutzerklärung:</strong><br>
-                Verantwortlicher: Michael Weichenberger, Deuringerstraße 1, 86462 Langweid am Lech.<br>
-                Die Nutzung des Kontaktformulars über EmailJS erfolgt freiwillig. Deine Daten werden ausschließlich zur Beantwortung deiner Anfrage verwendet und nicht an Dritte weitergegeben. Beim Aufrufen der Website werden durch Google Fonts und CDN-Dienste technisch bedingt Verbindungsdaten (wie IP-Adressen) verarbeitet.
-            </div>
-        </details>
+    <div class="container footer-inner">
+        <div>
+            <strong>MW IT-SERVICES • Michael Weichenberger</strong><br>
+            <span>IT-Systemintegration & Web-Engineering • Deuringerstrasse 1 • 86462 Langweid am Lech (Raum Augsburg) • <a href="mailto:info@mw-itservices.de">info@mw-itservices.de</a></span>
+        </div>
+        <div class="footer-links">
+            <a href="https://www.instagram.com/mwitservices/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="/impressum.html">Impressum</a>
+            <a href="/datenschutz.html">Datenschutzerklärung</a>
+            <span class="cookie-free-badge"><svg class="ico"><use href="#i-shield"/></svg> Ohne Werbetracking</span>
+        </div>
     </div>
 </footer>
 
