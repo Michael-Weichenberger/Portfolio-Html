@@ -6,7 +6,7 @@ compatibility_date = "2026-10-01"
 workers_dev = true
 
 [vars]
-ALLOWED_ORIGINS = "https://mw-itservices.de,https://www.mw-itservices.de,http://localhost:5517"
+ALLOWED_ORIGINS = "https://mw-itservices.de,https://www.mw-itservices.de"
 
 # Max. 10 Messungen pro Minute und IP (schützt das PageSpeed-Kontingent)
 [[ratelimits]]

@@ -4,3 +4,4 @@ harvey-agent/out/
 
 # Lokale Schlüssel des Harvey-Agenten
 harvey-agent/.env
+harvey-agent/node_modules/
