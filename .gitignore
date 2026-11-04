@@ -1,0 +1,6 @@
+
+# Harvey-Agent: interne Problemcases nicht veröffentlichen
+harvey-agent/out/
+
+# Lokale Schlüssel des Harvey-Agenten
+harvey-agent/.env

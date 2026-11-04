@@ -8,7 +8,7 @@
     <meta name="author" content="Michael Weichenberger, MW IT-SERVICES">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
     <meta name="theme-color" content="#1A1714">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://api.emailjs.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.emailjs.com https://www.googleapis.com https://mw-sichtbarkeit.harvey-agent.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="format-detection" content="telephone=no">
     <link rel="canonical" href="https://mw-itservices.de/">
@@ -31,7 +31,7 @@
     <meta property="og:image:alt" content="MW IT-SERVICES: Websites und digitale Abläufe für Handwerk und Mittelstand">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261104q">
 
     <script type="application/ld+json">
         {
@@ -86,6 +86,7 @@
                         "addressCountry": "DE"
                     },
                     "geo": { "@type": "GeoCoordinates", "latitude": 48.4900, "longitude": 10.8539 },
+                    "hasMap": "https://www.google.com/maps/search/?api=1&query=MW+IT-SERVICES+Deuringerstrasse+1+86462+Langweid+am+Lech",
                     "areaServed": [
                         { "@type": "City", "name": "Langweid am Lech" },
                         { "@type": "City", "name": "Augsburg" },
@@ -146,12 +147,22 @@
     <symbol id="i-phone" viewBox="0 0 512 512"><path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/></symbol>
     <symbol id="i-close" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></symbol>
     <symbol id="i-plus" viewBox="0 0 448 512"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 384 512"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 576 512"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 448 512"><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z"/></symbol>
+    <symbol id="i-network" viewBox="0 0 640 512"><path d="M256 64H384v64H256V64zM240 0c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48h48v32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h96v32H80c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48H240c26.5 0 48-21.5 48-48V368c0-26.5-21.5-48-48-48H192V288H448v32H400c-26.5 0-48 21.5-48 48v96c0 26.5 21.5 48 48 48H560c26.5 0 48-21.5 48-48V368c0-26.5-21.5-48-48-48H512V288h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H352V192h48c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48H240zM96 448V384H224v64H96zm320-64H544v64H416V384z"/></symbol>
+    <symbol id="i-user-shield" viewBox="0 0 640 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H322.8c-3.1-8.8-3.7-18.4-1.4-27.8l15-60.1c2.8-11.3 8.6-21.5 16.8-29.7l40.3-40.3c-32.1-31-75.7-50.1-123.9-50.1H178.3zm435.5-68.3c-15.6-15.6-40.9-15.6-56.6 0l-29.4 29.4 71 71 29.4-29.4c15.6-15.6 15.6-40.9 0-56.6l-14.4-14.4zM375.9 417c-4.1 4.1-7 9.2-8.4 14.9l-15 60.1c-1.4 5.5 .2 11.2 4.2 15.2s9.7 5.6 15.2 4.2l60.1-15c5.6-1.4 10.8-4.3 14.9-8.4L576.1 358.7l-71-71L375.9 417z"/></symbol>
 </svg>
 
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
 <!-- NAVIGATION -->
-<header class="site-nav" id="site-nav">
+<header class="site-nav on-dark" id="site-nav">
+    <a href="#planer" class="promo-ticker" data-promo data-apply-promo>
+        <svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg>
+        <span>20 % Black Friday Special bis 30.11.<span class="promo-ticker-more"> — Bestseller-Paket sichern</span></span>
+        <svg class="ico promo-ticker-arrow" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+    </a>
     <div class="nav-inner">
         <a href="#top" class="brand" aria-label="MW IT-SERVICES, zur Startseite">
             <img src="assets/opt/logo-mw-it-services.jpg" width="72" height="40" alt="" class="brand-logo">
@@ -162,6 +173,7 @@
         </a>
 
         <nav class="nav-links" aria-label="Hauptnavigation">
+            <a href="#sichtbarkeit">Sichtbarkeit</a>
             <a href="#leistungen">Leistungen</a>
             <a href="#planer">Projekt-Planer</a>
             <a href="#ablauf">Arbeitsweise</a>
@@ -177,6 +189,7 @@
         </div>
     </div>
     <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile Navigation" hidden>
+        <a href="#sichtbarkeit">Sichtbarkeit</a>
         <a href="#leistungen">Leistungen</a>
         <a href="#planer">Projekt-Planer</a>
         <a href="#ablauf">Arbeitsweise</a>
@@ -191,21 +204,124 @@
 
     <!-- HERO -->
     <section class="hero" id="top">
-        <img class="hero-logo-bg" src="assets/opt/logo-mw-cutout.png" width="720" height="402" alt="" aria-hidden="true" decoding="async">
         <div class="container hero-grid">
             <div class="hero-copy">
-                <p class="eyebrow">Digitalpartner für Handwerk & Mittelstand · Raum Augsburg & bundesweit</p>
-                <h1 class="hero-title">Weniger <span class="nowrap">Büro-Chaos.</span><br><em>Mehr Top-Aufträge.</em></h1>
-                <p class="hero-lead">Ich komme aus dem Handwerk und entwickle heute Software. Für Betriebe im Raum Augsburg und in ganz Deutschland baue ich Websites, die Kunden und Fachkräfte bringen, und digitale Abläufe, die Ihr Büro jede Woche um Stunden entlasten.</p>
+                <p class="eyebrow">Digitalpartner für Handwerk & Mittelstand · Augsburg, München & bundesweit</p>
+                <h1 class="hero-title">Weniger <span class="nowrap">Büro-Chaos.</span><br><em><img class="hero-logo-bg" src="assets/opt/logo-mw-bg.webp" width="640" height="357" alt="" aria-hidden="true">Mehr Top-Aufträge.</em><span class="hero-title-metal">Digitalisierung, die sich sofort rechnet.</span></h1>
+                <p class="hero-lead">Ich komme aus dem Handwerk und entwickle heute Software. Für Betriebe im Raum Augsburg, in München und in ganz Deutschland baue ich Websites, die Kunden und Fachkräfte bringen, und digitale Abläufe, die Ihr Büro jede Woche um Stunden entlasten.</p>
+                <ul class="hero-trust">
+                    <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> 100 % Fokus auf Handwerk & KMU</li>
+                    <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> Vor Ort in Augsburg, München & bundesweit</li>
+                    <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> Fester Ansprechpartner statt Agentur-Chaos</li>
+                </ul>
                 <div class="hero-actions">
                     <a href="#planer" class="btn btn-copper">Projekt in 2 Minuten planen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
                     <button type="button" class="btn btn-ghost-dark" data-book="Kostenlose Potenzialanalyse">Kostenloses Erstgespräch</button>
                 </div>
             </div>
 
-            <div class="hero-visual" id="hero-visual">
-                <canvas id="hero-3d" aria-hidden="true"></canvas>
-                <p class="hero-visual-caption"><span class="status-dot" aria-hidden="true"></span> <span><strong>Michael Weichenberger</strong> · direkt erreichbar</span></p>
+            <div class="hero-check" id="sichtbarkeit" role="region" aria-labelledby="vis-title">
+                <canvas id="vis-network-canvas" aria-hidden="true"></canvas>
+                <div class="vis-panel" id="vis-panel" data-stage="form">
+                    <span class="vis-border-beam" aria-hidden="true"></span>
+                    <span class="vis-scanline" aria-hidden="true"></span>
+                    <header class="vis-head">
+                        <p class="vis-live"><span class="vis-live-dot" aria-hidden="true"></span>Live-Test mit Google PageSpeed</p>
+                        <h2 id="vis-title">Wo Ihr Betrieb online liegen bleibt.</h2>
+                        <p class="vis-sub">Website-Adresse eintragen. In 20 bis 40 Sekunden prüfe ich über 30 Signale zu Ladezeit, lokaler Google-Suche, KI-Readiness und Sicherheit.</p>
+                    </header>
+
+                    <form class="vis-stage" id="vis-form" novalidate>
+                        <div class="field">
+                            <label for="vis-query">Adresse Ihrer Website</label>
+                            <input type="text" id="vis-query" name="query" required maxlength="200" inputmode="url" autocomplete="url" autocapitalize="off" placeholder="z. B. huber-maler.de" spellcheck="false">
+                        </div>
+                        <p class="vis-error" id="vis-form-error" role="alert" hidden></p>
+                        <div class="vis-cta">
+                            <button type="submit" class="btn btn-copper btn-block">Website jetzt testen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+                        </div>
+                        <p class="vis-fine">Gemessen wird live mit Google PageSpeed Insights aus Sicht eines Smartphones. Dafür geht die Adresse an Google, mehr in der <a href="datenschutz.html#formular">Datenschutzerklärung</a>. Google-Profil, lokale Suche und KI-Sichtbarkeit prüfe ich im persönlichen Report.</p>
+                    </form>
+
+                    <div class="vis-stage vis-scan" id="vis-scan" hidden>
+                        <div class="vis-ring" id="vis-scan-ring" aria-hidden="true">
+                            <svg class="vis-orbit" viewBox="0 0 200 200" aria-hidden="true">
+                                <circle class="vis-orbit-a" cx="100" cy="100" r="96"/>
+                                <circle class="vis-orbit-b" cx="100" cy="100" r="88"/>
+                                <circle class="vis-orbit-c" cx="100" cy="100" r="80"/>
+                            </svg>
+                            <span class="vis-ring-core">
+                                <span class="vis-ring-value" id="vis-count">0:00</span>
+                                <span class="vis-ring-label">Laufzeit</span>
+                            </span>
+                        </div>
+                        <div class="vis-scan-copy">
+                            <p class="vis-kicker">Test für <strong id="vis-scan-name"></strong></p>
+                            <h3 id="vis-scan-heading">Ihre Website wird gemessen</h3>
+                            <p class="vis-status" id="vis-status" aria-live="polite">Google PageSpeed ruft Ihre Website auf.</p>
+                            <ol class="vis-steps" id="vis-steps">
+                                <li class="is-current">Website aufrufen</li>
+                                <li>Ladezeit auf dem Handy messen</li>
+                                <li>Core Web Vitals auswerten</li>
+                                <li>Google- und KI-Signale prüfen</li>
+                                <li>Verschlüsselung prüfen</li>
+                                <li>Ergebnis zusammenstellen</li>
+                            </ol>
+                            <button type="button" class="btn btn-ghost-dark btn-sm" id="vis-cancel">Abbrechen</button>
+                        </div>
+                    </div>
+
+                    <div class="vis-stage" id="vis-result" hidden>
+                        <div class="vis-result-grid">
+                            <div class="vis-score">
+                                <div class="vis-ring vis-ring-score" id="vis-score-ring" aria-hidden="true">
+                                    <span class="vis-ring-core">
+                                        <span class="vis-ring-value" id="vis-score-value">–</span>
+                                        <span class="vis-ring-label" id="vis-score-label">offen</span>
+                                    </span>
+                                </div>
+                                <p class="vis-kicker" id="vis-score-kicker">Sichtbarkeits-Signale erfüllt</p>
+                                <h3 id="vis-result-heading" tabindex="-1">Ergebnis</h3>
+                                <p class="vis-score-note" id="vis-score-note"></p>
+                            </div>
+
+                            <div>
+                                <ul class="vis-points" id="vis-points"></ul>
+
+                                <form class="vis-unlock" id="vis-unlock" novalidate>
+                                    <h3>Vollständigen Report anfordern</h3>
+                                    <p class="vis-unlock-lead">Mit Ihrer E-Mail-Adresse schalten Sie den vollständigen Report frei:</p>
+                                    <ul class="vis-benefits">
+                                        <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Alle 4 Kernpunkte offen</strong> mit Messwert und Ampel, damit Sie sehen, wo Ihre Seite heute steht.</span></li>
+                                        <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Lokale Suche und Google-Profil</strong> geprüft, damit Kunden aus Ihrer Region Sie zuerst finden.</span></li>
+                                        <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span><strong>KI-Readiness im Detail</strong>, damit ChatGPT, Gemini und Perplexity Ihren Betrieb empfehlen können.</span></li>
+                                        <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Konkrete Maßnahmen nach Wirkung sortiert</strong>, damit Sie wissen, was zuerst die meisten Anfragen bringt.</span></li>
+                                        <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Persönlich geprüft, kostenlos</strong> und ohne Verpflichtung, keine automatische Massenmail.</span></li>
+                                    </ul>
+                                    <input type="text" id="vis-hp" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+                                    <div class="field">
+                                        <label for="vis-email">E-Mail-Adresse</label>
+                                        <input type="email" id="vis-email" required maxlength="120" autocomplete="email" placeholder="ihre-adresse@betrieb.de" inputmode="email">
+                                    </div>
+                                    <div class="vis-consent">
+                                        <input type="checkbox" id="vis-consent" required>
+                                        <label for="vis-consent">Ich willige ein, dass MW IT-SERVICES meine E-Mail-Adresse und die geprüfte Website-Adresse samt Messergebnis verwendet, um mir den vollständigen Sichtbarkeits-Report zu schicken. Die Einwilligung kann ich jederzeit widerrufen. Details in der <a href="datenschutz.html">Datenschutzerklärung</a>.</label>
+                                    </div>
+                                    <p class="vis-error" id="vis-mail-error" role="alert" hidden></p>
+                                    <button type="submit" class="btn btn-copper btn-block" id="vis-send">Alle 4 Punkte freischalten <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+                                </form>
+
+                                <div class="vis-thanks" id="vis-thanks" tabindex="-1" hidden>
+                                    <span class="success-icon" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>
+                                    <h3>Report ist unterwegs.</h3>
+                                    <p>Danke. Ich schaue mir <strong id="vis-thanks-name"></strong> persönlich an und melde mich an Ihre E-Mail-Adresse.</p>
+                                </div>
+
+                                <button type="button" class="vis-restart" id="vis-restart">Andere Website testen</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -216,22 +332,46 @@
                 <div><dt>1</dt><dd>Ansprechpartner statt Agentur</dd></div>
                 <div><dt>0</dt><dd>Tracker, Cookies, externe Fonts</dd></div>
             </dl>
+        </div>
+    </section>
 
-            <aside class="promo-bar" data-promo aria-label="Aktuelles Angebot">
-                <span class="promo-tag">Black Friday · bis 30.11.2026</span>
-                <p>Digital Starter + Pflege & Local SEO: <strong>479 €</strong> <s>599 €</s> einmalig und <strong>199 €</strong> <s>250 €</s> pro Monat in den ersten 6 Monaten.</p>
-                <a href="#planer" class="link-arrow" data-apply-promo>Im Planer übernehmen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-            </aside>
+    <!-- BLACK FRIDAY: BESTSELLER-PAKET -->
+    <section class="bf-section" data-promo aria-labelledby="bf-title">
+        <div class="container">
+            <a href="#planer" class="bf-card reveal" data-apply-promo data-tilt data-tilt-max="2">
+                <span class="bf-badge"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg> 20 % Black Friday Special · Exklusives Jahres-Angebot</span>
+                <span class="bf-content">
+                    <span class="bf-eyebrow">Das Handwerker-Upgrade zum Sparpreis · bis 30.11.2026</span>
+                    <span class="bf-title" id="bf-title">Bestseller-Paket (Web + Pflege & SEO)</span>
+                    <span class="bf-text">Digital Starter Website und laufende Pflege mit regionaler Google-Optimierung zum Black-Friday-Tarif. Volle digitale Entlastung bei maximaler Sichtbarkeit in Ihrer Region.</span>
+                    <span class="bf-chips">
+                        <span class="bf-chip"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> Inkl. kompletter Landingpage</span>
+                        <span class="bf-chip"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> Nur 479 € einmalig (statt 599 €)</span>
+                        <span class="bf-chip"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg> Nur 199 € / Mtl. (erste 6 Monate)</span>
+                    </span>
+                </span>
+                <span class="bf-side">
+                    <span class="bf-side-label">Black Friday Tarif</span>
+                    <span class="bf-price-row"><s class="bf-price-old">599 €</s><span class="bf-price-new">479 €</span></span>
+                    <span class="bf-price-note">einmalig + 199 € / Mtl. (erste 6 Monate)<small>danach regulär 250 € / Mtl. · 12 Monate Laufzeit<br>Alle Preise netto zzgl. 19 % MwSt.</small></span>
+                    <span class="bf-cta">Deal im Planer sichern <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+                </span>
+            </a>
         </div>
     </section>
 
     <!-- 01 LEISTUNGEN -->
     <section class="section services" id="leistungen">
         <div class="container">
-            <header class="section-head reveal">
-                <p class="section-index"><span>01</span> Leistungen</p>
-                <h2>Vier Bausteine.<br><em>Ein Ansprechpartner.</em></h2>
-                <p class="section-lead">Klare Umfänge, feste Richtpreise, keine versteckten Kosten. Alle Preise netto zzgl. 19 % MwSt. Jeder Baustein funktioniert allein und lässt sich im Planer kombinieren.</p>
+            <header class="section-head services-head reveal">
+                <div class="services-head-copy">
+                    <p class="section-index"><span>01</span> Leistungen</p>
+                    <h2>Vier Bausteine.<br><em>Ein Ansprechpartner.</em></h2>
+                    <p class="section-lead">Klare Umfänge, feste Richtpreise, keine versteckten Kosten. Alle Preise netto zzgl. 19 % MwSt. Jeder Baustein funktioniert allein und lässt sich im Planer kombinieren.</p>
+                </div>
+                <div class="house-stage" id="hero-visual">
+                    <canvas id="hero-3d" aria-hidden="true"></canvas>
+                </div>
             </header>
 
             <ol class="service-list">
@@ -307,7 +447,7 @@
         </div>
     </section>
 
-    <!-- 02 PLANER -->
+    <!-- 03 PLANER -->
     <section class="section planner" id="planer" aria-labelledby="planner-title">
         <div class="container">
             <header class="section-head reveal">
@@ -472,7 +612,7 @@
         </div>
     </section>
 
-    <!-- 03 ARBEITSWEISE -->
+    <!-- 04 ARBEITSWEISE -->
     <section class="section workflow" id="ablauf">
         <div class="container">
             <header class="section-head section-head-split reveal">
@@ -483,36 +623,43 @@
                 <p class="section-lead">Formulare, Schnittstellen und Automatisierung erledigen die Routine. Die letzte Entscheidung treffen immer Sie.</p>
             </header>
 
-            <ol class="pipeline reveal" id="pipeline">
-                <li class="pipe-step">
-                    <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-envelope"/></svg></span>
-                    <span class="pipe-num">Schritt 1</span>
-                    <h3>Anfrage geht ein</h3>
-                    <p>Formular, E-Mail oder WhatsApp: alles landet an einem Ort.</p>
-                </li>
-                <li class="pipe-step">
-                    <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-wand"/></svg></span>
-                    <span class="pipe-num">Schritt 2</span>
-                    <h3>Vorqualifizierung</h3>
-                    <p>Das System erfasst Maße, Fotos und Wunschtermin und bereitet die Daten auf.</p>
-                </li>
-                <li class="pipe-step">
-                    <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-user-check"/></svg></span>
-                    <span class="pipe-num">Schritt 3</span>
-                    <h3>Prüfung durch Sie</h3>
-                    <p>Sie prüfen, passen an und geben mit einem Klick frei.</p>
-                </li>
-                <li class="pipe-step">
-                    <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-plane"/></svg></span>
-                    <span class="pipe-num">Schritt 4</span>
-                    <h3>Versand & Ablage</h3>
-                    <p>Das Angebot geht raus, die Dokumente liegen sauber archiviert.</p>
-                </li>
-            </ol>
+            <div class="pipeline-box reveal">
+                <div class="pipeline-head">
+                    <p class="pipeline-title"><svg class="ico" aria-hidden="true"><use href="#i-network"/></svg> Live-Visualisierung: Automatisierter Anfrage-Workflow</p>
+                    <span class="pipeline-badge"><svg class="ico" aria-hidden="true"><use href="#i-user-shield"/></svg> Mit menschlicher Endkontrolle</span>
+                </div>
+                <p class="pipeline-sub">So verarbeitet Ihr Betrieb eingehende Anfragen mit smarten Formularen, automatischen Schnittstellen und sicherer Freigabe durch Sie:</p>
+                <ol class="pipeline" id="pipeline">
+                    <li class="pipe-step">
+                        <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-envelope"/></svg></span>
+                        <span class="pipe-num">Schritt 1</span>
+                        <h3>Anfrage geht ein</h3>
+                        <p>Formular, E-Mail oder WhatsApp: alles landet an einem Ort.</p>
+                    </li>
+                    <li class="pipe-step">
+                        <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-wand"/></svg></span>
+                        <span class="pipe-num">Schritt 2</span>
+                        <h3>Vorqualifizierung</h3>
+                        <p>Das System erfasst Maße, Fotos und Wunschtermin und bereitet die Daten auf.</p>
+                    </li>
+                    <li class="pipe-step">
+                        <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-user-check"/></svg></span>
+                        <span class="pipe-num">Schritt 3</span>
+                        <h3>Prüfung durch Sie</h3>
+                        <p>Sie prüfen, passen an und geben mit einem Klick frei.</p>
+                    </li>
+                    <li class="pipe-step">
+                        <span class="pipe-icon" aria-hidden="true"><svg class="ico"><use href="#i-plane"/></svg></span>
+                        <span class="pipe-num">Schritt 4</span>
+                        <h3>Versand & Ablage</h3>
+                        <p>Das Angebot geht raus, die Dokumente liegen sauber archiviert.</p>
+                    </li>
+                </ol>
+            </div>
         </div>
     </section>
 
-    <!-- 04 RECHNER -->
+    <!-- 05 RECHNER -->
     <section class="section calculator" id="rechner">
         <div class="container calc-grid">
             <header class="section-head reveal">
@@ -549,7 +696,7 @@
         </div>
     </section>
 
-    <!-- 05 REFERENZEN -->
+    <!-- 06 REFERENZEN -->
     <section class="section projects" id="referenzen">
         <div class="container">
             <header class="section-head section-head-split reveal">
@@ -557,7 +704,7 @@
                     <p class="section-index"><span>05</span> Referenzen</p>
                     <h2>Ausgewählte <em>Arbeiten.</em></h2>
                 </div>
-                <p class="section-lead">Ein Kundenprojekt im Einsatz und zwei Eigenentwicklungen, die ich Ihnen gern live zeige.</p>
+                <p class="section-lead">Ein Kundenprojekt im Einsatz, diese Website als komplette Eigenentwicklung und ein Workflow, den ich Ihnen gern live zeige.</p>
             </header>
 
             <div class="project-grid">
@@ -587,20 +734,26 @@
 
                 <article class="project-card reveal" data-tilt data-tilt-max="3">
                     <span class="project-img" data-depth="0.3">
-                        <img src="assets/opt/projekt-kalkulationssystem.jpg" width="1200" height="861" loading="lazy" decoding="async" alt="Interaktive Website mit Kalkulationssystem">
+                        <img src="assets/opt/projekt-mw-itservices-website.webp" width="1302" height="907" loading="lazy" decoding="async" alt="Startseite von mw-itservices.de mit 3D-Animation und Projekt-Planer">
                     </span>
                     <span class="project-body" data-depth="0.7">
-                        <span class="project-kind">Eigenentwicklung · Web</span>
-                        <h3 class="project-title">Anfrage- & Kalkulationssystem</h3>
-                        <span class="project-desc">Selbst entwickelt, ohne Baukasten: schnelle Ladezeiten, Live-Rechner und direktes Anfragesystem.</span>
-                        <button type="button" class="link-arrow" data-book="Anfrage: Interaktiver Kunden-Rechner / Website">Ähnliches System anfragen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+                        <span class="project-kind">Eigenentwicklung · Live</span>
+                        <h3 class="project-title">Diese Website: mw-itservices.de</h3>
+                        <span class="project-desc">Komplett selbst entwickelt, ohne Baukasten: 3D-Animation, Projekt-Planer mit Live-Preisen, Ersparnis-Rechner, keine Cookies und schnelle Ladezeiten.</span>
+                        <button type="button" class="link-arrow" data-book="Anfrage: Website wie mw-itservices.de">Ähnliche Website anfragen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
                     </span>
                 </article>
             </div>
+
+            <aside class="review-cta reveal" data-google-review-box hidden>
+                <span class="review-stars" aria-hidden="true"><svg class="ico"><use href="#i-star"/></svg><svg class="ico"><use href="#i-star"/></svg><svg class="ico"><use href="#i-star"/></svg><svg class="ico"><use href="#i-star"/></svg><svg class="ico"><use href="#i-star"/></svg></span>
+                <p><strong>Schon mit mir gearbeitet?</strong> Eine kurze Bewertung auf Google hilft anderen Betrieben bei der Entscheidung und mir sehr.</p>
+                <a class="btn btn-primary btn-sm" href="#" target="_blank" rel="noopener noreferrer" data-google-review>Bewertung schreiben</a>
+            </aside>
         </div>
     </section>
 
-    <!-- 06 PROFIL -->
+    <!-- 07 PROFIL -->
     <section class="section about" id="profil">
         <div class="container about-grid">
             <div class="about-copy reveal">
@@ -612,34 +765,33 @@
             </div>
 
             <div class="about-side reveal">
-            <figure class="about-portrait" data-tilt data-tilt-max="3">
-                <img src="assets/opt/portrait-michael-weichenberger.jpg" width="760" height="1013" loading="lazy" decoding="async" alt="Michael Weichenberger, IT-Systemintegrator und Web-Entwickler aus Langweid am Lech">
-                <figcaption>
-                    <span class="about-portrait-name">Michael Weichenberger</span>
-                    <span class="about-portrait-role">IT-Systemintegrator & Web-Entwickler · Langweid am Lech</span>
-                    <span class="about-portrait-trade">Gelernter Maler und Lackierer</span>
-                    <span class="about-portrait-status"><span class="status-dot" aria-hidden="true"></span> Direkt erreichbar, ohne Umwege</span>
-                    <button type="button" class="about-portrait-cta" data-book="Persönliches Gespräch mit Michael Weichenberger">Gespräch anfragen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
-                </figcaption>
-            </figure>
+                <figure class="about-portrait" data-tilt data-tilt-max="3">
+                    <img src="assets/opt/portrait-michael-weichenberger.jpg" width="760" height="1013" loading="lazy" decoding="async" alt="Michael Weichenberger, IT-Systemintegrator und Web-Entwickler aus Langweid am Lech">
+                    <figcaption>
+                        <span class="about-portrait-name">Michael Weichenberger</span>
+                        <span class="about-portrait-role">IT-Systemintegrator & Web-Entwickler · Langweid am Lech</span>
+                        <span class="about-portrait-status"><span class="status-dot" aria-hidden="true"></span> Direkt erreichbar, ohne Umwege</span>
+                        <button type="button" class="about-portrait-cta" data-book="Persönliches Gespräch mit Michael Weichenberger">Gespräch anfragen <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+                    </figcaption>
+                </figure>
 
-            <ol class="timeline">
-                <li>
-                    <span class="timeline-num">I</span>
-                    <h3>Handwerk: Maler und Lackierer</h3>
-                    <p>Abgeschlossene Ausbildung zum Maler und Lackierer und Praxis auf der Baustelle: Abläufe vor Ort, Kundenkontakt, pragmatisches Anpacken.</p>
-                </li>
-                <li>
-                    <span class="timeline-num">II</span>
-                    <h3>Softwareentwicklung & Systemintegration</h3>
-                    <p>2.300 UE Intensivausbildung am Syntax Institut (Kotlin & Swift), Google-Zertifikate in Projektmanagement, IT-Support und KI.</p>
-                </li>
-                <li>
-                    <span class="timeline-num">III</span>
-                    <h3>Web-Engineering & Automatisierung</h3>
-                    <p>Websites und digitale Büro-Abläufe für Handwerk und Mittelstand, schlüsselfertig aus einer Hand.</p>
-                </li>
-            </ol>
+                <ol class="timeline">
+                    <li>
+                        <span class="timeline-num">I</span>
+                        <h3>Handwerk: Maler und Lackierer</h3>
+                        <p>Abgeschlossene Ausbildung zum Maler und Lackierer und Praxis auf der Baustelle: Abläufe vor Ort, Kundenkontakt, pragmatisches Anpacken.</p>
+                    </li>
+                    <li>
+                        <span class="timeline-num">II</span>
+                        <h3>Softwareentwicklung & Systemintegration</h3>
+                        <p>2.300 UE Intensivausbildung am Syntax Institut (Kotlin & Swift), Google-Zertifikate in Projektmanagement, IT-Support und KI.</p>
+                    </li>
+                    <li>
+                        <span class="timeline-num">III</span>
+                        <h3>Web-Engineering & Automatisierung</h3>
+                        <p>Websites und digitale Büro-Abläufe für Handwerk und Mittelstand, schlüsselfertig aus einer Hand.</p>
+                    </li>
+                </ol>
             </div>
         </div>
 
@@ -669,7 +821,7 @@
         </div>
     </section>
 
-    <!-- 07 REGION & FAQ -->
+    <!-- 08 REGION & FAQ -->
     <section class="section faq" id="faq">
         <div class="container faq-grid">
             <div class="region reveal">
@@ -711,6 +863,10 @@
                     <li>Ulm</li>
                     <li>Deutschlandweit per Video-Call</li>
                 </ul>
+                <div class="google-links">
+                    <a class="link-arrow" href="https://www.google.com/maps/search/?api=1&query=MW+IT-SERVICES+Deuringerstrasse+1+86462+Langweid+am+Lech" target="_blank" rel="noopener noreferrer" data-google-profile><svg class="ico" aria-hidden="true"><use href="#i-map-pin"/></svg> Auf Google Maps ansehen</a>
+                    <a class="link-arrow" href="#" target="_blank" rel="noopener noreferrer" data-google-review hidden><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg> Bewertung auf Google schreiben</a>
+                </div>
             </div>
 
             <div class="faq-list reveal">
@@ -760,6 +916,7 @@
         </div>
         <nav class="footer-links" aria-label="Rechtliches">
             <a href="https://www.instagram.com/mwitservices/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=MW+IT-SERVICES+Deuringerstrasse+1+86462+Langweid+am+Lech" target="_blank" rel="noopener noreferrer" data-google-profile>Google Maps</a>
             <a href="impressum.html">Impressum</a>
             <a href="datenschutz.html">Datenschutz</a>
             <span class="footer-badge"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg> Ohne Werbetracking</span>
@@ -808,6 +965,7 @@
     </div>
 </dialog>
 
-<script src="script.js" defer></script>
+<script src="vis-rules.js?v=20261104q" defer></script>
+<script src="script.js?v=20261104q" defer></script>
 </body>
 </html>

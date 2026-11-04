@@ -1,0 +1,19 @@
+{
+  "name": "harvey-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lokaler Agent: misst Websites (Google PageSpeed + Strukturanalyse) und erstellt Problemcases und Teaser-Reports für den Sichtbarkeits-Check.",
+  "main": "harvey-worker.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "node harvey-worker.js",
+    "cf:dev": "npx wrangler dev --config cloudflare/wrangler.toml",
+    "cf:deploy": "npx wrangler deploy --config cloudflare/wrangler.toml"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
+  }
+}

@@ -1,6 +1,6 @@
 /* ==========================================================================
    MW IT-SERVICES · script.js
-   Module: Navigation · Reveal · Planer · Anfrage-Dialog · Rechner · Pipeline · Tilt
+   Module: Navigation · Reveal · Planer · Anfrage-Dialog · Sichtbarkeit · Rechner · Pipeline · Tilt
    Keine Tracker, keine Cookies, kein Browser-Speicher. Einzige Verbindung nach
    außen: der Formularversand an EmailJS, und nur beim Absenden.
    ========================================================================== */
@@ -47,6 +47,17 @@
         term: 12
     };
     const promoActive = () => Date.now() <= PROMO.until.getTime();
+
+    /* ======================================================================
+       GOOGLE-UNTERNEHMENSPROFIL: hier die beiden Links eintragen
+       profile: Link zum Profil (Google Maps → Profil → Teilen → Link kopieren)
+       review:  Bewertungslink (Profil → „Rezensionen anfordern“ → Link kopieren)
+       Solange review leer ist, bleiben alle Bewertungs-Buttons unsichtbar.
+       ====================================================================== */
+    const GOOGLE = {
+        profile: '',
+        review: ''
+    };
     const VAT = 0.19;
     const gross = (n) => Math.round(n * (1 + VAT));
 
@@ -58,12 +69,16 @@
         const toggle = $('#menu-toggle');
         const drawer = $('#mobile-nav');
 
-        const hero = $('.hero');
-        // Über dem dunklen Hero bleibt die Navigation dunkles Glas
+        // Über dem dunklen Hero bleibt die Navigation dunkel
+        const darkZones = $$('.hero');
         const onScroll = () => {
-            const overHero = hero && window.scrollY < hero.offsetHeight - nav.offsetHeight;
-            nav.classList.toggle('on-dark', !!overHero);
-            nav.classList.toggle('is-scrolled', !overHero && window.scrollY > 8);
+            const edge = nav.offsetHeight;
+            const overDark = darkZones.some((el) => {
+                const r = el.getBoundingClientRect();
+                return r.top < edge && r.bottom > edge;
+            });
+            nav.classList.toggle('on-dark', overDark);
+            nav.classList.toggle('is-scrolled', !overDark && window.scrollY > 8);
         };
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
@@ -96,20 +111,63 @@
     /* ======================================================================
        2. SCROLL-REVEAL
        ====================================================================== */
+    // Ausblenden erst, wenn dieses Skript läuft: lädt es nicht, bleibt alles sichtbar.
+    // Zwei Wege blenden ein (Observer und Scroll-Prüfung), damit nichts hängen bleibt.
     function initReveal() {
-        const items = $$('.reveal');
-        if (reducedMotion || !('IntersectionObserver' in window)) {
-            items.forEach((el) => el.classList.add('in-view'));
-            return;
+        let items = $$('.reveal');
+        if (reducedMotion || !items.length) return;
+        document.documentElement.classList.add('reveal-ready');
+
+        const show = (el) => el.classList.add('in-view');
+        const check = () => {
+            const line = window.innerHeight * 0.94;
+            items = items.filter((el) => {
+                const r = el.getBoundingClientRect();
+                if (r.top < line && r.bottom > 0) { show(el); return false; }
+                if (r.bottom <= 0) { show(el); return false; }      // übersprungen (Anker, Sprung nach unten)
+                return true;
+            });
+            if (!items.length) window.removeEventListener('scroll', onScroll);
+        };
+        let ticking = false;
+        const onScroll = () => {
+            if (ticking) return;
+            ticking = true;
+            const run = () => { if (!ticking) return; ticking = false; check(); };
+            requestAnimationFrame(run);
+            setTimeout(run, 120);           // falls rAF pausiert (Hintergrund-Tab)
+        };
+        check();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        window.addEventListener('load', check);
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => { if (entry.isIntersecting) { show(entry.target); io.unobserve(entry.target); } });
+            }, { threshold: 0, rootMargin: '0px 0px -6% 0px' });
+            items.forEach((el) => io.observe(el));
         }
+    }
+
+    /* Google-Links aus der Konfiguration oben setzen */
+    function initGoogleLinks() {
+        if (GOOGLE.profile) $$('[data-google-profile]').forEach((a) => { a.href = GOOGLE.profile; });
+        if (!GOOGLE.review) return;
+        $$('[data-google-review]').forEach((a) => { a.href = GOOGLE.review; a.hidden = false; });
+        $$('[data-google-review-box]').forEach((el) => { el.hidden = false; });
+    }
+
+    /* Leistungsfelder: das Feld in der Bildschirmmitte wird markiert */
+    function initServiceProgress() {
+        const rows = $$('.service-row');
+        if (!rows.length || !('IntersectionObserver' in window)) return;
         const io = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (!entry.isIntersecting) return;
-                entry.target.classList.add('in-view');
-                io.unobserve(entry.target);
+                rows.forEach((r) => r.classList.toggle('is-current', r === entry.target));
             });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-        items.forEach((el) => io.observe(el));
+        }, { rootMargin: '-42% 0px -42% 0px' });
+        rows.forEach((r) => io.observe(r));
     }
 
     /* ======================================================================
@@ -263,6 +321,20 @@
     };
     const CONTACT_EMAIL = 'info@mw-itservices.de';
 
+    async function sendMail(params) {
+        const res = await fetch(EMAILJS.endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                service_id: EMAILJS.serviceId,
+                template_id: EMAILJS.templateId,
+                user_id: EMAILJS.publicKey,
+                template_params: params
+            })
+        });
+        if (!res.ok) throw new Error('EmailJS antwortet mit Status ' + res.status);
+    }
+
     const Booking = (function () {
         const dialog = $('#booking');
         const form = $('#booking-form');
@@ -273,21 +345,6 @@
         const submitLabel = submitBtn ? submitBtn.textContent : '';
         let sending = false;
         let lastSentAt = 0;
-
-        // Versand direkt an die EmailJS-REST-Schnittstelle: kein Fremd-Skript, kein CDN
-        async function sendMail(params) {
-            const res = await fetch(EMAILJS.endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    service_id: EMAILJS.serviceId,
-                    template_id: EMAILJS.templateId,
-                    user_id: EMAILJS.publicKey,
-                    template_params: params
-                })
-            });
-            if (!res.ok) throw new Error('EmailJS antwortet mit Status ' + res.status);
-        }
 
         function reset() {
             form.reset();
@@ -381,7 +438,425 @@
     })();
 
     /* ======================================================================
-       5. ERSPARNIS-RECHNER
+       5. SICHTBARKEITS-CHECK (Teaser nach 60 Sekunden, Report per E-Mail)
+       ====================================================================== */
+    /* Live-Test der eingegebenen Website.
+       1. Voller Test über den Cloudflare Worker (harvey-agent/cloudflare): PageSpeed + Strukturanalyse,
+          bewertet mit vis-rules.js, also identisch mit dem Harvey-Agent.
+       2. Fallback ohne Worker: nur Google PageSpeed direkt aus dem Browser. Lokale Suche und
+          KI-Readiness lassen sich so nicht prüfen und bleiben "im Report".
+       Bewertung, Schwellen und Signale stehen ausschließlich in vis-rules.js (window.VisRules). */
+    const ANALYZE_ENDPOINT = 'https://mw-sichtbarkeit.harvey-agent.workers.dev/analyze';
+    const PSI_API_KEY = 'AIzaSyA8uDRhCVUSscnF7UndGk-N8dnTqpIAilk'; // nur für mw-itservices.de und localhost:5517 freigegeben
+    const PSI_ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+    const PSI_TIMEOUT_MS = 90000;
+
+    async function runFullCheck(url, signal) {
+        let res;
+        try {
+            res = await fetch(ANALYZE_ENDPOINT + '?url=' + encodeURIComponent(url), { signal, headers: { Accept: 'application/json' } });
+        } catch (err) {
+            if (err && err.name === 'AbortError') throw err;
+            throw Object.assign(new Error('network'), { kind: 'unavailable' });
+        }
+        let data = null;
+        try { data = await res.json(); } catch (err) { data = null; }
+        if (res.status === 422) throw Object.assign(new Error('unreachable'), { kind: 'unreachable' });
+        if (!res.ok || !data) throw Object.assign(new Error((data && data.error) || 'HTTP ' + res.status), { kind: 'unavailable' });
+        return data;
+    }
+
+    function toTestUrl(raw) {
+        let s = String(raw || '').trim().replace(/\s+/g, '');
+        if (!s) return null;
+        if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+        try {
+            const u = new URL(s);
+            if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z0-9-]{2,}$/i.test(u.hostname)) return null;
+            return { url: u.origin + u.pathname, name: u.hostname.replace(/^www\./i, '') };
+        } catch (err) {
+            return null;
+        }
+    }
+
+    async function runPageSpeed(url, signal) {
+        const params = new URLSearchParams({ url, strategy: 'mobile', locale: 'de' });
+        ['performance', 'seo', 'accessibility', 'best-practices'].forEach((c) => params.append('category', c));
+        if (PSI_API_KEY) params.set('key', PSI_API_KEY);
+        let res;
+        try {
+            res = await fetch(PSI_ENDPOINT + '?' + params.toString(), { signal });
+        } catch (err) {
+            if (err && err.name === 'AbortError') throw err;
+            throw Object.assign(new Error('network'), { kind: 'unavailable' });
+        }
+        let data = null;
+        try { data = await res.json(); } catch (err) { data = null; }
+        if (!res.ok || !data || !data.lighthouseResult) {
+            const msg = (data && data.error && data.error.message) || '';
+            const kind = res.status === 429 || res.status === 403 ? 'unavailable'
+                : /FAILED_DOCUMENT_REQUEST|ERRORED_DOCUMENT_REQUEST|DNS|NO_FCP|NOT_HTML|unable to resolve|Unable to process/i.test(msg) ? 'unreachable'
+                : 'unavailable';
+            throw Object.assign(new Error(msg || 'HTTP ' + res.status), { kind });
+        }
+        return data.lighthouseResult;
+    }
+
+    function initVisibility() {
+        const root = $('#sichtbarkeit');
+        if (!root) return;
+        const Rules = window.VisRules;
+        if (!Rules) throw new Error('vis-rules.js nicht geladen');
+
+        const form = $('#vis-form');
+        const scan = $('#vis-scan');
+        const result = $('#vis-result');
+        const queryInput = $('#vis-query');
+        const formError = $('#vis-form-error');
+        const countEl = $('#vis-count');
+        const scanRing = $('#vis-scan-ring');
+        const scanName = $('#vis-scan-name');
+        const statusEl = $('#vis-status');
+        const steps = $$('#vis-steps li');
+        const thanksName = $('#vis-thanks-name');
+        const scoreRing = $('#vis-score-ring');
+        const scoreValue = $('#vis-score-value');
+        const scoreLabel = $('#vis-score-label');
+        const scoreKicker = $('#vis-score-kicker');
+        const resultHeading = $('#vis-result-heading');
+        const scoreNote = $('#vis-score-note');
+        const pointsEl = $('#vis-points');
+        const unlock = $('#vis-unlock');
+        const thanks = $('#vis-thanks');
+        const mailError = $('#vis-mail-error');
+        const sendBtn = $('#vis-send');
+        const sendLabel = sendBtn.innerHTML;
+        const panelEl = $('#vis-panel');
+        const STATUS = [
+            'Google PageSpeed ruft Ihre Website auf.',
+            'Die Seite wird wie auf einem Smartphone im Mobilfunknetz geladen.',
+            'Core Web Vitals werden ausgewertet.',
+            'Titel, Beschreibung und Indexierung werden geprüft.',
+            'Verschlüsselung und Sicherheit werden geprüft.',
+            'Ergebnis steht bereit.'
+        ];
+        const MIN_SCAN_MS = 5000;
+
+        let timer = 0;
+        let startedAt = 0;
+        let target = null;
+        let report = null;
+        let controller = null;
+        let runId = 0;
+        let sending = false;
+        let lastSentAt = 0;
+        let lastStep = -1;
+
+        function show(stage) {
+            if (panelEl) panelEl.dataset.stage = stage;
+            form.hidden = stage !== 'form';
+            scan.hidden = stage !== 'scan';
+            result.hidden = stage !== 'result';
+        }
+
+        function formatTime(ms) {
+            const sec = Math.floor(ms / 1000);
+            return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+        }
+
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = 0;
+            }
+        }
+
+        function paint(elapsed, done) {
+            const progress = done ? 1 : Math.min(0.94, 1 - Math.exp(-elapsed / 16000));
+            countEl.textContent = formatTime(elapsed);
+            scanRing.style.setProperty('--p', String(progress));
+            const last = steps.length - 1;
+            const step = done ? last : Math.min(last - 1, Math.floor((progress / 0.94) * last));
+            steps.forEach((li, i) => {
+                li.classList.toggle('is-done', i < step || done);
+                li.classList.toggle('is-current', i === step && !done);
+            });
+            if (step !== lastStep) {
+                lastStep = step;
+                statusEl.textContent = STATUS[Math.min(step, STATUS.length - 1)];
+            }
+        }
+
+        function setFormError(text) {
+            queryInput.setAttribute('aria-invalid', 'true');
+            formError.textContent = text;
+            formError.hidden = false;
+        }
+
+        /* Ein Kernpunkt: offen mit Ampel (Weckruf) oder geblurrt mit Schloss. */
+        function pointItem(p) {
+            const li = document.createElement('li');
+            const open = p.open && p.status !== 'pending';
+            const measured = p.status !== 'pending';
+            // Auch verdeckte Punkte zeigen ihre Ampel, damit der Bedarf sofort sichtbar ist; nur die Details bleiben im Report.
+            li.className = 'vis-point ' + (open ? 'is-open' : 'is-blurred') + (measured ? ' is-' + p.status : '');
+            const k = document.createElement('p');
+            k.className = 'vis-point-kicker';
+            if (open) {
+                const dot = document.createElement('span');
+                dot.className = 'vis-point-dot';
+                dot.setAttribute('aria-hidden', 'true');
+                k.append(dot, document.createTextNode(Rules.STATUS_TEXT[p.status] + ' · ' + p.value));
+            } else if (measured) {
+                const dot = document.createElement('span');
+                dot.className = 'vis-point-dot';
+                dot.setAttribute('aria-hidden', 'true');
+                k.append(dot, document.createTextNode(Rules.STATUS_TEXT[p.status]));
+                k.insertAdjacentHTML('beforeend', '<svg class="ico vis-point-lock" aria-hidden="true"><use href="#i-lock"/></svg>');
+            } else {
+                k.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg>';
+                k.append(document.createTextNode('Im vollständigen Report'));
+            }
+            const h = document.createElement('h3');
+            h.textContent = p.title;
+            const body = document.createElement('p');
+            body.textContent = p.text;
+            if (open) {
+                li.append(k, h, body);
+                return li;
+            }
+            const veil = document.createElement('div');
+            veil.className = 'vis-veil';
+            veil.setAttribute('aria-hidden', 'true');
+            const val = document.createElement('span');
+            val.className = 'vis-veil-value';
+            val.textContent = p.value;
+            veil.append(val, body);
+            const sr = document.createElement('span');
+            sr.className = 'visually-hidden';
+            sr.textContent = 'Ergebnis im vollständigen Report.';
+            li.append(k, h, veil, sr);
+            return li;
+        }
+
+        function openText(points) {
+            const open = points.filter((p) => p.open).length;
+            const rest = points.length - open;
+            const words = ['Kein', 'Ein', 'Zwei', 'Drei', 'Vier'];
+            const restWords = ['keine', 'ein', 'zwei', 'drei', 'vier'];
+            if (!rest) return 'Alle Punkte sind offen.';
+            return (words[open] || open) + (open === 1 ? ' Punkt ist' : ' Punkte sind') + ' offen, ' + (restWords[rest] || rest) + ' weitere' + (rest === 1 ? 'r steht' : ' stehen') + ' im vollständigen Report.';
+        }
+
+        /* Zeigt einen Report im Format von vis-rules.js (Live-Test oder Harvey-JSON). */
+        function renderReport(r) {
+            pointsEl.textContent = '';
+            const measured = r.points.filter((p) => p.status !== 'pending');
+            const hasCount = typeof r.total === 'number' && r.total > 0;
+            scoreRing.style.setProperty('--p', String(hasCount ? r.met / r.total : 0));
+            scoreValue.textContent = hasCount ? String(r.met) : '–';
+            scoreLabel.textContent = hasCount ? 'von ' + r.total : 'offen';
+            scoreKicker.textContent = hasCount ? 'Sichtbarkeits-Signale erfüllt' : 'Live-Test';
+            resultHeading.textContent = r.headline;
+
+            scoreNote.textContent = '';
+            if (!measured.length) {
+                scoreNote.textContent = 'Für ' + r.name + ' kam gerade keine Messung zustande. Ich prüfe die Seite gern von Hand und schicke Ihnen alle vier Punkte.';
+            } else {
+                const date = new Date(r.measuredAt);
+                const when = isNaN(date) ? '' : ' am ' + date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+                const strong = document.createElement('strong');
+                strong.textContent = r.name;
+                scoreNote.append(document.createTextNode('Gemessen für '), strong,
+                    document.createTextNode(when + ' (' + r.source + '). ' + openText(r.points)));
+            }
+            r.points.filter((p) => p.open).concat(r.points.filter((p) => !p.open)).forEach((p) => pointsEl.appendChild(pointItem(p)));
+        }
+
+        function present(r) {
+            report = r;
+            target = { url: r.url, name: r.name };
+            renderReport(r);
+            thanksName.textContent = r.name;
+            unlock.hidden = false;
+            thanks.hidden = true;
+            mailError.hidden = true;
+            show('result');
+        }
+
+        async function begin(t) {
+            target = t;
+            report = null;
+            const id = ++runId;
+            scanName.textContent = t.name;
+            startedAt = Date.now();
+            lastStep = -1;
+            steps.forEach((li) => li.classList.remove('is-done', 'is-current'));
+            paint(0, false);
+            show('scan');
+            stopTimer();
+            timer = setInterval(() => paint(Date.now() - startedAt, false), reducedMotion ? 1000 : 200);
+
+            if (controller) controller.abort();
+            controller = new AbortController();
+            const timeout = setTimeout(() => controller && controller.abort(), PSI_TIMEOUT_MS);
+            let full = null;
+            let psi = null;
+            let failure = null;
+            try {
+                if (ANALYZE_ENDPOINT) {
+                    try {
+                        full = Rules.sanitizeReport(await runFullCheck(t.url, controller.signal));
+                        if (!full) throw Object.assign(new Error('format'), { kind: 'unavailable' });
+                    } catch (err) {
+                        if (err.kind === 'unreachable' || err.name === 'AbortError') throw err;
+                        console.warn('Voller Test nicht verfügbar, nur PageSpeed:', err.message || err);
+                    }
+                }
+                if (!full) psi = Rules.metricsFromLighthouse(await runPageSpeed(t.url, controller.signal));
+            } catch (err) {
+                failure = err;
+            } finally {
+                clearTimeout(timeout);
+            }
+            if (id !== runId) return; // abgebrochen oder neu gestartet
+            const wait = MIN_SCAN_MS - (Date.now() - startedAt);
+            if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+            if (id !== runId) return;
+
+            stopTimer();
+            if (failure && failure.kind === 'unreachable') {
+                show('form');
+                setFormError('Google konnte ' + t.name + ' nicht aufrufen. Stimmt die Adresse?');
+                queryInput.focus();
+                return;
+            }
+            if (failure) console.warn('PageSpeed-Test nicht möglich:', failure.message || failure);
+            paint(Date.now() - startedAt, true);
+            // Voller Report vom Worker, sonst nur PageSpeed; ohne Messung bleiben alle 4 Punkte im Report.
+            present(full || Rules.buildReport({ url: t.url, name: t.name, psi, structure: null }));
+            resultHeading.focus();
+        }
+
+        function reset() {
+            runId++;
+            if (controller) controller.abort();
+            controller = null;
+            stopTimer();
+            show('form');
+            formError.hidden = true;
+            queryInput.removeAttribute('aria-invalid');
+            queryInput.focus();
+        }
+
+        /* Vorbereiteter Report aus dem Harvey-Agent: ?check=<id> lädt reports/<id>.json.
+           Status und Score kommen fertig aus dem JSON, hier wird nichts neu bewertet. */
+        function loadPrepared() {
+            const id = new URLSearchParams(window.location.search).get('check');
+            if (!id || !/^[a-z0-9-]{3,90}$/.test(id)) return;
+            fetch('reports/' + id + '.json', { cache: 'no-cache' })
+                .then((res) => (res.ok ? res.json() : null))
+                .then((d) => {
+                    const r = Rules.sanitizeReport(d);
+                    if (!r) {
+                        if (d) console.warn('Report ' + id + ' hat ein unbekanntes Format.');
+                        return;
+                    }
+                    queryInput.value = r.name;
+                    present(r);
+                })
+                .catch((err) => console.warn('Report ' + id + ' nicht geladen:', err));
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const value = queryInput.value.trim();
+            const t = toTestUrl(value.slice(0, 200));
+            if (!t) {
+                setFormError(value.length < 2
+                    ? 'Bitte tragen Sie die Adresse Ihrer Website ein.'
+                    : 'Für den Test brauche ich die Website-Adresse, z. B. huber-maler.de. Noch keine Website? Dann sprechen Sie mich direkt an.');
+                queryInput.focus();
+                return;
+            }
+            queryInput.removeAttribute('aria-invalid');
+            formError.hidden = true;
+            begin(t);
+        });
+
+        $('#vis-cancel').addEventListener('click', reset);
+        $('#vis-restart').addEventListener('click', () => {
+            if (sending) return;
+            unlock.reset();
+            reset();
+        });
+
+        unlock.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (sending || !target) return;
+            mailError.hidden = true;
+            const email = $('#vis-email');
+            const consent = $('#vis-consent');
+            let invalid = null;
+            if (!email.value.trim() || !email.checkValidity()) {
+                email.setAttribute('aria-invalid', 'true');
+                invalid = email;
+            } else email.removeAttribute('aria-invalid');
+            if (!consent.checked) {
+                consent.setAttribute('aria-invalid', 'true');
+                invalid = invalid || consent;
+            } else consent.removeAttribute('aria-invalid');
+            if (invalid) {
+                mailError.textContent = consent.checked
+                    ? 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
+                    : 'Bitte bestätigen Sie die Einwilligung, damit ich Ihnen den Report schicken darf.';
+                mailError.hidden = false;
+                invalid.focus();
+                return;
+            }
+            if ($('#vis-hp').value.trim()) return;
+            if (Date.now() - lastSentAt < 30000) {
+                mailError.textContent = 'Bitte warten Sie kurz vor einer weiteren Anfrage.';
+                mailError.hidden = false;
+                return;
+            }
+
+            const summary = report
+                ? 'Signale ' + (report.total ? report.met + '/' + report.total : 'offen') + (report.id ? ' (Report ' + report.id + ')' : '') + '. '
+                    + report.points.map((p) => p.title + ': ' + p.value + ' (' + Rules.STATUS_TEXT[p.status] + ')'
+                        + (p.signals && p.signals.some((s) => !s.ok) ? ', fehlt: ' + p.signals.filter((s) => !s.ok).map((s) => s.label).join(', ') : '')).join('; ') + '.'
+                : 'Keine Messung vorhanden, bitte von Hand prüfen.';
+
+            sending = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Wird gesendet …';
+            try {
+                await sendMail({
+                    package: 'Website-Test: vollständiger Report',
+                    client_name: target.name.slice(0, 120),
+                    client_email: email.value.trim().slice(0, 120),
+                    client_phone: 'nicht angegeben',
+                    client_message: ('Bitte um den persönlichen Sichtbarkeits-Report für ' + target.url + '. ' + summary + ' DSGVO-Einwilligung: ja.').slice(0, 1500)
+                });
+                lastSentAt = Date.now();
+                unlock.hidden = true;
+                thanks.hidden = false;
+                thanks.focus();
+            } catch (err) {
+                console.error('Sichtbarkeits-Report fehlgeschlagen:', err);
+                mailError.textContent = 'Der Versand hat leider nicht geklappt. Bitte schreiben Sie direkt an ' + CONTACT_EMAIL + '.';
+                mailError.hidden = false;
+            } finally {
+                sending = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = sendLabel;
+            }
+        });
+
+        loadPrepared();
+    }
+    /* ======================================================================
+       6. ERSPARNIS-RECHNER
        ====================================================================== */
     const AUTOMATION_PRICE = 1190;   // komplette Workflow-Einrichtung, netto
     const AUTOMATION_SHARE = 0.3;    // vorsichtige Annahme: 30 % der Routinearbeit
@@ -427,7 +902,7 @@
     function initPipeline() {
         const steps = $$('#pipeline .pipe-step');
         if (!steps.length) return;
-        let active = 0;
+        let active = 2;
         let timer = null;
 
         const render = () => steps.forEach((s, i) => s.classList.toggle('is-active', i === active));
@@ -438,7 +913,11 @@
             timer = setInterval(() => { active = (active + 1) % steps.length; render(); }, 2800);
         };
 
-        steps.forEach((s, i) => s.addEventListener('mouseenter', () => { active = i; render(); start(); }));
+        steps.forEach((s, i) => {
+            const pick = () => { active = i; render(); start(); };
+            s.addEventListener('mouseenter', pick);
+            s.addEventListener('click', pick);
+        });
         document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
         if ('IntersectionObserver' in window) {
             new IntersectionObserver((entries) => (entries[0].isIntersecting ? start() : stop()), { threshold: 0.3 })
@@ -541,7 +1020,7 @@
         const canvas = $('#hero-3d');
         if (!canvas || !canvas.getContext) return;
         const ctx = canvas.getContext('2d');
-        const hero = $('.hero');
+        const stage = canvas.parentElement;
 
         // --- Geometrie -----------------------------------------------------
         const V = [];
@@ -635,18 +1114,19 @@
         let W = 0, H = 0, DPR = 1, scale = 1;
         let yaw = -0.6, pitch = 0.32;
         const look = { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0 };
-        let build = reducedMotion ? 1 : 0;
+        // Haus steht sofort: kein leerer Rahmen, wenn man dorthin scrollt
+        let build = 1;
         let last = performance.now();
         let raf = 0;
         let visible = true;
 
         function resize() {
             const r = canvas.getBoundingClientRect();
-            DPR = Math.min(window.devicePixelRatio || 1, 2);
+            DPR = Math.min(window.devicePixelRatio || 1, finePointer ? 2 : 1.5);
             W = Math.max(1, Math.round(r.width * DPR));
             H = Math.max(1, Math.round(r.height * DPR));
             canvas.width = W; canvas.height = H;
-            scale = Math.min(W, H) * 0.3;
+            scale = Math.min(W, H) * 0.25;
             if (!raf) draw();
         }
 
@@ -735,7 +1215,7 @@
             });
             nodePts.forEach((p) => {
                 const alpha = depthAlpha(p.z);
-                ctx.fillStyle = rgba([44, 24, 16], 1);
+                ctx.fillStyle = rgba([20, 17, 15], 1);
                 ctx.strokeStyle = rgba(COLORS.bright, alpha);
                 ctx.lineWidth = 1.4 * DPR;
                 ctx.beginPath(); ctx.arc(p.x, p.y, 7 * DPR * p.f, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -754,7 +1234,9 @@
             });
         }
 
+        const minFrame = finePointer ? 0 : 1000 / 30;
         function step(now) {
+            if (now - last < minFrame) { raf = visible && !document.hidden ? requestAnimationFrame(step) : 0; return; }
             const dt = Math.min(0.05, (now - last) / 1000);
             last = now;
             if (build < 1) build = Math.min(1, build + dt / 2.2);
@@ -774,13 +1256,13 @@
         }
         const start = () => { if (!raf && !reducedMotion) { last = performance.now(); raf = requestAnimationFrame(step); } };
 
-        if (finePointer && hero) {
-            hero.addEventListener('pointermove', (ev) => {
-                const r = hero.getBoundingClientRect();
+        if (finePointer && stage) {
+            stage.addEventListener('pointermove', (ev) => {
+                const r = stage.getBoundingClientRect();
                 look.tx = ((ev.clientX - r.left) / r.width - 0.5) * 0.7;
                 look.ty = ((ev.clientY - r.top) / r.height - 0.5) * 0.3;
             });
-            hero.addEventListener('pointerleave', () => { look.tx = 0; look.ty = 0; });
+            stage.addEventListener('pointerleave', () => { look.tx = 0; look.ty = 0; });
         }
 
         if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas);
@@ -798,13 +1280,181 @@
     }
 
     /* ======================================================================
+       9. SICHTBARKEITS-CHECK ALS HOLOGRAMM
+       Hinter der Karte schweben Kupferknoten, verbunden durch feine Lichtbahnen.
+       Fokus im Eingabefeld: die Bahnen richten sich auf das Feld aus.
+       Während des Scans: die Bahnen laufen auf den Countdown-Kern zu.
+       ====================================================================== */
+    function initVisNetwork() {
+        const canvas = $('#vis-network-canvas');
+        const panel = $('#vis-panel');
+        const input = $('#vis-query');
+        if (!canvas || !panel || !canvas.getContext) return;
+        const ctx = canvas.getContext('2d');
+
+        // Hero-Button und Nav-Link: direkt ins Feld statt nur dorthin scrollen
+        $$('a[href="#sichtbarkeit"]').forEach((link) => link.addEventListener('click', (ev) => {
+            if (panel.dataset.stage !== 'form' || !input) return;
+            const r = panel.getBoundingClientRect();
+            const inView = r.top >= 0 && r.bottom <= window.innerHeight + 40;
+            if (inView) { ev.preventDefault(); input.focus(); }
+            else window.setTimeout(() => input.focus({ preventScroll: true }), reducedMotion ? 0 : 600);
+        }));
+
+        const N = finePointer ? 26 : 16;
+        const nodes = Array.from({ length: N }, (_, i) => ({
+            x: Math.random(), y: Math.random(), z: Math.random(),     // z: 0 hinten, 1 vorn
+            vx: (Math.random() - 0.5) * 0.012, vy: (Math.random() - 0.5) * 0.012,
+            phase: Math.random() * Math.PI * 2,
+            hub: i % 5 === 0
+        }));
+        const pulses = Array.from({ length: 7 }, () => ({ a: 0, b: 1, t: Math.random(), speed: 0.25 + Math.random() * 0.3 }));
+        const pickLink = (p) => { p.a = Math.floor(Math.random() * N); p.b = Math.floor(Math.random() * N); if (p.a === p.b) p.b = (p.b + 1) % N; p.t = 0; };
+        pulses.forEach(pickLink);
+
+        let W = 0, H = 0, DPR = 1, raf = 0, last = 0, visible = true;
+        let focus = 0, focusT = 0, scanAmt = 0;
+        const par = { x: 0, y: 0, tx: 0, ty: 0 };
+        const LINK = 0.24;   // Verbindungsradius als Anteil der Breite
+
+        const resize = () => {
+            const r = canvas.getBoundingClientRect();
+            DPR = Math.min(window.devicePixelRatio || 1, finePointer ? 2 : 1.5);
+            W = Math.max(1, r.width); H = Math.max(1, r.height);
+            canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+            if (!raf) draw(0);
+        };
+
+        // Zielpunkt (Feld oder Scan-Kern) in Canvas-Koordinaten
+        const targetPoint = () => {
+            const cr = canvas.getBoundingClientRect();
+            const el = panel.dataset.stage === 'scan' ? $('#vis-scan-ring') : input;
+            if (!el || !el.offsetParent) return null;
+            const r = el.getBoundingClientRect();
+            return { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
+        };
+
+        const pos = (n) => ({
+            x: n.x * W + par.x * (n.z - 0.5) * 36,
+            y: n.y * H + par.y * (n.z - 0.5) * 28
+        });
+
+        function draw(dt) {
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            ctx.clearRect(0, 0, W, H);
+            const pts = nodes.map(pos);
+            const maxD = W * LINK;
+
+            // Netz zwischen benachbarten Knoten
+            ctx.lineWidth = 1;
+            for (let i = 0; i < N; i++) {
+                for (let j = i + 1; j < N; j++) {
+                    const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+                    const d = Math.hypot(dx, dy);
+                    if (d > maxD) continue;
+                    const depth = (nodes[i].z + nodes[j].z) / 2;
+                    const a = (1 - d / maxD) * (0.12 + depth * 0.22) * (1 + scanAmt * 0.6);
+                    ctx.strokeStyle = 'rgba(200,138,88,' + a.toFixed(3) + ')';
+                    ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke();
+                }
+            }
+
+            // Ausrichtung auf Feld oder Scan-Kern
+            const pull = Math.max(focus, scanAmt);
+            const tp = pull > 0.01 ? targetPoint() : null;
+            if (tp) {
+                nodes.forEach((n, i) => {
+                    if (!n.hub && i % 3) return;
+                    const p = pts[i];
+                    const g = ctx.createLinearGradient(p.x, p.y, tp.x, tp.y);
+                    const a = pull * (0.18 + n.z * 0.3);
+                    g.addColorStop(0, 'rgba(229,169,118,' + a.toFixed(3) + ')');
+                    g.addColorStop(1, 'rgba(255,227,200,0)');
+                    ctx.strokeStyle = g;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(tp.x, tp.y); ctx.stroke();
+                });
+            }
+
+            // Datenimpulse auf den Bahnen
+            pulses.forEach((p) => {
+                const a = pts[p.a], b = pts[p.b];
+                const x = a.x + (b.x - a.x) * p.t, y = a.y + (b.y - a.y) * p.t;
+                const r = 9 + scanAmt * 5;
+                const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                const al = Math.sin(Math.PI * p.t) * (0.55 + scanAmt * 0.3);
+                g.addColorStop(0, 'rgba(255,227,200,' + al.toFixed(3) + ')');
+                g.addColorStop(0.4, 'rgba(229,169,118,' + (al * 0.4).toFixed(3) + ')');
+                g.addColorStop(1, 'rgba(229,169,118,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Knoten: hinten klein und blass, vorn hell mit Lichthof
+            nodes.forEach((n, i) => {
+                const p = pts[i];
+                const beat = 0.5 + 0.5 * Math.sin(n.phase);
+                const size = (n.hub ? 2.4 : 1.4) + n.z * 1.4;
+                const a = 0.3 + n.z * 0.5 + beat * 0.2;
+                if (n.hub || n.z > 0.7) {
+                    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 6);
+                    g.addColorStop(0, 'rgba(229,169,118,' + (a * 0.35).toFixed(3) + ')');
+                    g.addColorStop(1, 'rgba(229,169,118,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, size * 6, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.fillStyle = 'rgba(255,227,200,' + Math.min(1, a).toFixed(3) + ')';
+                ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
+            });
+        }
+
+        function step(now) {
+            const dt = Math.min(0.05, (now - (last || now)) / 1000);
+            last = now;
+            const speed = 1 + scanAmt * 1.8;
+            nodes.forEach((n) => {
+                n.x += n.vx * dt * speed; n.y += n.vy * dt * speed;
+                if (n.x < 0.02 || n.x > 0.98) n.vx *= -1;
+                if (n.y < 0.02 || n.y > 0.98) n.vy *= -1;
+                n.phase += dt * (1.2 + scanAmt * 2);
+            });
+            pulses.forEach((p) => { p.t += dt * p.speed * speed; if (p.t >= 1) pickLink(p); });
+            focus += (focusT - focus) * 0.08;
+            scanAmt += ((panel.dataset.stage === 'scan' ? 1 : 0) - scanAmt) * 0.05;
+            par.x += (par.tx - par.x) * 0.06; par.y += (par.ty - par.y) * 0.06;
+            panel.style.setProperty('--focus', Math.max(focus, scanAmt * 0.8).toFixed(3));
+            draw(dt);
+            raf = visible && !document.hidden ? requestAnimationFrame(step) : 0;
+        }
+        const start = () => { if (!raf && !reducedMotion) { last = 0; raf = requestAnimationFrame(step); } };
+
+        if (input) {
+            input.addEventListener('focus', () => { focusT = 1; if (reducedMotion) { focus = 1; draw(0); } });
+            input.addEventListener('blur', () => { focusT = 0; if (reducedMotion) { focus = 0; draw(0); } });
+            input.addEventListener('input', () => { focus = Math.min(1.4, focus + 0.12); });
+        }
+        if (finePointer) {
+            const hero = canvas.closest('.hero') || document;
+            hero.addEventListener('pointermove', (ev) => {
+                par.tx = (ev.clientX / window.innerWidth - 0.5) * 2;
+                par.ty = (ev.clientY / window.innerHeight - 0.5) * 2;
+            });
+        }
+        if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas);
+        else window.addEventListener('resize', resize);
+        resize();
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; if (visible) start(); }).observe(canvas);
+        }
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) start(); });
+        if (reducedMotion) draw(0); else start();
+    }
+
+    /* ======================================================================
        INIT
        ====================================================================== */
-    initNav();
-    initReveal();
-    initPlanner();
-    initCalculator();
-    initPipeline();
-    initTilt();
-    initHero3D();
+    // Jedes Modul für sich: ein Fehler in einem hält die anderen nicht an
+    [initReveal, initNav, initVisibility, initServiceProgress, initGoogleLinks, initPlanner, initCalculator, initPipeline, initTilt, initHero3D, initVisNetwork]
+        .forEach((init) => {
+            try { init(); } catch (err) { console.error(init.name + ' fehlgeschlagen:', err); }
+        });
 })();

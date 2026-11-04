@@ -1,0 +1,44 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-03T15:13:18.491Z",
+        "reason": "Claude triage: flagged edges are open hairline dividers (border-top/left between editorial columns) and padded sections, not boxed containers; verified in browser at 1440px and 375px"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-03T15:48:57.906Z",
+        "reason": "User requested the logo as a blurred background layer in the hero; at opacity .16 it is visible behind the headline in the browser check at 1440px"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "datenschutz.html"
+        ],
+        "createdAt": "2026-11-03T15:56:39.746Z",
+        "reason": "Claude triage: legal-block and sub-hero use clamp() padding of 28-128px; flagged edges are open hairline dividers, spacing verified in browser at 1440px"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "impressum.html"
+        ],
+        "createdAt": "2026-11-03T15:56:48.318Z",
+        "reason": "Claude triage: legal-block and sub-hero use clamp() padding of 28-128px; flagged edges are open hairline dividers, spacing verified in browser at 1440px"
+      }
+    ]
+  }
+}
