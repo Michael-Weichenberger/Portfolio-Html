@@ -1,0 +1,217 @@
+{
+  "version": 3,
+  "id": "mw-itservices-de-59448e93",
+  "url": "https://mw-itservices.de/",
+  "name": "mw-itservices.de",
+  "measuredAt": "2026-11-04T13:58:15.984Z",
+  "source": "Google PageSpeed und Strukturanalyse",
+  "met": 24,
+  "total": 31,
+  "ratio": 0.8,
+  "headline": "Solide, aber Anfragen bleiben liegen.",
+  "points": [
+    {
+      "key": "performance",
+      "title": "Mobile Ladezeit & Core Web Vitals",
+      "status": "good",
+      "value": "6 von 6",
+      "text": "Alle 6 Signale erfüllt.",
+      "open": false,
+      "met": 6,
+      "total": 6,
+      "signals": [
+        {
+          "id": "lcp",
+          "label": "Hauptinhalt in max. 2,5 s",
+          "ok": true
+        },
+        {
+          "id": "cls",
+          "label": "Ruhiger Seitenaufbau (CLS max. 0,1)",
+          "ok": true
+        },
+        {
+          "id": "tbt",
+          "label": "Sofort bedienbar (TBT max. 200 ms)",
+          "ok": true
+        },
+        {
+          "id": "weight",
+          "label": "Seitengewicht unter 2 MB",
+          "ok": true
+        },
+        {
+          "id": "ttfb",
+          "label": "Server antwortet in unter 0,8 s",
+          "ok": true
+        },
+        {
+          "id": "viewport",
+          "label": "Für Smartphones eingerichtet",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "key": "local",
+      "title": "Lokale Google-Auffindbarkeit",
+      "status": "warn",
+      "value": "6 von 10",
+      "text": "Es fehlt: vollständige Firmendaten (Adresse, Telefon, Zeiten), Ort im Seitentitel, eingebundene Kundenbewertungen und 1 weitere.",
+      "open": true,
+      "met": 6,
+      "total": 10,
+      "signals": [
+        {
+          "id": "schema",
+          "label": "Firmendaten als LocalBusiness-Schema",
+          "ok": true
+        },
+        {
+          "id": "schemaComplete",
+          "label": "Adresse, Telefon und Öffnungszeiten im Schema",
+          "ok": false
+        },
+        {
+          "id": "geo",
+          "label": "Geo-Koordinaten hinterlegt",
+          "ok": true
+        },
+        {
+          "id": "area",
+          "label": "Einsatzgebiet angegeben",
+          "ok": true
+        },
+        {
+          "id": "cityTitle",
+          "label": "Ort im Seitentitel",
+          "ok": false
+        },
+        {
+          "id": "cityH1",
+          "label": "Ort in der Hauptüberschrift",
+          "ok": false
+        },
+        {
+          "id": "tel",
+          "label": "Anruf per Fingertipp",
+          "ok": true
+        },
+        {
+          "id": "maps",
+          "label": "Google-Profil oder Maps verknüpft",
+          "ok": true
+        },
+        {
+          "id": "reviews",
+          "label": "Bewertungen strukturiert eingebunden",
+          "ok": false
+        },
+        {
+          "id": "nap",
+          "label": "Adresse mit PLZ auf der Seite",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "key": "ai",
+      "title": "KI- & ChatGPT-Readiness",
+      "status": "warn",
+      "value": "7 von 9",
+      "text": "Es fehlt: aussagekräftige Meta-Beschreibung, eigene Leistungsseiten.",
+      "open": true,
+      "met": 7,
+      "total": 9,
+      "signals": [
+        {
+          "id": "bots",
+          "label": "KI-Crawler zugelassen",
+          "ok": true
+        },
+        {
+          "id": "faq",
+          "label": "FAQ zu typischen Kundenfragen",
+          "ok": true
+        },
+        {
+          "id": "services",
+          "label": "Leistungen strukturiert ausgezeichnet",
+          "ok": true
+        },
+        {
+          "id": "content",
+          "label": "Mindestens 600 Wörter Inhalt",
+          "ok": true
+        },
+        {
+          "id": "headings",
+          "label": "Klare Gliederung (1 H1, mind. 3 H2)",
+          "ok": true
+        },
+        {
+          "id": "description",
+          "label": "Aussagekräftige Meta-Beschreibung",
+          "ok": false
+        },
+        {
+          "id": "pages",
+          "label": "Eigene Unterseiten für Leistungen",
+          "ok": false
+        },
+        {
+          "id": "sameAs",
+          "label": "Profile verknüpft (sameAs)",
+          "ok": true
+        },
+        {
+          "id": "llms",
+          "label": "KI-Leitfaden llms.txt",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "key": "https",
+      "title": "SSL-Verschlüsselung & Sicherheit",
+      "status": "good",
+      "value": "5 von 6",
+      "text": "Es fehlt: HSTS-Schutz.",
+      "open": false,
+      "met": 5,
+      "total": 6,
+      "signals": [
+        {
+          "id": "https",
+          "label": "Verschlüsselt über HTTPS",
+          "ok": true
+        },
+        {
+          "id": "redirect",
+          "label": "HTTP leitet auf HTTPS um",
+          "ok": true
+        },
+        {
+          "id": "hsts",
+          "label": "HSTS-Schutz aktiv",
+          "ok": false
+        },
+        {
+          "id": "impressum",
+          "label": "Impressum verlinkt",
+          "ok": true
+        },
+        {
+          "id": "privacy",
+          "label": "Datenschutzerklärung verlinkt",
+          "ok": true
+        },
+        {
+          "id": "bp",
+          "label": "Keine Browser-Warnungen (Best Practices ab 90)",
+          "ok": true
+        }
+      ]
+    }
+  ]
+}
