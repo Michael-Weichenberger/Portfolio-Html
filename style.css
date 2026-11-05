@@ -1375,7 +1375,7 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .form-privacy { font-size: .8rem; color: var(--text-muted); line-height: 1.5; margin: 6px 0 16px; }
 .form-privacy a { color: var(--copper-ink); }
 .site-footer address { font-style: normal; line-height: 1.7; }
-.site-footer address a { color: var(--copper-pale); text-decoration: none; }
+.site-footer address a { color: var(--copper-pale); text-decoration: none; white-space: nowrap; } /* Telefonnummer und Mail nie mitten im Wort umbrechen */
 .form-error { font-size: .85rem; color: #A3341F; margin-bottom: 14px; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
