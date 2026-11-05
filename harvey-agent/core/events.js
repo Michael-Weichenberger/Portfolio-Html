@@ -23,7 +23,8 @@ const LABEL = {
     ticket_new: 'Support-Ticket',
     booking_new: 'Neuer Termin',
     booking_moved: 'Termin verschoben',
-    booking_cancelled: 'Termin abgesagt'
+    booking_cancelled: 'Termin abgesagt',
+    booking_missing: 'Cal.com-Webhook fehlt'
 };
 
 function record(type, data) {

@@ -174,12 +174,23 @@ async function gmailSend(rfc822) {
 }
 
 /* ---------- Kalender ---------- */
+/* Von Cal.com angelegt? Dann die Buchungsnummer (uid), sonst null */
+function calUid(e) {
+    const ical = String(e.iCalUID || '');
+    const m1 = ical.match(/^([A-Za-z0-9_-]{6,})@cal\.com$/i);
+    if (m1) return m1[1];
+    const m2 = String(e.description || '').match(/cal\.com\/(?:booking|reschedule)\/([A-Za-z0-9_-]{6,})/i);
+    if (m2) return m2[1];
+    return /cal\.com/i.test(ical + ' ' + (e.description || '') + ' ' + ((e.organizer && e.organizer.email) || '')) ? '?' : null;
+}
+
 async function calendarEvents(fromIso, toIso) {
     const j = await api('https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=100&timeMin=' + encodeURIComponent(fromIso) + '&timeMax=' + encodeURIComponent(toIso));
     return (j.items || []).filter((e) => e.status !== 'cancelled').map((e) => ({
         title: e.summary || '(ohne Titel)', location: e.location || '', start: (e.start && (e.start.dateTime || e.start.date + 'T00:00:00')) || null,
         end: (e.end && (e.end.dateTime || e.end.date + 'T00:00:00')) || null, allDay: !!(e.start && e.start.date), attendees: (e.attendees || []).map((a) => a.email).filter(Boolean),
-        description: String(e.description || '').slice(0, 500), link: e.htmlLink || null
+        description: String(e.description || '').slice(0, 500), link: e.htmlLink || null,
+        cal: calUid(e)
     }));
 }
 
@@ -198,5 +209,5 @@ async function driveDoc(name, text, parentId) {
     return api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', { method: 'POST', raw: body, type: 'multipart/related; boundary=' + boundary });
 }
 
-module.exports = { configured, connected, has, SCOPES, authUrl, exchange, locations, reviews, reply, localPost, ownLocation, performance, searchKeywords, searchSites, searchTotals, searchBy,
+module.exports = { calUid, configured, connected, has, SCOPES, authUrl, exchange, locations, reviews, reply, localPost, ownLocation, performance, searchKeywords, searchSites, searchTotals, searchBy,
     gmailProfile, gmailList, gmailMeta, gmailRaw, gmailSend, calendarEvents, driveFolder, driveDoc, REDIRECT };

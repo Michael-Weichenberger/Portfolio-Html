@@ -176,7 +176,7 @@
                     mail ? h('button', { type: 'button', class: 'link', onclick: openMail(mail.id) }, 'Freigeben') : null]]);
         });
         ag.preps.filter((p) => Date.parse(p.at) > Date.now() - 3600000 && Date.parse(p.at) < Date.now() + 36 * 3600000).forEach((p) => next.push(['Termin ' + hm(p.at), p.name + ' · Hauptpunkt: ' + p.headline + ' · Vorlage: harvey-agent/' + p.file, () => go('termine')]));
-        ag.list.forEach((a) => (a.notes || []).filter((n) => /Nachfass-Brief|nicht erreichbar|SSL|Domain .* läuft|defekte Links/.test(n)).slice(0, 3).forEach((n) => next.push([a.name, n, () => go('agenten')])));
+        ag.list.forEach((a) => (a.notes || []).filter((n) => /Nachfass-Brief|nicht erreichbar|SSL|Domain .* läuft|defekte Links|Cal.com-Webhook prüfen/.test(n)).slice(0, 3).forEach((n) => next.push([a.name, n, () => go('agenten')])));
         if (k.outbox) next.push(['Postausgang', k.outbox + (k.outbox === 1 ? ' Mail wartet' : ' Mails warten') + ' auf Ihre Freigabe.', () => go('zentrale', 'postausgang')]);
         data.invoices.filter((i) => i.paused).forEach((i) => next.push(['Klären', i.client + ' hat zu ' + i.number + ' geantwortet. Mahnwesen pausiert.', () => go('finanzen')]));
         data.leads.filter((l) => l.status === 'antwort').forEach((l) => next.push(['Antwort', l.name + ' hat geantwortet.', () => go('leads')]));

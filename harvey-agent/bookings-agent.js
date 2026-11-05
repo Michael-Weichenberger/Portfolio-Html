@@ -69,18 +69,61 @@ function discardFor(uid, keepStart) {
     Outbox.all().filter((e) => e.type === 'termin' && e.meta && e.meta.booking === uid && (keepStart === undefined || e.meta.start !== keepStart) && ['entwurf', 'freigegeben'].includes(e.status)).forEach((e) => Outbox.discard(e.id));
 }
 
+/* Bestätigungen, die erst nach Terminbeginn freigegeben würden, sind sinnlos: verwerfen.
+   Absage-Entwürfe („Neuer Termin?“) bleiben stehen. */
+function dropExpired() {
+    const old = Outbox.all().filter((e) => e.type === 'termin' && e.meta && !e.meta.cancelled && e.meta.start && Date.parse(e.meta.start) < Date.now() && ['entwurf', 'freigegeben'].includes(e.status));
+    old.forEach((e) => Outbox.discard(e.id));
+    return old;
+}
+
+/* Einmal am Tag: Cal.com-Einträge im Google Kalender mit den empfangenen Webhooks vergleichen.
+   Fehlt eine Buchung in Kasi, kommt der Webhook nicht an (abgeschaltet, Geheimnis geändert …). */
+async function audit() {
+    const Google = require('./core/google.js');
+    if (!Google.has('calendar')) return { at: new Date().toISOString(), skipped: 'Google Kalender nicht verbunden' };
+    const from = new Date(Date.now() - 7 * 86400000).toISOString();
+    const to = new Date(Date.now() + 60 * 86400000).toISOString();
+    const evs = (await Google.calendarEvents(from, to)).filter((e) => e.cal);
+    const rows = await Cloud.query('SELECT uid, start_at FROM bookings WHERE updated_at >= ? OR start_at >= ?', [new Date(Date.now() - 90 * 86400000).toISOString(), from]);
+    const uids = new Set(rows.map((r) => r.uid));
+    const starts = new Set(rows.map((r) => r.start_at && Date.parse(r.start_at)));
+    // Eintrag aus der Zeit vor dem Autopiloten nicht melden
+    const since = Date.parse(process.env.BOOKINGS_SINCE || '2026-11-05T00:00:00Z');
+    const missing = evs.filter((e) => Date.parse(e.start) >= since && !(e.cal !== '?' && uids.has(e.cal)) && !starts.has(Date.parse(e.start)))
+        .map((e) => e.title + ' (' + when(e.start) + ')');
+    return { at: new Date().toISOString(), checked: evs.length, missing };
+}
+
 async function main() {
     Store.ensure();
+    const expired = dropExpired();
+    if (expired.length) console.log('Veraltete Bestätigungen verworfen: ' + expired.map((e) => e.meta.client || e.to).join(', '));
+    const prev = ((Run.all().bookings || {}).data) || {};
+    let check = prev.audit || null;
+    const today = new Date().toDateString();
+    if (!check || new Date(check.at).toDateString() !== today || process.argv.includes('--abgleich')) {
+        try {
+            check = await audit();
+            if (check.missing && check.missing.length) {
+                Events.record('booking_missing', { name: 'Cal.com', label: check.missing.length + ' Termin(e) ohne Webhook', kind: 'Termin' });
+                await Notify.send('Kasi: Cal.com-Webhook prüfen', check.missing.length + ' Termin(e) im Kalender sind nicht bei Kasi angekommen: ' + check.missing.slice(0, 3).join(', '), { priority: 'high' }).catch(() => {});
+            }
+        } catch (err) { check = { at: new Date().toISOString(), error: err.message.slice(0, 160) }; }
+    }
     let rows;
     try {
         rows = await Cloud.query('SELECT * FROM bookings WHERE handled_at IS NULL ORDER BY updated_at LIMIT 25');
     } catch (err) {
         console.log('✗ Termine nicht abrufbar: ' + err.message);
-        return Run.done('bookings', { ok: false, summary: 'Termine nicht abrufbar: ' + err.message.slice(0, 120) });
+        return Run.done('bookings', { ok: false, summary: 'Termine nicht abrufbar: ' + err.message.slice(0, 120), data: { audit: check } });
     }
     const local = Store.load('bookings');
     const list = Array.isArray(local) ? local : [];
     const notes = [];
+    if (expired.length) notes.push('Veraltete Bestätigungen verworfen: ' + expired.map((e) => e.meta.client || e.to).join(', '));
+    if (check && check.missing && check.missing.length) notes.push('Cal.com-Webhook prüfen: ' + check.missing.length + ' Termin(e) im Kalender ohne Buchung in Kasi · ' + check.missing.slice(0, 3).join(', '));
+    if (check && check.error) notes.push('Kalenderabgleich nicht möglich: ' + check.error);
     let done = 0;
     for (const b of rows) {
         try {
@@ -131,8 +174,8 @@ async function main() {
     const summary = (done ? done + (done === 1 ? ' Termin-Änderung verarbeitet' : ' Termin-Änderungen verarbeitet') : 'Keine neuen Termine') + ' · ' + upcoming + ' kommend';
     console.log(summary);
     notes.forEach((n) => console.log('  · ' + n));
-    Run.done('bookings', { summary, notes });
+    Run.done('bookings', { ok: !(check && check.missing && check.missing.length), summary, notes, data: { audit: check } });
 }
 
 if (require.main === module) main().catch((err) => { console.error('✗ ' + err.message); Run.done('bookings', { ok: false, summary: err.message }); process.exit(1); });
-module.exports = { main, confirmText, conflicts };
+module.exports = { main, confirmText, conflicts, audit, dropExpired };
