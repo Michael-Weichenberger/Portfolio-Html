@@ -6,8 +6,8 @@
    Danach liest Kasi das Briefing mit den frischen Ergebnissen vor.
 
    npm run daily                   von Hand ausführen
-   npm run schedule:install        Zentrale beim Anmelden an Windows im Hintergrund
-                                   starten (dann nur noch die Seite öffnen)
+   npm run schedule:install        Autostart beim Anmelden + Desktop-Verknüpfung „Kasi“
+                                   (siehe autostart.js)
    npm run schedule:remove         wieder entfernen
 
    Reihenfolge: Zahlungen (Bank/CSV) und Antworten → Posteingang → Mahn-Check
@@ -25,35 +25,9 @@ const { execFileSync, execFile } = require('child_process');
 const ROOT = __dirname;
 const args = process.argv.slice(2);
 
+// Autostart steckt jetzt in autostart.js (npm run schedule:install)
 if (args.includes('--install') || args.includes('--remove')) {
-    if (process.platform !== 'win32') {
-        console.log('Unter macOS/Linux die Zentrale beim Anmelden starten, z. B. per Autostart: cd ' + ROOT + ' && ' + process.execPath + ' dashboard/server.js');
-        process.exit(0);
-    }
-    // Werte über Umgebungsvariablen, damit nichts in den Befehl eingesetzt werden muss.
-    // Entfernt immer auch die frühere 7-Uhr-Aufgabe „Kasi Morgenlauf“.
-    const ps = [
-        'foreach ($n in @("Kasi Morgenlauf", $env:K_NAME)) { if (Get-ScheduledTask -TaskName $n -ErrorAction SilentlyContinue) { Unregister-ScheduledTask -TaskName $n -Confirm:$false } }',
-        ...(args.includes('--remove') ? [] : [
-            '$cmd = "& \'" + $env:K_NODE + "\' \'" + $env:K_FILE + "\'"',
-            '$a = New-ScheduledTaskAction -Execute "powershell.exe" -Argument ("-NoProfile -WindowStyle Hidden -Command " + $cmd) -WorkingDirectory $env:K_DIR',
-            '$t = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME',
-            '$s = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero)',
-            'Register-ScheduledTask -TaskName $env:K_NAME -Action $a -Trigger $t -Settings $s -Description "MW IT-SERVICES: startet die Kasi-Zentrale (nur 127.0.0.1:5590) beim Anmelden. Sendet nichts." -Force | Out-Null',
-            'Start-ScheduledTask -TaskName $env:K_NAME'
-        ])
-    ].join('; ');
-    try {
-        execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], {
-            stdio: 'inherit',
-            env: { ...process.env, K_NAME: 'Kasi Zentrale', K_NODE: process.execPath, K_FILE: path.join(ROOT, 'dashboard', 'server.js'), K_DIR: ROOT }
-        });
-    } catch (err) {
-        console.error('✗ Aufgabe konnte nicht ' + (args.includes('--remove') ? 'entfernt' : 'angelegt') + ' werden.');
-        process.exit(1);
-    }
-    console.log(args.includes('--remove') ? '✓ Autostart entfernt. Die Zentrale startet wieder mit npm run dashboard.'
-        : '✓ Die Zentrale startet ab jetzt beim Anmelden im Hintergrund. Einfach http://127.0.0.1:5590 öffnen; beim ersten Besuch am Tag läuft der Morgenlauf.');
+    require('./autostart.js')[args.includes('--remove') ? 'remove' : 'install']();
     process.exit(0);
 }
 

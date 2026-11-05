@@ -43,8 +43,9 @@ function json(body, status, headers) {
     });
 }
 
+// v3: mit technischer Diagnose (CMS, Ursachen); neue Version macht alte Zwischenstände ungültig
 function cacheKey(target) {
-    return new Request('https://cache.mw-check/v2/' + encodeURIComponent(target.url));
+    return new Request('https://cache.mw-check/v3/' + encodeURIComponent(target.url));
 }
 
 /* Messung aus dem Cache: { report, psi, structure } */

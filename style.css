@@ -1514,6 +1514,12 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .vis-panel:not([data-stage="form"]) .vis-sub { display: none; }
 .vis-panel:not([data-stage="form"]) .vis-head { margin-bottom: 18px; }
 .vis-cta { margin-top: 4px; }
+.vis-diag { margin: 16px 0 4px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(223, 154, 103, .28); background: rgba(22, 17, 14, .45); display: grid; gap: 6px; }
+.vis-diag p { margin: 0; font-size: .9rem; line-height: 1.5; color: var(--text-on-dark-muted); }
+.vis-diag .vis-diag-pain { color: #fff; font-weight: 600; }
+.vis-diag .vis-diag-tech { font-size: .82rem; letter-spacing: .02em; color: var(--copper-pale); }
+.vis-diag .vis-diag-cause strong { color: var(--copper-bright); }
+.vis-diag .vis-diag-more { font-size: .82rem; }
 .hero-check .vis-fine { font-size: .8rem; margin-top: 14px; color: rgba(244, 240, 232, .62); }
 
 /* Tech-Core: gegenläufige Ringe um den Countdown */

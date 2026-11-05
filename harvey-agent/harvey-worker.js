@@ -48,6 +48,20 @@ function makeId(name) {
     return name.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-|-$/g, '').slice(0, 60) + '-' + hash;
 }
 
+function diagnosisMd(g) {
+    if (!g) return [];
+    const st = g.stack || {};
+    const tech = [st.cms ? st.cms + (st.version ? ' ' + st.version : '') : 'kein bekanntes CMS erkannt', st.theme ? 'Theme ' + st.theme : null, st.builder ? 'Page-Builder ' + st.builder : null,
+        st.plugins && st.plugins.length ? 'Plugins (sichtbar): ' + st.plugins.join(', ') : null, st.cachePlugin ? 'Cache: ' + st.cachePlugin : null, st.server ? 'Server: ' + st.server : null].filter(Boolean);
+    return [
+        ...(g.pain && g.pain.level !== 'ok' ? ['## Schmerzpunkt', '', '**' + g.pain.headline + '**', '', g.pain.text, '', ...(g.pain.cause ? [g.pain.cause, ''] : [])] : []),
+        '## Technik', '', '- ' + tech.join('\n- '), '',
+        '## Technische Ursachen', '',
+        ...(g.causes.length ? ['| Gewicht | Ursache | Beleg | Lösung |', '|---|---|---|---|', ...g.causes.map((c) => '| ' + '●'.repeat(c.sev) + ' | ' + c.title + ' | ' + c.evidence + ' | ' + c.fix + ' |')] : ['Keine technischen Bremsen gefunden.']),
+        ''
+    ];
+}
+
 function toMarkdown(r) {
     const c = r.case;
     const t = r.teaser;
@@ -68,6 +82,7 @@ function toMarkdown(r) {
         r.structure ? '- Server-Antwort ' + fmt(r.structure.ttfbMs / 1000, 1) + ' s, HTML ' + r.structure.htmlKB + ' KB, ' + r.structure.words + ' Wörter, ' + r.structure.internalPages + ' Unterseiten' : '- Strukturanalyse: nicht möglich (' + r.structureError + ')',
         '- Teaser-Link: ' + c.teaserLink + (r.published ? '' : ' (noch nicht veröffentlicht, mit --publish erzeugen)'),
         '',
+        ...diagnosisMd(r.teaser && r.teaser.diagnosis),
         '## Fehlende Signale',
         '',
         '| Schwere | Bereich | Befund | Beleg | Lösung |',

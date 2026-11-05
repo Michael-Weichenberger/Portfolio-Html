@@ -95,6 +95,12 @@ function replyDraft(opts) {
     ];
     if (findings.length) body.push(b.findingsLead, '', ...findingLines(findings, 4, true), '');
     else body.push(b.noFindings, '');
+    const g = report.diagnosis;
+    const top = g && g.causes && g.causes.find((c) => c.area === 'speed');
+    if (g && g.pain && g.pain.level !== 'ok') {
+        body.push(g.pain.headline + ' ' + g.pain.text, '');
+        if (top) body.push('Technisch liegt es vor allem daran: ' + top.title + '. ' + top.evidence + ' Lösung: ' + top.fix, '');
+    }
     if (good.length) body.push(fill(b.strengths, { list: good.join(', ') }), '');
     body.push(b.outro, '', SIGNATURE);
     return { subject: fill(b.subject, vars), body: body.join('\n') };
@@ -147,10 +153,12 @@ function buildCase(target, report, findings, psi, fmt) {
     const areas = [...new Set(top.map((x) => AREA[x.area]))];
     const link = teaserLink(target.id);
     const vars = { name: target.name, link, met: report.met, total: report.total, count: findings.length };
+    const cause = report.diagnosis && report.diagnosis.causes && report.diagnosis.causes.find((c) => c.area === 'speed');
     const letter = [
         b.greeting, '',
         fill(b.intro, vars), '',
         ...findingLines(top, 3, false), '',
+        ...(cause && slow ? ['Technisch liegt das vor allem an einem Punkt: ' + cause.title + '. ' + cause.fix, ''] : []),
         fill(b.link, vars), '',
         b.outro, '',
         SIGNATURE
@@ -164,7 +172,8 @@ function buildCase(target, report, findings, psi, fmt) {
         priority: critical >= 2 || (report.ratio !== null && report.ratio < 0.5) ? 'hoch' : findings.length >= 6 ? 'mittel' : 'niedrig',
         areas: Object.fromEntries(Object.keys(AREA).map((k) => [k, findings.filter((x) => x.area === k).length])),
         topFindings: top,
-        callOpener: 'Ich habe mir ' + target.name + ' angesehen. ' + (top[0] ? top[0].evidence : '') + ' Darf ich Ihnen kurz zeigen, was das für Anfragen bedeutet?',
+        callOpener: 'Ich habe mir ' + target.name + ' angesehen. ' + (top[0] ? top[0].evidence : '') + (cause ? ' Die Ursache ist technisch: ' + cause.title + '.' : '') + ' Darf ich Ihnen kurz zeigen, was das für Anfragen bedeutet?',
+        diagnosis: report.diagnosis || null,
         subject: fill(b.subject, vars),
         letter,
         teaserLink: link,

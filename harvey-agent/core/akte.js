@@ -66,6 +66,21 @@ function signalsOf(a) {
     return a.report ? a.report.points : [];
 }
 
+/* Schmerzpunkt, Technik und Ursachen */
+function diag(g) {
+    if (!g) return '';
+    const st = g.stack || {};
+    const tech = [st.cms ? st.cms + (st.version ? ' ' + st.version : '') : 'kein bekanntes CMS erkannt', st.theme ? 'Theme: ' + st.theme : null,
+        st.builder ? 'Page-Builder: ' + st.builder : null, st.cachePlugin ? 'Cache: ' + st.cachePlugin : null, st.server ? 'Server: ' + st.server : null].filter(Boolean);
+    const pain = g.pain && g.pain.level !== 'ok'
+        ? '<h2>Schmerzpunkt</h2><p class="opener"><b>' + esc(g.pain.headline) + '</b><br>' + esc(g.pain.text) + (g.pain.cause ? '<br><b>' + esc(g.pain.cause) + '</b>' : '') + '</p>' : '';
+    const plugins = st.plugins && st.plugins.length ? '<p class="muted small">Sichtbare Plugins: ' + st.plugins.map(esc).join(', ') + '</p>' : '';
+    const causes = g.causes && g.causes.length
+        ? '<table class="causes">' + g.causes.map((c) => '<tr><td class="sev">' + '●'.repeat(c.sev) + '</td><td class="sig"><b>' + esc(c.title) + '</b><div class="ev">' + esc(c.evidence) + '</div><div class="fix">' + esc(c.fix) + '</div></td></tr>').join('') + '</table>'
+        : '<p class="muted">Keine technischen Bremsen gefunden.</p>';
+    return pain + '<h2>Technik der Website</h2><p>' + tech.map(esc).join(' · ') + '</p>' + plugins + '<h2>Technische Ursachen</h2>' + causes;
+}
+
 function render(a) {
     const points = signalsOf(a);
     const top = (a.findings || []).slice(0, 4);
@@ -101,6 +116,7 @@ table{width:100%;border-collapse:collapse}td{padding:10px 16px;border-top:1px so
 td.ok{width:34px;font-size:18px}.y{color:var(--good)}.n{color:var(--bad)}.u{color:var(--muted)}
 .sig b{display:block}.sig .ev{color:var(--muted);font-size:13px}.sig .fix{font-size:13px;margin-top:4px}.sig .fix:before{content:"Lösung: ";color:var(--cu);font-weight:600}
 .sev{color:var(--cu);letter-spacing:2px;font-size:12px;white-space:nowrap}
+table.causes{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}table.causes td.sev{width:60px}
 pre{white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;font:13px/1.5 ui-monospace,Consolas,monospace;color:var(--muted)}
 .notes{min-height:140px;border:1px dashed var(--line);border-radius:12px;padding:12px;color:var(--muted)}
 ul.acts{list-style:none;padding:0;margin:0}ul.acts li{padding:6px 0;border-top:1px solid var(--line);font-size:13px}
@@ -127,6 +143,7 @@ ul.acts{list-style:none;padding:0;margin:0}ul.acts li{padding:6px 0;border-top:1
   <div class="fact"><b>Ergebnis</b>${a.report ? esc(a.report.headline || '') : 'noch nicht gemessen'}</div>
   ${count ? `<div class="fact"><b>Offene Punkte</b>${missing} von ${count}</div>` : ''}
 </div>
+${diag(a.report && a.report.diagnosis)}
 ${a.callOpener ? `<h2>Gesprächseinstieg</h2><p class="opener">${esc(a.callOpener)}</p>` : ''}
 ${q ? `<h2>Gewähltes Paket</h2><p>${q.lines.map((l) => esc(l.label) + (l.month !== undefined ? ' · ' + l.month + ' €/Monat' : l.included ? ' · inklusive' : ' · ' + l.once + ' €')).join('<br>')}</p><p class="muted">Summe einmalig ${q.once} € netto${q.month ? ' + ' + q.month + ' €/Monat' : ''}${q.promo ? ' · Aktionspreis' : ''}</p>` : ''}
 ${a.message ? `<h2>Nachricht des Kunden</h2><p class="opener">${esc(a.message)}</p>` : ''}

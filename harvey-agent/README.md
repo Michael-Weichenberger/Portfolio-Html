@@ -90,7 +90,7 @@ Alle Agenten schreiben nur Entwürfe und Hinweise. Gesendet oder veröffentlicht
 | Beiträge | `npm run beitraege` | jede Woche ein Beitrag fürs eigene Google-Profil und für LinkedIn mit Bild im Website-Look (`out/beitraege/`); Google nach Freigabe, LinkedIn kopieren und selbst posten | optional Google |
 | Marketing | `npm run marketing` · `npm run anzeigenbilder` | Anfragen je Kampagne und Unterseite (Herkunft aus dem Link, `utm_*`), Unterseiten erreichbar?, Bewertungs-Erinnerungen; Anzeigenbilder im Website-Look für Feed und Story in `out/marketing/`. Ansicht „Marketing“ in der Zentrale mit Marke, Kampagnen, Texten und Links zum Kopieren | Cloudflare-Login |
 
-Der Morgenlauf startet von selbst, wenn Sie die Zentrale zum ersten Mal am Tag öffnen, und höchstens einmal am Tag. Damit Sie nicht jedes Mal das Terminal brauchen: `npm run schedule:install` startet die Zentrale beim Anmelden an Windows im Hintergrund (Aufgabe „Kasi Zentrale“, entfernen mit `npm run schedule:remove`). Dann genügt ein Lesezeichen auf http://127.0.0.1:5590.
+Der Morgenlauf startet von selbst, wenn Sie die Zentrale zum ersten Mal am Tag öffnen, und höchstens einmal am Tag. Ohne Terminal: `npm run schedule:install` richtet die Aufgabe „Kasi Zentrale“ ein (startet die Zentrale beim Anmelden unsichtbar und nach einem Absturz neu) und legt auf dem Desktop die Verknüpfung „Kasi“ an, die Kasi als App-Fenster öffnet. Ausgaben stehen in `data/zentrale.log`, entfernen mit `npm run schedule:remove`.
 
 Buchhaltung: Konten in `data/company.json` → `accounting` (Standard SKR03: Erlöse 8400, Bank 1200, Debitoren ab 10000; für DATEV zusätzlich `datev.consultant` und `datev.client`). Vor der ersten Übergabe einen Probe-Import mit dem Steuerberater machen.
 

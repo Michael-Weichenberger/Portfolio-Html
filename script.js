@@ -688,6 +688,29 @@
                     document.createTextNode(when + ' (' + r.source + '). ' + openText(r.points)));
             }
             r.points.filter((p) => p.open).concat(r.points.filter((p) => !p.open)).forEach((p) => pointsEl.appendChild(pointItem(p)));
+            renderDiagnosis(r.diagnosis);
+        }
+
+        /* Kurzfassung der technischen Diagnose; Details stehen im vollständigen Report */
+        function renderDiagnosis(g) {
+            const box = $('#vis-diag');
+            if (!box) return;
+            box.textContent = '';
+            const speed = g && Array.isArray(g.causes) ? g.causes.filter((c) => c.area === 'speed') : [];
+            const st = (g && g.stack) || {};
+            const techLine = [st.cms ? st.cms : null, st.builder ? 'Page-Builder ' + st.builder : null, st.cachePlugin ? 'Cache aktiv' : null].filter(Boolean).join(' · ');
+            if (!g || (!speed.length && !(g.pain && g.pain.level !== 'ok') && !techLine)) { box.hidden = true; return; }
+            const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; };
+            if (g.pain && g.pain.level !== 'ok') box.append(el('p', 'vis-diag-pain', g.pain.headline));
+            if (techLine) box.append(el('p', 'vis-diag-tech', 'Erkannt: ' + techLine));
+            if (speed[0]) {
+                const p = el('p', 'vis-diag-cause');
+                p.append(el('strong', '', 'Hauptursache: '), document.createTextNode(speed[0].title + '.'));
+                box.append(p);
+            }
+            const more = (g.causes || []).length - (speed[0] ? 1 : 0);
+            if (more > 0) box.append(el('p', 'vis-diag-more', more + (more === 1 ? ' weitere technische Ursache' : ' weitere technische Ursachen') + ' mit konkreter Lösung stehen im vollständigen Report.'));
+            box.hidden = false;
         }
 
         function present(r) {

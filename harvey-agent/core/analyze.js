@@ -169,6 +169,81 @@ async function checkHttpRedirect(host) {
 
 /* ------------------------------------------------------ Strukturanalyse --- */
 
+/* ------------------------------------------------- Technik & Code-Aufbau --- */
+
+const BUILDERS = [
+    ['Elementor', /\/plugins\/elementor(-pro)?\/|elementor-frontend|class=["'][^"']*elementor-/i],
+    ['Divi', /\/themes\/Divi\/|et_pb_|et-divi/i],
+    ['WPBakery', /\/plugins\/js_composer\/|vc_row|wpb_wrapper/i],
+    ['Avada (Fusion Builder)', /\/themes\/Avada\/|fusion-builder|fusion-layout/i],
+    ['Oxygen', /\/plugins\/oxygen\/|ct-section|oxy-/i],
+    ['Beaver Builder', /\/plugins\/bb-plugin\/|fl-builder/i],
+    ['Bricks', /\/themes\/bricks\/|brxe-/i],
+    ['Enfold', /\/themes\/enfold\/|av_section/i]
+];
+const CACHE_PLUGINS = /^(wp-rocket|w3-total-cache|wp-super-cache|litespeed-cache|wp-fastest-cache|autoptimize|sg-cachepress|breeze|hummingbird-performance|wp-optimize|perfmatters|flying-press|nitropack|swift-performance)/;
+const HEAVY_PLUGINS = { revslider: 'Slider Revolution', layerslider: 'LayerSlider', js_composer: 'WPBakery', jetpack: 'Jetpack', 'essential-addons-for-elementor-lite': 'Essential Addons', 'ultimate-elementor': 'Ultimate Addons', 'elementor-pro': 'Elementor Pro', woocommerce: 'WooCommerce', 'smart-slider-3': 'Smart Slider', 'master-slider': 'Master Slider', 'premium-addons-for-elementor': 'Premium Addons', 'wpforms-lite': 'WPForms', 'contact-form-7': 'Contact Form 7', 'the-events-calendar': 'The Events Calendar' };
+const OTHER_CMS = [
+    ['Wix', /static\.wixstatic\.com|wix-bolt|x-wix-/i],
+    ['Jimdo', /jimdo|jimstatic\.com/i],
+    ['Squarespace', /static1\.squarespace\.com|squarespace-cdn/i],
+    ['Shopify', /cdn\.shopify\.com|Shopify\.theme/i],
+    ['Webflow', /webflow\.js|data-wf-page/i],
+    ['TYPO3', /typo3conf\/|typo3temp\/|content="TYPO3/i],
+    ['Joomla', /content="Joomla|\/media\/jui\/|\/components\/com_/i],
+    ['Drupal', /content="Drupal|\/sites\/default\/files\//i]
+];
+
+function detectTech(html, head, body, headers, finalUrl, raw) {
+    const own = new URL(finalUrl).hostname.replace(/^www\./i, '');
+    const gen = ((head.match(/<meta[^>]+name=["']generator["'][^>]*>/i) || [])[0] || '').match(/content=["']([^"']+)/i);
+    const generator = gen ? gen[1].slice(0, 60) : null;
+    const isWp = /\/wp-content\/|\/wp-includes\/|wp-json/i.test(html) || /wordpress/i.test(generator || '');
+    let cms = isWp ? 'WordPress' : null;
+    if (!cms) { const o = OTHER_CMS.find(([, re]) => re.test(html) || re.test(generator || '')); cms = o ? o[0] : null; }
+    const version = isWp && generator ? ((generator.match(/WordPress\s*([\d.]+)/i) || [])[1] || null) : null;
+    const plugins = isWp ? [...new Set([...html.matchAll(/\/wp-content\/plugins\/([a-z0-9_-]+)\//gi)].map((m) => m[1].toLowerCase()))].slice(0, 40) : [];
+    const theme = isWp ? ((html.match(/\/wp-content\/themes\/([a-z0-9_-]+)\//i) || [])[1] || null) : null;
+    const builder = (BUILDERS.find(([, re]) => re.test(html)) || [])[0] || null;
+
+    const scriptTags = tags(html, 'script').map(attrs).filter((a) => a.src || a['data-src']).map((a) => ({ ...a, src: a.src || a['data-src'] }));
+    const headScripts = tags(head, 'script').map(attrs).filter((a) => a.src);
+    const blocking = headScripts.filter((a) => a.async === undefined && a.defer === undefined && !/module/i.test(a.type || ''));
+    const styles = tags(html, 'link').map(attrs).filter((a) => /stylesheet/i.test(a.rel || ''));
+    const inlineCssKB = Math.round((html.match(/<style\b[^>]*>[\s\S]*?<\/style>/gi) || []).reduce((n, s) => n + s.length, 0) / 1024);
+    const hostOf = (u) => { try { return new URL(u, finalUrl).hostname.replace(/^www\./i, ''); } catch (_) { return null; } };
+    const thirdParty = [...new Set(scriptTags.map((a) => hostOf(a.src)).filter((h) => h && h !== own && !h.endsWith('.' + own)))].slice(0, 12);
+
+    const imgs = tags(body, 'img').map(attrs);
+    const srcOf = (a) => a['data-src'] || a['data-lazy-src'] || a.src || '';
+    const modernSources = (html.match(/<source\b[^>]*type=["']image\/(webp|avif)["']/gi) || []).length;
+    const ext = (s) => ((s.split('?')[0].match(/\.(jpe?g|png|gif|webp|avif|svg)$/i) || [])[1] || '').toLowerCase();
+    const legacy = imgs.filter((a) => /^(jpe?g|png|gif)$/.test(ext(srcOf(a)))).length;
+    const modern = imgs.filter((a) => /^(webp|avif)$/.test(ext(srcOf(a)))).length + modernSources;
+    const lazy = imgs.filter((a) => /lazy/i.test(a.loading || '') || a['data-src'] || a['data-lazy-src']).length;
+    const noSize = imgs.filter((a) => !a.width || !a.height).length;
+
+    // Im Cloudflare-Worker stammen Server-, CDN- und Komprimierungs-Header von Cloudflare selbst, nicht vom Webserver
+    const inWorker = typeof WebSocketPair !== 'undefined';
+    const h = (n) => (inWorker && /^(server|cf-ray|cf-cache-status|content-encoding)$/.test(n) ? null : headers.get(n));
+    return {
+        cms, version, generator, theme, builder,
+        plugins, pluginCount: plugins.length,
+        cachePlugin: plugins.find((p) => CACHE_PLUGINS.test(p)) || null,
+        heavyPlugins: plugins.filter((p) => HEAVY_PLUGINS[p]).map((p) => HEAVY_PLUGINS[p]),
+        scripts: scriptTags.length, blockingScripts: blocking.length, stylesheets: styles.length, inlineCssKB,
+        jquery: /jquery(\.min)?\.js/i.test(html),
+        thirdParty,
+        images: imgs.length, legacyImages: legacy, modernImages: modern, lazyImages: lazy, imagesNoSize: noSize,
+        googleFonts: /fonts\.(googleapis|gstatic)\.com/i.test(html),
+        compression: (h('content-encoding') || '').toLowerCase() || null,
+        cacheControl: h('cache-control') ? String(h('cache-control')).slice(0, 80) : null,
+        server: (h('server') || h('x-powered-by') || '').slice(0, 40) || null,
+        cdn: h('cf-ray') ? 'Cloudflare' : h('x-amz-cf-id') ? 'CloudFront' : h('x-served-by') && /cache/i.test(h('x-served-by')) ? 'Fastly' : null,
+        pageCache: Boolean(h('x-litespeed-cache') || h('x-cache') || h('x-wp-rocket') || h('cf-cache-status') === 'HIT' || /wp-rocket|this website is like a rocket|cache enabler|wp super cache|w3 total cache|litespeed cache/i.test(String(raw || '').slice(-3000)))
+    };
+}
+
 async function analyzeStructure(target) {
     const started = Date.now();
     const res = await get(target.url, {}, 20000);
@@ -261,7 +336,8 @@ async function analyzeStructure(target) {
         internalPages: pages.size,
         robots,
         llmsTxt,
-        sitemap
+        sitemap,
+        tech: detectTech(html, head, body, res.headers, finalUrl, raw)
     };
 }
 

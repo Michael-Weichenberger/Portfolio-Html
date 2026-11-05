@@ -202,7 +202,161 @@
             https: pass('is-on-https') !== null ? pass('is-on-https') : (finalUrl ? /^https:/i.test(finalUrl) : null),
             viewport: pass('viewport'),
             metaDescription: pass('meta-description'),
-            finalUrl
+            finalUrl,
+            fcp: val('first-contentful-paint') === null ? null : val('first-contentful-paint') / 1000,
+            opps: opportunities(A)
+        };
+    }
+
+    /* Einspar-Hinweise aus Lighthouse, kompakt: score, ms (Ersparnis LCP/FCP/TBT), kb (Ersparnis Bytes), n (Einträge) */
+    const OPP_IDS = ['render-blocking-resources', 'render-blocking-insight', 'modern-image-formats', 'uses-optimized-images', 'uses-responsive-images',
+        'image-delivery-insight', 'offscreen-images', 'unused-javascript', 'unused-css-rules', 'legacy-javascript-insight', 'duplicated-javascript-insight',
+        'uses-text-compression', 'server-response-time', 'document-latency-insight', 'uses-long-cache-ttl', 'cache-insight', 'third-party-summary',
+        'third-parties-insight', 'dom-size', 'dom-size-insight', 'bootup-time', 'mainthread-work-breakdown', 'font-display', 'font-display-insight',
+        'lcp-discovery-insight', 'cls-culprits-insight'];
+    function opportunities(A) {
+        const out = {};
+        OPP_IDS.forEach((id) => {
+            const a = A[id];
+            if (!a) return;
+            const d = a.details || {};
+            const ms = Math.max(0, isNum(d.overallSavingsMs) ? d.overallSavingsMs : 0, ...Object.values(a.metricSavings || {}).filter(isNum));
+            let bytes = isNum(d.overallSavingsBytes) ? d.overallSavingsBytes : 0;
+            if (!bytes && id === 'image-delivery-insight' && isNum(a.numericValue)) bytes = a.numericValue;
+            out[id] = { score: isNum(a.score) ? Math.round(a.score * 100) / 100 : null, ms: Math.round(ms), kb: Math.round(bytes / 1024),
+                num: isNum(a.numericValue) ? Math.round(a.numericValue) : null, n: Array.isArray(d.items) ? d.items.length : 0 };
+        });
+        return out;
+    }
+
+    /* ------------------------------------------------------------ Diagnose ---
+       Technische Ursachen hinter den Messwerten, mit Beleg und Lösung, plus
+       der Schmerzpunkt als Text für Report und Gespräch. Nur was gemessen ist. */
+    function diagnose(psi, st) {
+        const t = (st && st.tech) || {};
+        const o = (psi && psi.opps) || {};
+        const pick = (...ids) => ids.map((id) => o[id]).find((x) => x && x.score !== null && x.score < 0.9);
+        const sec = (ms) => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
+        const causes = [];
+        const add = (c) => causes.push(c);
+        const slow = psi && isNum(psi.lcp) && psi.lcp > THRESHOLDS.lcp;
+
+        // System und Baukasten
+        const stack = { cms: t.cms || null, version: t.version || null, theme: t.theme || null, builder: t.builder || null,
+            plugins: (t.plugins || []).slice(0, 20), cachePlugin: t.cachePlugin || null, server: t.server || null, cdn: t.cdn || null };
+        if (t.builder && (slow || (psi && isNum(psi.tbt) && psi.tbt > THRESHOLDS.tbt))) {
+            add({ id: 'builder', sev: 3, area: 'speed', title: 'Page-Builder ' + t.builder + ' lädt viel Code',
+                evidence: t.builder + ' erkannt' + (t.jquery ? ', dazu jQuery' : '') + (t.inlineCssKB > 40 ? ', ' + t.inlineCssKB + ' KB Inline-CSS' : '') + '. Solche Baukästen laden Skripte und Stile für alle Module, auch die, die die Seite gar nicht nutzt.',
+                fix: 'Nicht genutzte ' + t.builder + '-Module und Widgets abschalten, Assets nur auf den Seiten laden, wo sie gebraucht werden. Auf Dauer: schlankes Theme statt Baukasten.' });
+        }
+        if (t.cms === 'WordPress' && (t.heavyPlugins || []).length) {
+            add({ id: 'heavy-plugins', sev: 2, area: 'speed', title: 'Schwere Plugins: ' + t.heavyPlugins.slice(0, 3).join(', '),
+                evidence: 'Mindestens ' + t.pluginCount + ' Plugins im Quelltext sichtbar, darunter ' + t.heavyPlugins.join(', ') + '.',
+                fix: 'Plugins prüfen und ersetzen oder entfernen, die auf jeder Seite Code laden. Slider und Effekt-Pakete sind die häufigsten Bremsen.' });
+        } else if (t.cms === 'WordPress' && t.pluginCount >= 15) {
+            add({ id: 'many-plugins', sev: 2, area: 'speed', title: 'Viele Plugins (mindestens ' + t.pluginCount + ')',
+                evidence: t.pluginCount + ' Plugins laden sichtbar Dateien auf der Startseite.',
+                fix: 'Plugins ausmisten: Jedes, das nur selten gebraucht wird, kostet bei jedem Seitenaufruf Ladezeit.' });
+        }
+        const srv = (o['server-response-time'] && o['server-response-time'].num) || (st && st.ttfbMs) || null;
+        if (t.cms === 'WordPress' && !t.cachePlugin && !t.pageCache && srv && srv > 600) {
+            add({ id: 'no-cache', sev: 3, area: 'speed', title: 'Kein Seiten-Cache erkennbar',
+                evidence: 'Der Server braucht ' + sec(srv) + ' für die erste Antwort, ein Cache-Plugin ist nicht zu sehen.',
+                fix: 'Seiten-Cache einrichten (z. B. LiteSpeed Cache oder WP Rocket, je nach Hosting). Damit baut WordPress die Seite nicht bei jedem Aufruf neu.' });
+        } else if (srv && srv > 800) {
+            add({ id: 'server', sev: 2, area: 'speed', title: 'Langsame Server-Antwort',
+                evidence: 'Erste Antwort nach ' + sec(srv) + ' (gut sind unter 0,8 s).',
+                fix: 'Hosting und Cache prüfen: schnellerer Tarif, PHP-Version aktualisieren, Seiten-Cache oder CDN.' });
+        }
+
+        // Ladezeit-Ursachen aus PageSpeed
+        const rb = pick('render-blocking-insight', 'render-blocking-resources');
+        if ((rb && rb.ms >= 150) || t.blockingScripts >= 3) {
+            add({ id: 'render-blocking', sev: rb && rb.ms >= 500 ? 3 : 2, area: 'speed', title: 'Skripte und Styles blockieren die Anzeige',
+                evidence: (rb && rb.ms ? 'Etwa ' + sec(rb.ms) + ' Verzögerung' + (rb.n ? ' durch ' + rb.n + ' Dateien' : '') : t.blockingScripts + ' Skripte im Kopf der Seite ohne async/defer') + ', bevor überhaupt etwas zu sehen ist.',
+                fix: 'JavaScript mit defer laden, nur das nötige CSS direkt einbinden (Critical CSS), den Rest nachladen.' });
+        }
+        const js = pick('unused-javascript');
+        const main = o['mainthread-work-breakdown'];
+        if ((js && js.kb >= 100) || (psi && isNum(psi.tbt) && psi.tbt > 600)) {
+            add({ id: 'javascript', sev: psi && psi.tbt > 600 ? 3 : 2, area: 'speed', title: 'Zu viel JavaScript',
+                evidence: [js && js.kb ? 'rund ' + js.kb + ' KB ungenutzter Code' : null, psi && isNum(psi.tbt) ? 'Handy ist ' + sec(psi.tbt) + ' blockiert' : null, main && main.num ? sec(main.num) + ' Rechenzeit im Browser' : null].filter(Boolean).join(', ') + '.',
+                fix: 'Ungenutzte Skripte entfernen oder erst bei Bedarf laden (z. B. Slider, Animationen, Tracking), jQuery-Abhängigkeiten reduzieren.' });
+        }
+        const css = pick('unused-css-rules');
+        if (css && css.kb >= 40) {
+            add({ id: 'css', sev: 1, area: 'speed', title: 'Ungenutztes CSS',
+                evidence: 'Rund ' + css.kb + ' KB Stil-Code werden geladen, aber auf der Seite nicht gebraucht.',
+                fix: 'CSS je Seite aufteilen oder ungenutzte Regeln entfernen.' });
+        }
+        const img = pick('image-delivery-insight', 'modern-image-formats', 'uses-optimized-images', 'uses-responsive-images');
+        const legacyShare = t.images ? t.legacyImages / t.images : 0;
+        if ((img && img.kb >= 80) || (t.images >= 4 && legacyShare >= 0.5)) {
+            add({ id: 'images', sev: img && img.kb >= 300 ? 3 : 2, area: 'speed', title: 'Bilder nicht optimiert (WebP/AVIF, Größe)',
+                evidence: [img && img.kb ? 'rund ' + img.kb + ' KB einsparbar' : null, t.images ? t.legacyImages + ' von ' + t.images + ' Bildern als JPG/PNG/GIF' : null].filter(Boolean).join(', ') + '.',
+                fix: 'Bilder als WebP oder AVIF in passender Größe ausliefern, mit srcset für das Handy. Das Hauptbild nicht verzögert laden.' });
+        }
+        const lcpd = o['lcp-discovery-insight'];
+        if (slow && lcpd && lcpd.score !== null && lcpd.score < 0.9) {
+            add({ id: 'lcp-element', sev: 2, area: 'speed', title: 'Hauptbild wird zu spät geladen',
+                evidence: 'Das größte Element oben auf der Seite wird nicht vorrangig geladen (Lazy Loading oder fehlende Priorität).',
+                fix: 'Für das Hauptbild „loading=lazy“ entfernen und fetchpriority="high" setzen.' });
+        }
+        const comp = pick('uses-text-compression');
+        if (comp) { // nur nach Google-Messung: im Cloudflare-Worker fehlt der Header, weil die Antwort schon entpackt ist
+            add({ id: 'compression', sev: 2, area: 'speed', title: 'Keine Komprimierung (gzip/Brotli)',
+                evidence: comp.kb ? 'Rund ' + comp.kb + ' KB ließen sich durch Komprimierung sparen.' : 'Der Server liefert Dateien unkomprimiert aus.',
+                fix: 'Brotli- oder gzip-Komprimierung beim Hosting einschalten.' });
+        }
+        const cache = pick('cache-insight', 'uses-long-cache-ttl');
+        if (cache && cache.n >= 5) {
+            add({ id: 'browser-cache', sev: 1, area: 'speed', title: 'Browser-Cache zu kurz',
+                evidence: cache.n + ' Dateien werden bei jedem Besuch neu geladen.',
+                fix: 'Lange Cache-Zeiten für Bilder, CSS und JavaScript setzen.' });
+        }
+        const tp = pick('third-parties-insight', 'third-party-summary');
+        if ((tp && tp.ms >= 250) || (t.thirdParty || []).length >= 5) {
+            add({ id: 'third-party', sev: 2, area: 'speed', title: 'Fremd-Skripte bremsen',
+                evidence: ((t.thirdParty || []).length ? 'Skripte von ' + t.thirdParty.slice(0, 4).join(', ') + (t.thirdParty.length > 4 ? ' und weiteren' : '') : 'Skripte anderer Anbieter') + (tp && tp.ms ? ', etwa ' + sec(tp.ms) + ' Verzögerung' : '') + '.',
+                fix: 'Nicht nötige Einbindungen entfernen, den Rest erst nach Einwilligung oder Klick laden.' });
+        }
+        const dom = o['dom-size-insight'] || o['dom-size'];
+        if (dom && dom.num > 1500) {
+            add({ id: 'dom', sev: 1, area: 'speed', title: 'Sehr verschachtelter Seitenaufbau',
+                evidence: dom.num + ' HTML-Elemente auf der Startseite' + (t.builder ? ', typisch für ' + t.builder : '') + '.',
+                fix: 'Abschnitte vereinfachen, verschachtelte Container zusammenfassen.' });
+        }
+        const cls = o['cls-culprits-insight'];
+        if (psi && isNum(psi.cls) && psi.cls > THRESHOLDS.cls) {
+            add({ id: 'cls', sev: 2, area: 'speed', title: 'Inhalte springen beim Laden',
+                evidence: 'Layout-Verschiebung ' + psi.cls.toFixed(2).replace('.', ',') + (t.imagesNoSize ? ', ' + t.imagesNoSize + ' Bilder ohne feste Größe' : '') + (cls && cls.n ? ', ' + cls.n + ' Verursacher' : '') + '.',
+                fix: 'Bildern und Werbeflächen feste Maße geben, Schriften mit font-display laden.' });
+        }
+        // Rechtliches mit Technik-Bezug
+        if (t.googleFonts) {
+            add({ id: 'google-fonts', sev: 2, area: 'recht', title: 'Google Fonts werden von Google-Servern geladen',
+                evidence: 'Die Seite lädt Schriften direkt von fonts.googleapis.com. Dabei geht die IP-Adresse jedes Besuchers an Google.',
+                fix: 'Schriften lokal einbinden. Das LG München I (Urteil vom 20.01.2022, 3 O 17493/20) hat das dynamische Einbinden ohne Einwilligung als Datenschutzverstoß gewertet.' });
+        }
+        causes.sort((a, b) => b.sev - a.sev);
+        return { stack, causes: causes.slice(0, 8), pain: painText(psi, causes) };
+    }
+
+    /* Schmerzpunkt: was die Ladezeit für Anfragen bedeutet. Keine erfundenen Rankings. */
+    function painText(psi, causes) {
+        if (!psi || !isNum(psi.lcp)) return null;
+        const s = psi.lcp.toFixed(1).replace('.', ',');
+        const top = causes.filter((c) => c.area === 'speed')[0];
+        if (psi.lcp <= THRESHOLDS.lcp) {
+            return { level: 'ok', headline: 'Schnell genug: Hauptinhalt nach ' + s + ' s.',
+                text: 'Die Ladezeit liegt im grünen Bereich (Google empfiehlt höchstens 2,5 s). Der Hebel für mehr Anfragen liegt hier eher bei lokaler Suche und Inhalten.', cause: null };
+        }
+        return {
+            level: psi.lcp > 4 ? 'bad' : 'warn',
+            headline: 'Auf dem Handy dauert es ' + s + ' s, bis Ihre Seite steht. Google empfiehlt höchstens 2,5 s.',
+            text: 'Wer unterwegs einen Betrieb sucht, wartet nicht: Laut einer Google-Studie steigt die Wahrscheinlichkeit, dass Besucher abspringen, um 32 %, wenn die Ladezeit von 1 auf 3 Sekunden steigt, bei 5 Sekunden um 90 %. '
+                + 'Dazu bewertet Google die Ladezeit auf dem Handy selbst mit (Core Web Vitals). Bei sonst ähnlichen Seiten kann das in der lokalen Suche entscheiden, ob Sie unter den ersten drei Treffern stehen oder ein Mitbewerber.',
+            cause: top ? 'Hauptursache: ' + top.title + '.' : null
         };
     }
 
@@ -282,7 +436,8 @@
             ratio: ratio === null ? null : Math.round(ratio * 100) / 100,
             headline: headlineFor(ratio, known.length > 0),
             points: points.map((p) => ({ key: p.key, title: p.title, status: p.status, value: p.value, text: p.text,
-                open: openKeys.includes(p.key), met: p.met, total: p.total, signals: p.signals }))
+                open: openKeys.includes(p.key), met: p.met, total: p.total, signals: p.signals })),
+            diagnosis: (opts.psi || opts.structure) ? diagnose(opts.psi, opts.structure) : null
         };
     }
 
@@ -325,10 +480,21 @@
             total: total || null,
             ratio: isNum(d.ratio) ? Math.max(0, Math.min(1, d.ratio)) : null,
             headline: str(d.headline, 80) || headlineFor(null, false),
-            points
+            points,
+            diagnosis: cleanDiagnosis(d.diagnosis, str)
         };
     }
 
+    function cleanDiagnosis(g, str) {
+        if (!g || typeof g !== 'object') return null;
+        const st = g.stack || {};
+        const causes = (Array.isArray(g.causes) ? g.causes : []).slice(0, 8).map((c) => ({ id: str(c.id, 30), sev: isNum(c.sev) ? Math.max(1, Math.min(3, c.sev)) : 1, area: str(c.area, 10),
+            title: str(c.title, 120), evidence: str(c.evidence, 400), fix: str(c.fix, 400) }));
+        const p = g.pain && typeof g.pain === 'object' ? { level: str(g.pain.level, 6), headline: str(g.pain.headline, 160), text: str(g.pain.text, 600), cause: str(g.pain.cause, 160) } : null;
+        return { stack: { cms: str(st.cms, 30) || null, version: str(st.version, 20) || null, theme: str(st.theme, 60) || null, builder: str(st.builder, 40) || null,
+            plugins: (Array.isArray(st.plugins) ? st.plugins : []).slice(0, 20).map((x) => str(x, 60)), cachePlugin: str(st.cachePlugin, 60) || null }, causes, pain: p };
+    }
+
     return { VERSION, OPEN_COUNT, THRESHOLDS, TITLES, ORDER, STATUS_TEXT, AI_BOTS, SIGNALS, fmt,
-        metricsFromLighthouse, evaluateSignals, buildReport, findingsFrom, sanitizeReport };
+        metricsFromLighthouse, evaluateSignals, buildReport, findingsFrom, sanitizeReport, diagnose };
 }));
