@@ -1804,6 +1804,8 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 }
 
 @media (max-width: 640px) {
+    /* Handy: der Live-Check steht als Erstes im Bild, der Text folgt darunter (im HTML bleibt die Überschrift zuerst) */
+    .hero-check { order: -1; margin-top: 0; }
     .brand-sub { display: none; }
     .brand-name { white-space: nowrap; }
     .brand-logo { width: 52px; }
