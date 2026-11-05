@@ -139,6 +139,19 @@ async function main() {
             Outbox.add({ key: 'willkommen:' + c.id, type: 'willkommen', to: c.email, subject: 'Willkommen bei MW IT-SERVICES: so starten wir', body: welcome(c, pl, mat), ref: c.id,
                 contactAllowed: 'bestehend', meta: { client: c.company, clientId: c.id, folder: path.relative(__dirname, dir).replace(/\\/g, '/') } });
         } else notes.push(c.company + ': keine Mailadresse, Willkommensmail bitte selbst senden');
+        // Kundenordner zusätzlich in Google Drive (nur wenn Google mit Drive-Berechtigung verbunden ist)
+        const Google = require('./core/google.js');
+        if (Google.has('drive')) {
+            try {
+                const root = await Google.driveFolder('Kasi · Kunden');
+                const folder = await Google.driveFolder(c.id + ' ' + c.company, root.id);
+                for (const fn of ['00-Checkliste.md', '01-Material.md', '02-Zugaenge.md', '03-Projektplan.md']) {
+                    await Google.driveDoc(fn.replace(/\.md$/, '').replace(/^\d+-/, '') + ' · ' + c.company, fs.readFileSync(path.join(dir, fn), 'utf8'), folder.id);
+                }
+                c.driveUrl = folder.webViewLink || null;
+                console.log('  Drive-Ordner: ' + (folder.webViewLink || folder.id));
+            } catch (err) { notes.push(c.company + ': Drive-Ordner nicht angelegt (' + err.message + ')'); }
+        }
         c.onboardedAt = new Date().toISOString();
         c.folder = path.relative(__dirname, dir).replace(/\\/g, '/');
         Events.record('client_onboarded', { name: c.company, label: 'Onboarding vorbereitet', kind: 'Kunde' });

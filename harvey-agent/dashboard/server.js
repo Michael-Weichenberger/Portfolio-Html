@@ -99,7 +99,7 @@ function setupChecks(company, smtpMissing) {
     const baseAge = company.dunning ? B.days(company.dunning.baseRate.validFrom, B.iso(Date.now())) : 0;
     return [
         { id: 'company', ok: !need.length, title: 'Firmendaten', text: need.length ? 'Es fehlen: ' + need.join(', ') + '. Ohne diese Angaben lassen sich Rechnungen und Mahnungen nicht freigeben.' : 'Vollständig.', action: 'stammdaten' },
-        { id: 'smtp', ok: !smtpMissing.length, title: 'Mailversand', text: smtpMissing.length ? smtpMissing.join(', ') + ' in harvey-agent/.env eintragen (Google-App-Passwort), dann das Dashboard neu starten.' : 'Bereit, gesendet wird über Ihr Postfach.', action: null },
+        { id: 'smtp', ok: !smtpMissing.length, title: 'Mailversand', text: smtpMissing.length ? 'Agenten → Einrichtung → „Google verbinden“ (Versand über Gmail) oder ' + smtpMissing.join(', ') + ' in harvey-agent/.env.' : 'Bereit, gesendet wird über ' + (require('../core/mailer.js').config().via === 'gmail' ? 'Gmail (info@mw-itservices.de).' : 'Ihr Postfach (SMTP).'), action: null },
         { id: 'baserate', ok: baseAge <= 183, title: 'Basiszinssatz', text: baseAge > 183 ? 'Stand ' + B.de(company.dunning.baseRate.validFrom) + '. Aktuellen Wert bei der Bundesbank prüfen und eintragen.' : 'Aktuell.', action: 'stammdaten', link: company.dunning && company.dunning.baseRate.source }
     ];
 }
@@ -201,7 +201,8 @@ function agentState() {
     const Notify = require('../core/notify.js');
     const runs = Run.all();
     const pick = (id) => { const r = runs[id] || {}; return { lastRun: r.lastRun || null, ok: r.ok !== false, summary: r.summary || '', notes: r.notes || [] }; };
-    const imap = !!((process.env.IMAP_USER || process.env.SMTP_USER) && (process.env.IMAP_PASS || process.env.SMTP_PASS));
+    const mailboxMode = require('../core/mailbox.js').mode();
+    const imap = !!mailboxMode;
     return {
         list: AGENTS.map(([id, name, task, job]) => ({ id, name, task, job, ...pick(id) })),
         hot: ((runs.alert || {}).data || {}).hot || [],
@@ -211,9 +212,9 @@ function agentState() {
         content: (runs.content || {}).data || null,
         setup: [
             { id: 'ai', ok: AI.available(), optional: true, title: 'KI (Claude, optional)', text: AI.available() ? 'Bereit · Entwürfe mit ' + AI.MODEL() + ', Einordnung mit ' + AI.MODEL_FAST() : 'Später. Bis dahin schreiben die Agenten mit Vorlagen und Regeln.' },
-            { id: 'imap', ok: imap, title: 'Postfach', text: imap ? 'Bereit' : 'IMAP_USER/IMAP_PASS (oder SMTP_USER/SMTP_PASS) in .env.' },
+            { id: 'imap', ok: imap, title: 'Postfach', text: mailboxMode === 'gmail' ? 'Bereit über Gmail (Google-Verbindung), Versand und Empfang' : imap ? 'Bereit über IMAP/SMTP' : 'Über „Google verbinden“ (Gmail) oder IMAP_USER/IMAP_PASS in .env.' },
             { id: 'notify', ok: Notify.channels().length > 0, title: 'Handy-Hinweise', text: Notify.channels().length ? 'Über ' + Notify.channels().join(' und ') : 'WHATSAPP_PHONE + CALLMEBOT_APIKEY oder NTFY_TOPIC in .env.' },
-            { id: 'google', ok: Google.connected(), title: 'Google', text: Google.connected() ? 'Verbunden (Unternehmensprofile, Search Console)' : Google.configured() ? 'Bereit zum Verbinden' : 'GOOGLE_CLIENT_ID/SECRET in .env (README).', action: Google.configured() && !Google.connected() ? 'google' : null },
+            { id: 'google', ok: Google.connected(), title: 'Google', text: Google.connected() ? 'Verbunden: ' + [Google.has('business') && 'Unternehmensprofil', Google.has('search') && 'Search Console', Google.has('gmailSend') && 'Gmail', Google.has('calendar') && 'Kalender', Google.has('drive') && 'Drive'].filter(Boolean).join(', ') : Google.configured() ? 'Bereit zum Verbinden' : 'GOOGLE_CLIENT_ID/SECRET in .env (README).', action: Google.configured() && !Google.connected() ? 'google' : null },
             { id: 'lexware', ok: !!process.env.LEXWARE_API_KEY, optional: true, title: 'Lexware Office (optional)', text: process.env.LEXWARE_API_KEY ? 'Bereit · Übertragung nur auf Klick' : 'LEXWARE_API_KEY in .env. Ohne: DATEV-Export für den Steuerberater.' },
             { id: 'bank', ok: Bank.connected(), title: 'Bank', text: Bank.connected() ? 'Verbunden · ' + (Bank.status().bank || '') : Bank.configured() ? 'Bereit zum Verbinden' : 'Enable Banking einrichten (README).', action: Bank.configured() && !Bank.connected() ? 'bank' : null }
         ]

@@ -154,11 +154,8 @@ function processBankFiles() {
 
 /* ---------- Postfach: Antworten erkennen (nur Kopfzeilen) ---------- */
 async function checkMailbox() {
-    const user = process.env.IMAP_USER || process.env.SMTP_USER;
-    const pass = process.env.IMAP_PASS || process.env.SMTP_PASS;
-    if (!user || !pass) return log('Postfach-Prüfung übersprungen: IMAP_USER/IMAP_PASS (oder SMTP_USER/SMTP_PASS) fehlen in .env.');
-    let ImapFlow;
-    try { ({ ImapFlow } = require('imapflow')); } catch (err) { return log('imapflow fehlt: im Ordner harvey-agent „npm install“ ausführen.'); }
+    const Mailbox = require('./core/mailbox.js');
+    if (!Mailbox.mode()) return log('Postfach-Prüfung übersprungen: Google verbinden (mit Gmail) oder IMAP_USER/IMAP_PASS in .env.');
 
     const state = Store.load('monitor');
     const since = state.lastMailCheck ? new Date(state.lastMailCheck) : new Date(Date.now() - 7 * 86400000);
@@ -167,25 +164,23 @@ async function checkMailbox() {
     const leads = Store.load('leads');
     const outbox = Store.load('outbox');
     const company = Store.load('company');
-    const own = String(user).toLowerCase();
+    const own = await Mailbox.own();
     // bekannte Adressen: Kunden, Leads mit E-Mail, Empfänger gesendeter Mails
     const known = new Map();
     clients.forEach((c) => c.email && known.set(c.email.toLowerCase(), { kind: 'client', id: c.id, name: c.company }));
     leads.forEach((l) => l.email && known.set(l.email.toLowerCase(), { kind: 'lead', id: l.domain, name: l.name }));
     outbox.filter((e) => e.status === 'gesendet' && e.to).forEach((e) => { if (!known.has(e.to.toLowerCase())) known.set(e.to.toLowerCase(), { kind: 'contact', id: e.ref, name: e.to }); });
 
-    const client = new ImapFlow({ host: process.env.IMAP_HOST || 'imap.gmail.com', port: Number(process.env.IMAP_PORT) || 993, secure: true, auth: { user, pass }, logger: false });
-    await client.connect();
     let found = 0;
-    try {
-        const lock = await client.getMailboxLock('INBOX');
-        try {
-            for await (const msg of client.fetch({ since }, { envelope: true, internalDate: true })) {
-                const from = ((msg.envelope.from || [])[0] || {}).address;
-                if (!from || from.toLowerCase() === own) continue;
-                const who = known.get(from.toLowerCase());
+    {
+        {
+            for (const msg of await Mailbox.recent(since, 100)) {
+                const from = msg.from;
+                if (!from || from === own) continue;
+                const who = known.get(from);
                 if (!who) continue;
-                const at = new Date(msg.internalDate).toISOString();
+                const at = msg.date || new Date().toISOString();
+                msg.envelope = { subject: msg.subject };
                 if (state.lastMailCheck && at <= state.lastMailCheck) continue;
                 found++;
                 Events.record('reply_received', { from, name: who.name, kind: who.kind, ref: who.id, subject: String(msg.envelope.subject || '').slice(0, 140), at });
@@ -204,11 +199,7 @@ async function checkMailbox() {
                     if (l && !['termin', 'kunde', 'abgelegt'].includes(l.status)) { l.status = 'antwort'; l.repliedAt = at; }
                 }
             }
-        } finally {
-            lock.release();
         }
-    } finally {
-        await client.logout().catch(() => {});
     }
     state.lastMailCheck = new Date().toISOString();
     Store.save('monitor', state);

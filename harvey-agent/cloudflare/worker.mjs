@@ -109,6 +109,26 @@ function cleanSource(s) {
     return out.source ? out : null;
 }
 
+/* Cookielose Zählung: ein Tageszähler je Seite, Herkunft und Ereignis. Keine IP, kein Cookie. */
+const HIT_EVENTS = ['view', 'check', 'planer', 'anfrage', 'tel', 'mail', 'whatsapp', 'instagram', 'termin'];
+const HIT_SOURCE = /^[a-z0-9._-]{1,30}$/;
+const HIT_PAGE = /^\/[a-z0-9\-\/.]{0,80}$/;
+async function handleHit(request, env, cors) {
+    if (!env.DB) return new Response(null, { status: 204, headers: cors.headers });
+    const ua = request.headers.get('User-Agent') || '';
+    if (/bot|crawl|spider|slurp|preview|lighthouse|headless|pagespeed/i.test(ua)) return new Response(null, { status: 204, headers: cors.headers });
+    let d;
+    try { d = JSON.parse((await request.text()).slice(0, 500)); } catch (err) { return new Response(null, { status: 204, headers: cors.headers }); }
+    const page = String(d.p || '/').toLowerCase().split('?')[0].split('#')[0].slice(0, 80);
+    const source = String(d.s || 'direkt').toLowerCase().slice(0, 30);
+    const event = String(d.e || 'view');
+    if (!HIT_PAGE.test(page) || !HIT_SOURCE.test(source) || !HIT_EVENTS.includes(event)) return new Response(null, { status: 204, headers: cors.headers });
+    const day = new Date().toISOString().slice(0, 10);
+    await env.DB.prepare('INSERT INTO visits (day, page, source, event, n) VALUES (?, ?, ?, ?, 1) ON CONFLICT (day, page, source, event) DO UPDATE SET n = n + 1')
+        .bind(day, page, source, event).run();
+    return new Response(null, { status: 204, headers: cors.headers });
+}
+
 async function handleLead(request, env, cors) {
     if (!env.DB) return json({ error: 'unavailable' }, 503, cors.headers);
     let d;
@@ -188,8 +208,9 @@ export default {
         // Server-zu-Server (Cal.com), eigene Signaturprüfung statt Origin
         if (route === 'POST /webhook/cal') return handleCalWebhook(request, env);
         if (request.method === 'OPTIONS') return new Response(null, { status: cors.ok ? 204 : 403, headers: cors.headers });
-        if (!['GET /analyze', 'POST /lead', 'GET /report'].includes(route)) return json({ error: 'not_found' }, 404, cors.headers);
+        if (!['GET /analyze', 'POST /lead', 'GET /report', 'POST /hit'].includes(route)) return json({ error: 'not_found' }, 404, cors.headers);
         if (!cors.ok) return json({ error: 'origin_not_allowed' }, 403, cors.headers);
+        if (route === 'POST /hit') return handleHit(request, env, cors).catch(() => new Response(null, { status: 204, headers: cors.headers }));
         if (route !== 'GET /report' && await limited(request, env)) return json({ error: 'rate_limited' }, 429, cors.headers);
 
         if (route === 'GET /analyze') return handleAnalyze(url, env, ctx, cors);

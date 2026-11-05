@@ -44,3 +44,13 @@ CREATE INDEX IF NOT EXISTS idx_leads_created ON leads (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_kind_status ON leads (kind, status);
 
 -- Bestehende Datenbank aktualisieren: cloudflare/migrate-*.sql der Reihe nach ausführen.
+
+-- Cookielose Besuchs- und Klick-Zählung (nur Tageszähler)
+CREATE TABLE IF NOT EXISTS visits (
+    day    TEXT NOT NULL,
+    page   TEXT NOT NULL,
+    source TEXT NOT NULL,
+    event  TEXT NOT NULL,
+    n      INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, page, source, event)
+);

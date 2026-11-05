@@ -425,6 +425,7 @@
                 params.client_message = (params.client_message + dashboardLine(leadId)).slice(0, 1400);
                 await sendMail(params);
                 lastSentAt = Date.now();
+                if (window.kasiTrack) window.kasiTrack('anfrage');
                 formArea.hidden = true;
                 success.hidden = false;
                 success.focus();
@@ -725,6 +726,7 @@
         }
 
         async function begin(t) {
+            if (window.kasiTrack) window.kasiTrack('check');
             target = t;
             report = null;
             const id = ++runId;
@@ -881,6 +883,7 @@
                     client_message: ('Bitte um den persönlichen Sichtbarkeits-Report für ' + target.url + '. ' + summary + ' DSGVO-Einwilligung: ja.').slice(0, 1300) + dashboardLine(leadId)
                 });
                 lastSentAt = Date.now();
+                if (window.kasiTrack) window.kasiTrack('anfrage');
                 unlock.hidden = true;
                 thanks.hidden = false;
                 thanks.focus();

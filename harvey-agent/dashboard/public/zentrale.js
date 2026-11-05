@@ -526,9 +526,10 @@
 
         $('#sources').replaceChildren(...(agenda.sources.length ? agenda.sources.map((s) => h('li', { class: 'source' + (s.enabled ? '' : ' is-off') },
             h('span', { class: 'src-dot k-' + s.kind, 'aria-hidden': 'true' }),
-            h('span', { class: 'src-main' }, h('strong', { text: s.name }), h('span', { class: 'muted small', text: s.kindLabel + ' · ' + (s.error ? 'Fehler: ' + s.error : s.count !== null ? s.count + ' Einträge' : s.host) })),
-            h('button', { type: 'button', class: 'btn btn-sm btn-ghost', 'aria-pressed': s.enabled ? 'true' : 'false', onclick: () => calUpdate(s.id, { enabled: !s.enabled }) }, s.enabled ? 'Aktiv' : 'Aus'),
-            h('button', { type: 'button', class: 'btn btn-sm btn-ghost', 'aria-label': s.name + ' entfernen', onclick: () => { if (confirm('Kalender „' + s.name + '“ entfernen?')) calUpdate(s.id, { remove: true }); } }, 'Entfernen')))
+            h('span', { class: 'src-main' }, h('strong', { text: s.name }), h('span', { class: 'muted small', text: (s.kindLabel || 'Google-Verbindung') + ' · ' + (s.error ? 'Fehler: ' + s.error : s.count !== null && s.count !== undefined ? s.count + ' Einträge' : s.host) })),
+            s.id === 'google' ? h('span', { class: 'muted small', text: 'über Google verbunden' }) : null,
+            s.id === 'google' ? null : h('button', { type: 'button', class: 'btn btn-sm btn-ghost', 'aria-pressed': s.enabled ? 'true' : 'false', onclick: () => calUpdate(s.id, { enabled: !s.enabled }) }, s.enabled ? 'Aktiv' : 'Aus'),
+            s.id === 'google' ? null : h('button', { type: 'button', class: 'btn btn-sm btn-ghost', 'aria-label': s.name + ' entfernen', onclick: () => { if (confirm('Kalender „' + s.name + '“ entfernen?')) calUpdate(s.id, { remove: true }); } }, 'Entfernen')))
             : [h('li', { class: 'is-empty', text: 'Noch kein Kalender angebunden.' })]),
             h('li', { class: 'source is-harvey' }, h('span', { class: 'src-dot k-harvey', 'aria-hidden': 'true' }),
                 h('span', { class: 'src-main' }, h('strong', { text: 'Kasi' }), h('span', { class: 'muted small', text: 'Lead-Termine und Fälligkeiten, immer aktiv' }))));
@@ -929,6 +930,8 @@
             ['Bewertungen offen', String((run.reminders || []).length), 'persönlich anfragen']
         ].map(([t, v, sub]) => stat(t, v, sub, { cls: 'lg:col-span-3' })));
 
+        renderVisits(run.visits);
+        renderGoogleData(run.google);
         const imgs = run.creatives || [];
         $('#campaigns').replaceChildren(...m.campaigns.map((c) => {
             const r = c.result || {};
@@ -991,6 +994,40 @@
                 c.reviewAskedAt ? null : h('button', { type: 'button', class: 'btn btn-sm', onclick: () => mktClient(c.id, { asked: true }) }, 'Gefragt'),
                 h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => mktClient(c.id, { reference: !c.reference }) }, c.reference ? 'Freigabe zurücknehmen' : 'Referenz freigegeben'))))
             : [h('li', { class: 'is-empty', text: 'Noch keine Kunden. Nach dem ersten Auftrag erscheinen sie hier.' })]));
+    }
+    const EVT = { check: 'Website-Check gestartet', planer: 'Planer geöffnet', anfrage: 'Anfrage gesendet', tel: 'Telefon angetippt', mail: 'Mail angetippt', whatsapp: 'WhatsApp', instagram: 'Instagram', termin: 'Erstgespräch' };
+    const SRC = { direkt: 'direkt / Lesezeichen', google: 'Google', suche: 'andere Suchmaschine', instagram: 'Instagram', facebook: 'Facebook', linkedin: 'LinkedIn', ki: 'KI-Assistent', verweis: 'andere Website', signatur: 'Mail-Signatur', website: 'eigene Unterseiten' };
+    const bars = (rows, label, max) => h('ul', { class: 'bars' }, ...rows.map(([k, n]) => h('li', {},
+        h('span', { class: 'bar-label', text: label(k) }), h('span', { class: 'bar' }, h('i', { style: 'width:' + Math.max(3, Math.round(n / (max || 1) * 100)) + '%' })), h('b', { text: String(n) }))));
+    function renderVisits(v) {
+        const box = $('#visits');
+        if (!v) return box.replaceChildren(h('p', { class: 'muted small', text: 'Noch keine Zahlen. Die Zählung startet, sobald die Website mit dem Zähler live ist; Auswertung im Morgenlauf.' }));
+        const dayMax = Math.max(1, ...v.days.map((d) => d[1]));
+        box.replaceChildren(
+            h('p', { class: 'visits-total' }, h('b', { text: String(v.views) }), ' Seitenaufrufe seit ' + new Date(v.since).toLocaleDateString('de-DE')),
+            h('div', { class: 'spark', role: 'img', 'aria-label': 'Seitenaufrufe pro Tag' }, ...v.days.map(([d, n]) => h('i', { style: 'height:' + Math.max(4, Math.round(n / dayMax * 100)) + '%', title: new Date(d).toLocaleDateString('de-DE') + ': ' + n }))),
+            h('div', { class: 'visits-grid' },
+                h('div', {}, h('h3', { text: 'Herkunft' }), v.sources.length ? bars(v.sources, (k) => SRC[k] || k, v.sources[0][1]) : h('p', { class: 'muted small', text: '–' })),
+                h('div', {}, h('h3', { text: 'Seiten' }), v.pages.length ? bars(v.pages, (k) => k === '/' ? 'Startseite' : LP[k.replace(/\//g, '')] || k, v.pages[0][1]) : h('p', { class: 'muted small', text: '–' })),
+                h('div', {}, h('h3', { text: 'Klicks' }), v.events.length ? bars(v.events, (k) => EVT[k] || k, v.events[0][1]) : h('p', { class: 'muted small', text: 'Noch keine Klicks.' }))));
+    }
+    function renderGoogleData(g) {
+        const box = $('#gdata');
+        $('#gdata-meta').textContent = g && g.connected ? 'Search Console und Unternehmensprofil' : 'nicht verbunden';
+        if (!g || !g.connected) return box.replaceChildren(h('p', { class: 'muted small', text: 'Google ist noch nicht verbunden (Agenten → Einrichtung → „Google verbinden“). Dann stehen hier Klicks und Suchbegriffe aus der Google-Suche und Aufrufe, Anrufe und Routen aus dem Unternehmensprofil.' }));
+        const parts = [];
+        if (g.search) {
+            const t = g.search.totals;
+            parts.push(h('h3', { text: 'Google-Suche (28 Tage)' }), h('p', { class: 'gnums' }, h('span', {}, h('b', { text: String(t.clicks) }), ' Klicks'), h('span', {}, h('b', { text: String(t.impressions) }), ' Einblendungen'), t.position ? h('span', {}, h('b', { text: String(t.position).replace('.', ',') }), ' Ø Position') : null));
+            if (g.search.queries.length) parts.push(h('table', { class: 'mkt-table' }, h('thead', {}, h('tr', {}, ...['Suchbegriff', 'Klicks', 'Einbl.', 'Pos.'].map((x) => h('th', { scope: 'col', text: x })))),
+                h('tbody', {}, ...g.search.queries.slice(0, 10).map((q) => h('tr', {}, h('th', { scope: 'row', text: q.key }), h('td', { text: String(q.clicks) }), h('td', { text: String(q.impressions) }), h('td', { text: q.position ? String(q.position).replace('.', ',') : '–' }))))));
+        } else parts.push(h('p', { class: 'muted small', text: 'Search Console: ' + (g.searchNote || 'keine Daten') }));
+        if (g.profile) {
+            const m = g.profile.metrics;
+            parts.push(h('h3', { text: 'Unternehmensprofil (28 Tage)' }), h('p', { class: 'gnums' }, h('span', {}, h('b', { text: String(m.viewsSearch + m.viewsMaps) }), ' Aufrufe'), h('span', {}, h('b', { text: String(m.calls) }), ' Anrufe'), h('span', {}, h('b', { text: String(m.websiteClicks) }), ' Website-Klicks'), h('span', {}, h('b', { text: String(m.directions) }), ' Routen')));
+            if ((g.profile.keywords || []).length) parts.push(h('p', { class: 'muted small', text: 'Gefunden über: ' + g.profile.keywords.slice(0, 8).map((k) => k.keyword).join(', ') }));
+        } else parts.push(h('p', { class: 'muted small', text: 'Unternehmensprofil: ' + (g.profileNote || 'keine Daten') }));
+        box.replaceChildren(...parts);
     }
     async function mktClient(id, body) {
         try { await api('marketing/client/' + id, body); toast('Gespeichert'); load(); } catch (err) { toast(err.message, true); }

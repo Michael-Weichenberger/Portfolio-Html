@@ -110,6 +110,50 @@ async function sources() {
     return Object.values(by).sort((a, b) => b.leads - a.leads);
 }
 
+/* Cookielose Zählung der Website (D1-Tabelle visits), letzte 30 Tage */
+async function visits() {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const rows = await Cloud.query('SELECT day, page, source, event, n FROM visits WHERE day >= ? ORDER BY day', [since]);
+    const sum = (filter, key) => { const o = {}; rows.filter(filter).forEach((r) => { o[r[key]] = (o[r[key]] || 0) + r.n; }); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+    const views = (r) => r.event === 'view';
+    const days = {};
+    rows.filter(views).forEach((r) => { days[r.day] = (days[r.day] || 0) + r.n; });
+    return {
+        since, views: rows.filter(views).reduce((n, r) => n + r.n, 0),
+        days: Object.entries(days).sort((a, b) => a[0].localeCompare(b[0])),
+        pages: sum(views, 'page').slice(0, 12), sources: sum(views, 'source').slice(0, 12),
+        events: sum((r) => r.event !== 'view', 'event')
+    };
+}
+
+/* Google: Search Console und Unternehmensprofil (wenn verbunden) */
+async function google() {
+    const Google = require('./core/google.js');
+    if (!Google.connected()) return { connected: false };
+    const out = { connected: true };
+    const iso = (d) => d.toISOString().slice(0, 10);
+    const to = new Date(Date.now() - 3 * 86400000); // Search Console liegt etwa 2–3 Tage zurück
+    const from = new Date(to.getTime() - 27 * 86400000);
+    try {
+        const sites = await Google.searchSites();
+        const site = sites.find((u) => /mw-itservices\.de/.test(u));
+        if (site) {
+            out.search = { site, from: iso(from), to: iso(to), totals: await Google.searchTotals(site, iso(from), iso(to)),
+                queries: await Google.searchBy(site, iso(from), iso(to), 'query', 20), pages: await Google.searchBy(site, iso(from), iso(to), 'page', 15) };
+        } else out.searchNote = 'mw-itservices.de ist in der Search Console nicht hinterlegt oder nicht freigegeben.';
+    } catch (err) { out.searchNote = err.message; }
+    try {
+        const loc = await Google.ownLocation();
+        const pTo = new Date(Date.now() - 2 * 86400000); const pFrom = new Date(pTo.getTime() - 27 * 86400000);
+        out.profile = { title: loc.title, from: iso(pFrom), to: iso(pTo), metrics: await Google.performance(loc, iso(pFrom), iso(pTo)) };
+        try {
+            const m = (d) => d.toISOString().slice(0, 7);
+            out.profile.keywords = await Google.searchKeywords(loc, m(new Date(Date.now() - 95 * 86400000)), m(new Date(Date.now() - 32 * 86400000)));
+        } catch (err) { out.profile.keywordsNote = err.message; }
+    } catch (err) { out.profileNote = err.message; }
+    return out;
+}
+
 async function checkPages() {
     const out = [];
     for (const slug of PAGES) {
@@ -196,6 +240,12 @@ async function main() {
     let offline = false;
     try { stats = await sources(); } catch (err) { offline = true; notes.push('Web-Dashboard nicht erreichbar: ' + err.message); }
     const pages = await checkPages();
+    let visitData = null;
+    try { visitData = await visits(); } catch (err) { notes.push('Besuchszählung nicht abrufbar: ' + err.message); }
+    let googleData = { connected: false };
+    try { googleData = await google(); } catch (err) { notes.push('Google: ' + err.message); }
+    if (googleData.searchNote) notes.push('Search Console: ' + googleData.searchNote);
+    if (googleData.profileNote) notes.push('Google-Profil: ' + googleData.profileNote);
     pages.filter((p) => !p.ok).forEach((p) => notes.push('Unterseite /' + p.slug + '/ nicht erreichbar (' + (p.status || 'keine Antwort') + ')'));
     const rem = reminders();
     rem.forEach((r) => notes.push('Bewertung persönlich anfragen: ' + r.company + ' (betreut seit ' + r.since + ')'));
@@ -206,9 +256,9 @@ async function main() {
     Store.save('marketing', m);
     const total = stats.reduce((a, s) => a + s.leads, 0);
     const tracked = stats.filter((s) => s.source).reduce((a, s) => a + s.leads, 0);
-    const summary = offline ? 'Auswertung ohne Web-Dashboard' : total + ' Anfragen, davon ' + tracked + ' mit Herkunft · ' + pages.filter((p) => p.ok).length + '/' + pages.length + ' Unterseiten erreichbar';
+    const summary = offline ? 'Auswertung ohne Web-Dashboard' : (visitData ? visitData.views + ' Seitenaufrufe (30 Tage) · ' : '') + total + ' Anfragen, davon ' + tracked + ' mit Herkunft · ' + pages.filter((p) => p.ok).length + '/' + pages.length + ' Unterseiten erreichbar';
     const prev = ((Run.all().marketing || {}).data) || {};
-    Run.done('marketing', { ok: !offline, summary, notes, data: { stats, pages, reminders: rem, creatives: prev.creatives || [], creativesAt: prev.creativesAt || null } });
+    Run.done('marketing', { ok: !offline, summary, notes, data: { stats, pages, reminders: rem, visits: visitData, google: googleData, creatives: prev.creatives || [], creativesAt: prev.creativesAt || null } });
     console.log(summary);
     notes.forEach((n) => console.log('  · ' + n));
 }

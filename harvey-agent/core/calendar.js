@@ -229,6 +229,7 @@ function harveyEvents(from, to, invoices) {
 }
 
 /* Alle Termine von heute bis +days, sortiert */
+let googleCache = { key: null, at: 0, events: [] };
 async function agenda({ days = 14, force = false, invoices } = {}) {
     const now = new Date();
     const from = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -238,8 +239,24 @@ async function agenda({ days = 14, force = false, invoices } = {}) {
         const entry = await fetchSource(s, force);
         return expand(entry.events, from, to).map((e) => ({ ...e, source: s.id, sourceName: s.name, kind: s.kind }));
     }));
-    const events = [...results.flat(), ...harveyEvents(from, to, invoices)].sort((a, b) => a.start.localeCompare(b.start));
-    return { from: new Date(from).toISOString(), to: new Date(to).toISOString(), events: events.slice(0, 300), sources: list.map(publicSource) };
+    // Google Kalender direkt (mit Teilnehmern), wenn Google mit Kalender-Berechtigung verbunden ist
+    const Google = require('./google.js');
+    let google = [];
+    let googleSource = null;
+    if (Google.has('calendar')) {
+        const key = 'google:' + from + ':' + days;
+        if (!force && googleCache.key === key && Date.now() - googleCache.at < 10 * 60000) google = googleCache.events;
+        else {
+            try {
+                google = (await Google.calendarEvents(new Date(from).toISOString(), new Date(to).toISOString()))
+                    .map((e) => ({ title: e.title, location: e.location, start: new Date(e.start).toISOString(), end: e.end ? new Date(e.end).toISOString() : null, allDay: e.allDay, attendees: e.attendees, source: 'google', sourceName: 'Google Kalender', kind: 'google' }));
+                googleCache = { key, at: Date.now(), events: google };
+            } catch (err) { googleSource = { error: err.message }; }
+        }
+        googleSource = { id: 'google', name: 'Google Kalender (info@mw-itservices.de)', kind: 'google', enabled: true, count: google.length, ...(googleSource || {}) };
+    }
+    const events = [...results.flat(), ...google, ...harveyEvents(from, to, invoices)].sort((a, b) => a.start.localeCompare(b.start));
+    return { from: new Date(from).toISOString(), to: new Date(to).toISOString(), events: events.slice(0, 300), sources: [...(googleSource ? [googleSource] : []), ...list.map(publicSource)] };
 }
 
 function forBrowser(agenda) {

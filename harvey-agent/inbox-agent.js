@@ -93,36 +93,29 @@ async function draftReply(who, subject, text, cls, lastSent) {
 
 async function main() {
     Store.ensure();
-    const user = process.env.IMAP_USER || process.env.SMTP_USER;
-    const pass = process.env.IMAP_PASS || process.env.SMTP_PASS;
-    if (!user || !pass) {
-        console.log('Postfach nicht eingerichtet: IMAP_USER/IMAP_PASS (oder SMTP_USER/SMTP_PASS) in .env.');
-        return Run.done('inbox', { ok: false, summary: 'Postfach nicht eingerichtet (IMAP/SMTP in .env)' });
+    const Mailbox = require('./core/mailbox.js');
+    if (!Mailbox.mode()) {
+        console.log('Postfach nicht eingerichtet: Google verbinden (mit Gmail) oder IMAP_USER/IMAP_PASS in .env.');
+        return Run.done('inbox', { ok: false, summary: 'Postfach nicht eingerichtet (Google verbinden oder IMAP in .env)' });
     }
-    const { ImapFlow } = require('imapflow');
     const { simpleParser } = require('mailparser');
     const prev = (Run.all().inbox || {}).data || {};
     const seen = new Set(prev.seen || []);
     const since = new Date(Date.now() - (Number(opt('days')) || 2) * 86400000);
     const known = await knownContacts();
-    const own = String(user).toLowerCase();
+    const own = await Mailbox.own();
     const notes = [];
     let handled = 0;
-    const client = new ImapFlow({ host: process.env.IMAP_HOST || 'imap.gmail.com', port: Number(process.env.IMAP_PORT) || 993, secure: true, auth: { user, pass }, logger: false });
-    await client.connect();
-    try {
-        const lock = await client.getMailboxLock('INBOX');
-        try {
+    {
+        {
             const list = [];
-            for await (const msg of client.fetch({ since }, { envelope: true, uid: true })) {
-                const from = (((msg.envelope.from || [])[0] || {}).address || '').toLowerCase();
-                if (!from || from === own || !known.has(from)) continue;
-                const id = msg.envelope.messageId || 'uid:' + msg.uid;
-                if (!seen.has(id)) list.push({ uid: msg.uid, from, id, subject: msg.envelope.subject || '' });
+            for (const msg of await Mailbox.recent(since, 100)) {
+                if (!msg.from || msg.from === own || !known.has(msg.from)) continue;
+                const id = msg.messageId || 'mail:' + msg.id;
+                if (!seen.has(id)) list.push({ uid: msg.id, from: msg.from, id, subject: msg.subject || '' });
             }
             for (const m of list.slice(0, 25)) {
-                const raw = await client.fetchOne(String(m.uid), { source: { maxLength: 400000 } }, { uid: true });
-                const parsed = await simpleParser(raw.source);
+                const parsed = await simpleParser(await Mailbox.source(m.uid));
                 const text = stripQuote(parsed.text || '');
                 const who = known.get(m.from);
                 if (who.kind === 'Kunde' && who.client) {
@@ -156,8 +149,8 @@ async function main() {
                 seen.add(m.id);
                 handled++;
             }
-        } finally { lock.release(); }
-    } finally { await client.logout().catch(() => {}); }
+        }
+    }
     const summary = handled ? handled + ' Mails eingeordnet' + (AI.available() ? '' : ' (ohne KI, nur Stichworte)') : 'Keine neuen Mails von bekannten Kontakten';
     console.log(summary);
     Run.done('inbox', { summary, notes, data: { seen: [...seen].slice(-1000) } });
