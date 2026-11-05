@@ -159,9 +159,14 @@ async function main() {
         } catch (err) { throw new Error('Noch kein Scout-Lauf vorhanden.'); }
     } else throw new Error('Bitte --domain <domain> oder --top <Anzahl> angeben.');
     const done = [];
-    for (const d of domains) { try { done.push(await pitch(d)); } catch (err) { console.log('✗ ' + d + ': ' + err.message); } }
+    const errors = [];
+    for (const d of domains) { try { done.push(await pitch(d)); } catch (err) { errors.push(d + ': ' + err.message); console.log('✗ ' + d + ': ' + err.message); } }
     const prev = (Run.all().video || {}).data || {};
-    Run.done('video', { summary: done.length + ' Video-Pitches erstellt', data: { videos: [...done.map((v) => ({ ...v, at: new Date().toISOString() })), ...(prev.videos || [])].slice(0, 30) } });
+    // Neue Aufnahme einer Domain ersetzt die alte in der Liste
+    const keep = (prev.videos || []).filter((v) => !done.some((x) => x.domain === v.domain));
+    const summary = done.length ? done.length + (done.length === 1 ? ' Video-Pitch erstellt' : ' Video-Pitches erstellt') + (errors.length ? ', ' + errors.length + ' fehlgeschlagen' : '') : 'Aufnahme fehlgeschlagen: ' + (errors[0] || 'unbekannt');
+    Run.done('video', { ok: done.length > 0 || !errors.length, summary, notes: errors, data: { videos: [...done.map((v) => ({ ...v, at: new Date().toISOString() })), ...keep].slice(0, 30) } });
+    if (!done.length && errors.length) process.exitCode = 1;
 }
 
 if (require.main === module) main().catch((err) => { console.error('✗ ' + err.message); process.exit(1); });

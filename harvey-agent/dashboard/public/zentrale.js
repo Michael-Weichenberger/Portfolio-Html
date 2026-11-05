@@ -18,7 +18,7 @@
     const TYPE = { mahnung: 'Mahnung', akquise: 'Akquise', angebot: 'Angebot', nachfass: 'Nachfass', antwort: 'Antwort', report: 'Bericht', bewertung: 'Bewertung', support: 'Support', willkommen: 'Willkommen', beitrag: 'Beitrag', sonstiges: 'Mail' };
     const STAGE = { 1: 'Erinnerung', 2: 'Zahlungsaufforderung', 3: 'Letzte Mahnung' };
     const MAIL_STATE = { entwurf: 'Entwurf', freigegeben: 'freigegeben', gesendet: 'gesendet' };
-    const LEAD_STATE = { neu: 'neu', gemessen: 'gemessen', angeschrieben: 'angeschrieben', antwort: 'Antwort erhalten', termin: 'Termin', kunde: 'Kunde', abgelegt: 'abgelegt' };
+    const LEAD_STATE = { neu: 'neu', gemessen: 'gemessen', angeschrieben: 'angeschrieben', antwort: 'Antwort erhalten', termin: 'Termin', kunde: 'Kunde', abgelegt: 'abgelegt', gesendet: 'Angebot raus', auftrag: 'Kunde', in_arbeit: 'in Arbeit' };
 
     let data = null;
     let agenda = null;
@@ -161,7 +161,7 @@
         const ag = data.agents || { hot: [], preps: [], list: [] };
         // Heiße Leads zuerst: Anruf oder WhatsApp öffnen Sie selbst (nur bei eigenen Anfragen)
         ag.hot.slice(0, 3).forEach((l) => next.push(['Heiß · ' + l.score, l.name + ': ' + l.why.slice(0, 2).join(', ') + (l.inbound ? '' : ' (Kaltakquise: Brief oder Besuch)'), l.inbound ? null : () => go('leads'),
-            [l.tel ? h('a', { class: 'link', href: l.tel }, 'Anrufen') : null, l.wa ? h('a', { class: 'link', href: l.wa, target: '_blank', rel: 'noopener noreferrer' }, 'WhatsApp') : null]]));
+            [/^c:/.test(l.id) ? h('a', { class: 'link', href: '/akte/cloud/' + l.id.slice(2), target: '_blank', rel: 'noopener' }, 'Akte') : null, l.tel ? h('a', { class: 'link', href: l.tel }, 'Anrufen') : null, l.wa ? h('a', { class: 'link', href: l.wa, target: '_blank', rel: 'noopener noreferrer' }, 'WhatsApp') : null]]));
         // Dringende Support-Tickets von Bestandskunden
         (data.tickets || []).filter((t) => t.status !== 'erledigt' && t.priority === 'hoch').slice(0, 3).forEach((t) => next.push(['Support', t.client + ': ' + t.summary + (t.check ? (t.check.ok ? ' (Seite von hier erreichbar)' : ' (Störung bestätigt)') : ''), () => go('agenten')]));
         ag.preps.filter((p) => Date.parse(p.at) > Date.now() - 3600000 && Date.parse(p.at) < Date.now() + 36 * 3600000).forEach((p) => next.push(['Termin ' + hm(p.at), p.name + ' · Hauptpunkt: ' + p.headline + ' · Vorlage: harvey-agent/' + p.file, () => go('termine')]));
@@ -360,6 +360,30 @@
         return h('span', { class: 'dots' }, (points || []).map((p) => h('i', { class: 'd-' + p.status, title: p.title + ': ' + STATUS[p.status] })));
     }
 
+    const caseId = (f) => String(f || '').replace(/\\/g, '/').split('/').pop().replace(/\.md$/, '');
+    const KINDS = { anfrage: 'Website-Check', paket: 'Projekt-Planer' };
+    let inqLoaded = 0;
+    async function loadInquiries(force) {
+        if (!force && Date.now() - inqLoaded < 60000) return;
+        inqLoaded = Date.now();
+        const list = $('#inquiries');
+        if (force) list.replaceChildren(h('li', { class: 'is-empty', text: 'Wird geladen …' }));
+        let r;
+        try { r = await api('inquiries' + (force ? '?refresh=1' : '')); } catch (err) { r = { rows: [], error: err.message }; }
+        $('#cnt-inq').textContent = r.rows.length ? String(r.rows.filter((x) => x.status === 'neu').length || '') : '';
+        list.replaceChildren(...(r.rows.length ? r.rows.map((x) => sysRow(x.status === 'neu' ? 'warn' : x.status === 'auftrag' ? 'good' : 'off',
+            x.name + ' · ' + (KINDS[x.kind] || x.kind),
+            [x.url ? x.url.replace(/^https?:\/\//, '').replace(/\/$/, '') : null, x.email, x.measured ? x.open + ' offene Punkte' : null, x.source ? 'über ' + x.source.source + (x.source.campaign ? ' / ' + x.source.campaign : '') : null].filter(Boolean).join(' · '),
+            (LEAD_STATE[x.status] || x.status) + ' · ' + ago(x.createdAt),
+            h('span', { class: 'btns' },
+                h('a', { class: 'btn btn-sm btn-primary', href: '/akte/cloud/' + x.id, target: '_blank', rel: 'noopener' }, 'Akte'),
+                x.url ? h('a', { class: 'btn btn-sm btn-ghost', href: x.url, target: '_blank', rel: 'noopener noreferrer' }, 'Website') : null,
+                x.phone ? h('a', { class: 'btn btn-sm btn-ghost', href: 'tel:' + String(x.phone).replace(/[^\d+]/g, '') }, 'Anrufen') : null)))
+            : [h('li', { class: 'is-empty', text: r.error ? 'Web-Dashboard nicht erreichbar: ' + r.error : 'Noch keine Anfragen über die Website.' })]));
+    }
+    $('#inq-refresh').addEventListener('click', () => loadInquiries(true));
+    document.querySelector('[data-sub="anfragen"]').addEventListener('click', () => loadInquiries(false));
+
     function renderLeads() {
         const s = data.scout;
         const known = new Set(data.leads.map((l) => l.domain));
@@ -404,7 +428,10 @@
                 h('div', {}, h('dt', { text: 'Signale' }), h('dd', { text: l.total ? l.met + '/' + l.total : '–' })),
                 h('div', {}, h('dt', { text: 'Priorität' }), h('dd', { text: l.priority || '–' })),
                 h('div', {}, h('dt', { text: 'Kontaktweg' }), h('dd', { text: l.contactAllowed || 'brief' }))),
-            h('p', { class: 'muted small', text: l.caseFile ? 'Briefing: harvey-agent/' + l.caseFile : 'Briefing nach „Akquise-Liste messen“' })))
+            l.caseFile ? h('div', { class: 'tile-foot' },
+                h('a', { class: 'btn btn-primary btn-sm', href: '/akte/local/' + caseId(l.caseFile), target: '_blank', rel: 'noopener' }, 'Gesprächsakte'),
+                h('a', { class: 'btn btn-sm btn-ghost', href: 'https://' + l.domain + '/', target: '_blank', rel: 'noopener noreferrer' }, 'Website'))
+                : h('p', { class: 'muted small', text: 'Akte nach „Akquise-Liste messen“' })))
             : [h('div', { class: 'tile md:col-span-2 xl:col-span-3' }, empty('Die Akquise-Liste ist leer.', 'Vorschläge übernehmen, dann „Akquise-Liste messen“.'))]));
     }
 
@@ -828,7 +855,13 @@
             h('span', {}, h('strong', { text: s.title }), h('span', { class: 'muted small', text: s.text }),
                 s.action === 'google' ? h('button', { type: 'button', class: 'btn btn-sm', onclick: connectGoogle }, 'Google verbinden') : null,
                 s.action === 'bank' ? h('button', { type: 'button', class: 'btn btn-sm', onclick: () => { $('#bank-form').hidden = false; $('#bank-name').focus(); } }, 'Bank verbinden') : null))));
-        $('#videos').replaceChildren(...(ag.videos.length ? ag.videos.slice(0, 6).map((v) => sysRow('good', v.domain, 'harvey-agent/' + v.dir + '/', ago(v.at))) : [h('li', { class: 'is-empty', text: 'Noch keine Videos.' })]));
+        $('#videos').replaceChildren(...(ag.videos.length ? ag.videos.slice(0, 8).map((v) => sysRow('good', v.domain, 'harvey-agent/' + v.dir + '/', ago(v.at),
+            h('span', { class: 'btns' },
+                h('a', { class: 'btn btn-sm btn-primary', href: '/' + v.dir + '/pitch-desktop.webm', target: '_blank', rel: 'noopener' }, 'Desktop'),
+                h('a', { class: 'btn btn-sm', href: '/' + v.dir + '/pitch-handy.webm', target: '_blank', rel: 'noopener' }, 'Handy'),
+                h('a', { class: 'btn btn-sm btn-ghost', href: '/' + v.dir + '/sprechtext.md', target: '_blank', rel: 'noopener' }, 'Sprechtext'),
+                h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => api('open-folder', { domain: v.domain }).then(() => toast('Ordner geöffnet')).catch((err) => toast(err.message, true)) }, 'Ordner'))))
+            : [h('li', { class: 'is-empty', text: 'Noch keine Videos.' })]));
     }
     const TCAT = { ausfall: 'Website nicht erreichbar', fehler: 'Fehler auf der Website', aenderung: 'Änderungswunsch', email: 'E-Mail / Postfach', rechnung: 'Rechnung', frage: 'Frage', sonstiges: 'Sonstiges' };
     const TSTATE = { offen: 'offen', in_arbeit: 'in Arbeit', erledigt: 'erledigt' };

@@ -220,6 +220,19 @@ function agentState() {
     };
 }
 
+let inquiryCache = { at: 0, rows: null };
+async function inquiries(force) {
+    if (!force && inquiryCache.rows && Date.now() - inquiryCache.at < 120000) return inquiryCache.rows;
+    const Cloud = require('../core/cloud.js');
+    const rows = await Cloud.query("SELECT id, kind, status, name, url, email, phone, created_at, source, measured_at, findings FROM leads WHERE kind IN ('anfrage','paket') ORDER BY created_at DESC LIMIT 40");
+    inquiryCache = { at: Date.now(), rows: rows.map((r) => {
+        let f = []; try { f = JSON.parse(r.findings || '[]'); } catch (_) { f = []; }
+        let src = null; try { src = r.source ? JSON.parse(r.source) : null; } catch (_) { src = null; }
+        return { id: r.id, kind: r.kind, status: r.status, name: r.name, url: r.url, email: r.email, phone: r.phone, createdAt: r.created_at, measured: !!r.measured_at, open: f.length, source: src };
+    }) };
+    return inquiryCache.rows;
+}
+
 const Live = { last: null, daily: null }; // Stand der Läufe für die Zentrale
 const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + (x.getMonth() + 1) + '-' + x.getDate(); };
 /* Morgenlauf: höchstens einmal am Tag, nie doppelt */
@@ -263,6 +276,10 @@ const CONTACTS = ['brief', 'persoenlich', 'bestehend', 'einwilligung'];
 async function api(req, res, url) {
     const parts = url.pathname.split('/').filter(Boolean).slice(1); // nach /api
     if (req.method === 'GET' && parts[0] === 'state') return send(res, 200, state());
+    if (req.method === 'GET' && parts[0] === 'inquiries') {
+        try { return send(res, 200, { rows: await inquiries(url.searchParams.get('refresh') === '1') }); }
+        catch (err) { return send(res, 200, { rows: [], error: err.message }); }
+    }
     if (req.method === 'POST' && parts[0] === 'morning') return send(res, 200, { status: morning(false) });
     if (req.method === 'GET' && parts[0] === 'run-live') {
         const l = url.searchParams.get('slot') === 'daily' ? Live.daily : Live.last;
@@ -348,6 +365,14 @@ async function api(req, res, url) {
         }
         return send(res, 404, { error: 'unbekannt' });
     }
+    if (parts[0] === 'open-folder') {
+        const d = String(body.domain || '');
+        if (!DOMAIN.test(d)) return send(res, 400, { error: 'Ungültige Domain' });
+        const dir = path.join(ROOT, 'out', 'video', d);
+        if (!fs.existsSync(dir)) return send(res, 404, { error: 'Ordner nicht gefunden' });
+        execFile(process.platform === 'win32' ? 'explorer.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open', [dir], () => {});
+        return send(res, 200, { ok: true });
+    }
     if (parts[0] === 'accounting' && parts[1] === 'push') {
         // Übergabe an Lexware Office: nur mit ausdrücklicher Bestätigung aus der Zentrale
         if (body.confirm !== true) return send(res, 400, { error: 'Übertragung nicht bestätigt.' });
@@ -428,6 +453,22 @@ const server = http.createServer(async (req, res) => {
             try { await require('../core/google.js').exchange(url.searchParams.get('code') || '', url.searchParams.get('state') || ''); Activity.log('good', '✓ Google verbunden'); }
             catch (err) { msg = 'Google-Verbindung fehlgeschlagen: ' + err.message; }
             return send(res, 200, '<!doctype html><meta charset=utf-8><title>Kasi</title><body style="font:16px system-ui;background:#16110E;color:#F4F0E8;padding:40px"><p>' + msg.replace(/[<>&]/g, '') + '</p><p><a style="color:#DF9A67" href="/#agenten">Zur Zentrale</a></p>', 'text/html; charset=utf-8');
+        }
+        const akte = url.pathname.match(/^\/akte\/(local|cloud)\/([a-z0-9-]{3,90})$/);
+        if (akte) {
+            const Akte = require('../core/akte.js');
+            try {
+                const a = akte[1] === 'local' ? Akte.local(akte[2]) : await Akte.cloud(akte[2]);
+                return send(res, 200, Akte.render(a), 'text/html; charset=utf-8');
+            } catch (err) {
+                return send(res, 404, '<!doctype html><meta charset=utf-8><title>Akte</title><body style="font:16px system-ui;background:#16110E;color:#F4F0E8;padding:40px"><p>' + String(err.message).replace(/[<>&]/g, '') + '</p><p><a style="color:#DF9A67" href="/#leads">Zurück zur Zentrale</a></p>', 'text/html; charset=utf-8');
+            }
+        }
+        const vid = url.pathname.match(/^\/out\/video\/([a-z0-9.-]{3,120})\/(pitch-desktop\.webm|pitch-handy\.webm|sprechtext\.md)$/i);
+        if (vid && DOMAIN.test(vid[1])) {
+            const p = path.join(ROOT, 'out', 'video', vid[1], vid[2]);
+            if (!fs.existsSync(p)) return send(res, 404, 'Nicht gefunden', 'text/plain; charset=utf-8');
+            return send(res, 200, fs.readFileSync(p), vid[2].endsWith('.md') ? 'text/plain; charset=utf-8' : 'video/webm');
         }
         const ad = url.pathname.match(/^\/out\/marketing\/([a-z0-9-]{2,40})\/([a-z0-9-]{2,40}-(?:feed|story))\.png$/);
         if (ad) {
