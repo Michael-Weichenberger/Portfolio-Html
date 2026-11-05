@@ -164,6 +164,17 @@
             [/^c:/.test(l.id) ? h('a', { class: 'link', href: '/akte/cloud/' + l.id.slice(2), target: '_blank', rel: 'noopener' }, 'Akte') : null, l.tel ? h('a', { class: 'link', href: l.tel }, 'Anrufen') : null, l.wa ? h('a', { class: 'link', href: l.wa, target: '_blank', rel: 'noopener noreferrer' }, 'WhatsApp') : null]]));
         // Dringende Support-Tickets von Bestandskunden
         (data.tickets || []).filter((t) => t.status !== 'erledigt' && t.priority === 'hoch').slice(0, 3).forEach((t) => next.push(['Support', t.client + ': ' + t.summary + (t.check ? (t.check.ok ? ' (Seite von hier erreichbar)' : ' (Störung bestätigt)') : ''), () => go('agenten')]));
+        // Cal.com: neue, verschobene und abgesagte Termine mit fertigem Entwurf zur Freigabe
+        const openMail = (id) => () => { if (id) open.add(id); renderOutbox(); go('zentrale', 'postausgang'); };
+        const STATE = { gebucht: 'Neuer Termin', verschoben: 'Verschoben', abgesagt: 'Abgesagt' };
+        (ag.bookings || []).filter((b) => STATE[b.status]).forEach((b) => {
+            const mail = b.draft && (data.outbox || []).find((m) => m.id === b.draft && ['entwurf', 'freigegeben'].includes(m.status));
+            const clash = (b.conflicts || []).length ? ' · Überschneidung: ' + b.conflicts.join(', ') : '';
+            if (!mail && !clash) return;
+            next.push([STATE[b.status] + ' ' + (b.status === 'abgesagt' ? '' : new Date(b.start).toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })), (b.name || b.email) + (b.status === 'abgesagt' ? ' hat abgesagt' : '') + clash + (mail ? ' · Entwurf bereit' : ''), null,
+                [b.leadId ? h('a', { class: 'link', href: '/akte/cloud/' + b.leadId, target: '_blank', rel: 'noopener' }, 'Akte') : null,
+                    mail ? h('button', { type: 'button', class: 'link', onclick: openMail(mail.id) }, 'Freigeben') : null]]);
+        });
         ag.preps.filter((p) => Date.parse(p.at) > Date.now() - 3600000 && Date.parse(p.at) < Date.now() + 36 * 3600000).forEach((p) => next.push(['Termin ' + hm(p.at), p.name + ' · Hauptpunkt: ' + p.headline + ' · Vorlage: harvey-agent/' + p.file, () => go('termine')]));
         ag.list.forEach((a) => (a.notes || []).filter((n) => /Nachfass-Brief|nicht erreichbar|SSL|Domain .* läuft|defekte Links/.test(n)).slice(0, 3).forEach((n) => next.push([a.name, n, () => go('agenten')])));
         if (k.outbox) next.push(['Postausgang', k.outbox + (k.outbox === 1 ? ' Mail wartet' : ' Mails warten') + ' auf Ihre Freigabe.', () => go('zentrale', 'postausgang')]);
@@ -248,6 +259,7 @@
             : review ? '★'.repeat(m.stars || 0) + ' · ' + (m.location || '') + (m.comment ? ' · „' + m.comment.slice(0, 220) + '“' : ' · ohne Text') + ' · wird öffentlich im Google-Profil angezeigt'
             : post ? (linkedin ? 'LinkedIn · Sie posten selbst: Text wird kopiert, danach in LinkedIn einfügen' : 'Google-Unternehmensprofil MW IT-SERVICES · wird öffentlich als Neuigkeit angezeigt') + ' · ' + body.value.length + ' Zeichen'
             : e.type === 'support' ? 'Ticket ' + (m.ticket || '') + ' · Lösungsvorschlag, bitte prüfen'
+            : e.type === 'termin' ? (m.cancelled ? 'Cal.com-Absage · Angebot für einen neuen Termin' : 'Cal.com-Termin ' + (m.start ? new Date(m.start).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') + ' · Bestätigung an den Kunden') + (m.akte ? ' · Akte in der Zentrale' : '')
             : e.type === 'willkommen' ? 'Onboarding · Projektordner ' + (m.folder || '')
             : e.type === 'report' ? (m.kind === 'roi' ? 'Quartals-ROI ' + m.quarter + ' · Schätzung bitte prüfen' : 'Betreuungsbericht ' + (m.month || '')) : '';
 

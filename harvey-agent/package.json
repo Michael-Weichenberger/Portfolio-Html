@@ -24,6 +24,7 @@
     "monitor": "node monitor-agent.js",
     "followup": "node followup-agent.js",
     "termine": "node appointment-agent.js",
+    "buchungen": "node bookings-agent.js",
     "watch": "node watch-agent.js",
     "report": "node watch-agent.js --report",
     "roi": "node watch-agent.js --quarter",

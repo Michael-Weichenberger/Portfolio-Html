@@ -20,7 +20,10 @@ const LABEL = {
     review_replied: 'Bewertung beantwortet',
     review_new: 'Neue Bewertung',
     client_onboarded: 'Onboarding',
-    ticket_new: 'Support-Ticket'
+    ticket_new: 'Support-Ticket',
+    booking_new: 'Neuer Termin',
+    booking_moved: 'Termin verschoben',
+    booking_cancelled: 'Termin abgesagt'
 };
 
 function record(type, data) {

@@ -15,6 +15,7 @@
      bank.json      Bank-Anbindung (Enable Banking: Sitzung, Konten, letzter Abruf)
      watch.json     Website-Wächter: tägliche Messwerte je Kunden-Domain
      geo.json       KI-Sichtbarkeit: Ergebnisse je Kunde und Suchanfrage
+     bookings.json  Termine aus Cal.com (gebucht, verschoben, abgesagt)
      agents.json    Stand der Agenten (Nachfass, Termine, Posteingang, Alarm …)
 
    Schreiben ist atomar (temporäre Datei + Umbenennen), vor der ersten Änderung
@@ -29,7 +30,7 @@ const ROOT = path.join(__dirname, '..');
 const DATA_DIR = process.env.HARVEY_DATA_DIR || path.join(ROOT, 'data');
 const TEMPLATE_DIR = path.join(ROOT, 'data-templates');
 const BACKUP_DIR = path.join(DATA_DIR, '.backup');
-const FILES = ['company', 'clients', 'leads', 'invoices', 'outbox', 'scout', 'events', 'monitor', 'calendars', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'tickets', 'marketing'];
+const FILES = ['company', 'clients', 'leads', 'invoices', 'outbox', 'scout', 'events', 'monitor', 'calendars', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'tickets', 'marketing', 'bookings'];
 const OBJECT_FILES = ['company', 'scout', 'monitor', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'marketing'];
 
 function file(name) {

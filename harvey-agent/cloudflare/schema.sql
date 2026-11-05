@@ -54,3 +54,10 @@ CREATE TABLE IF NOT EXISTS visits (
     n      INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (day, page, source, event)
 );
+
+-- Termine aus Cal.com
+CREATE TABLE IF NOT EXISTS bookings (
+    uid TEXT PRIMARY KEY, lead_id TEXT, status TEXT NOT NULL, start_at TEXT, end_at TEXT, title TEXT, name TEXT, email TEXT,
+    location TEXT, notes TEXT, replaced_by TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, handled_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_bookings_open ON bookings (handled_at, updated_at);

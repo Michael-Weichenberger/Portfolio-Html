@@ -53,6 +53,7 @@ function run(file, extra) {
         ['Mahn-Check', 'billing-agent.js'],
         ['Nachfass', 'followup-agent.js'],
         ['Website-Wächter', 'watch-agent.js'],
+        ['Cal.com-Termine', 'bookings-agent.js'],
         ['Termin-Vorbereitung', 'appointment-agent.js'],
         ['Heiße Leads', 'alert-agent.js'],
         ['Bewertungen', 'reviews-agent.js'],

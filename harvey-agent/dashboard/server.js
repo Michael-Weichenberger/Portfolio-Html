@@ -182,6 +182,7 @@ const AGENTS = [
     ['inbox', 'Posteingang', 'Antworten einordnen und vorschreiben', 'inbox'],
     ['followup', 'Nachfass', 'Angebote ohne Antwort nachfassen', 'followup'],
     ['appointments', 'Termin-Vorbereitung', 'Gesprächsvorlagen für die nächsten Termine', 'termine'],
+    ['bookings', 'Cal.com-Termine', 'Buchungen, Verschiebungen, Absagen als Entwurf', 'buchungen'],
     ['alert', 'Heiße Leads', 'Neue Anfragen bewerten, Hinweis aufs Handy', 'alert'],
     ['watch', 'Website-Wächter', 'Kunden-Websites täglich prüfen', 'watch'],
     ['watch-report', 'Betreuungsbericht', 'Monatsbericht an Betreuungskunden', 'report'],
@@ -207,6 +208,7 @@ function agentState() {
         list: AGENTS.map(([id, name, task, job]) => ({ id, name, task, job, ...pick(id) })),
         hot: ((runs.alert || {}).data || {}).hot || [],
         preps: ((runs.appointments || {}).data || {}).preps || [],
+        bookings: Store.load('bookings').filter((b) => b.start && Date.parse(b.start) > Date.now() - 86400000),
         videos: ((runs.video || {}).data || {}).videos || [],
         accounting: { ...((runs.accounting || {}).data || {}), lexware: !!process.env.LEXWARE_API_KEY },
         content: (runs.content || {}).data || null,
@@ -247,7 +249,8 @@ function morning(force) {
 }
 function runScript(file, extra, slot) {
     const label = file.replace(/-agent\.js$|\.js$/, '') + (extra && extra.length ? ' ' + extra.join(' ') : '');
-    Activity.log('run', '▶ ' + label);
+    const quiet = slot === 'quiet'; // Hintergrund-Takt: nur protokollieren, wenn etwas passiert ist
+    if (!quiet) Activity.log('run', '▶ ' + label);
     const live = { label, startedAt: Date.now(), output: '', done: false };
     if (slot === 'daily') Live.daily = live;
     else if (!slot) Live.last = live;
@@ -264,7 +267,7 @@ function runScript(file, extra, slot) {
             const lastLine = output.split('\n').filter((l) => l.trim()).pop() || '';
             const ok = code === 0;
             live.done = true;
-            Activity.log(ok ? 'good' : 'bad', (ok ? '✓ ' : '✗ ') + label + (lastLine ? ' · ' + lastLine.trim().slice(0, 120) : ''));
+            if (!(quiet && ok && /^Keine neuen Termine/.test(lastLine.trim()))) Activity.log(ok ? 'good' : 'bad', (ok ? '✓ ' : '✗ ') + label + (lastLine ? ' · ' + lastLine.trim().slice(0, 120) : ''));
             resolve({ ok, output: output.slice(-8000) });
         });
     });
@@ -505,4 +508,8 @@ server.listen(PORT, '127.0.0.1', () => {
     const alertLoop = () => runScript('alert-agent.js', [], true).catch(() => {});
     setTimeout(alertLoop, 20000);
     setInterval(alertLoop, 10 * 60000);
+    // Cal.com-Termine alle 2 Minuten abholen (nur Entwürfe, Versand erst nach Freigabe)
+    const bookingLoop = () => runScript('bookings-agent.js', [], 'quiet').catch(() => {});
+    setTimeout(bookingLoop, 30000);
+    setInterval(bookingLoop, 2 * 60000);
 });

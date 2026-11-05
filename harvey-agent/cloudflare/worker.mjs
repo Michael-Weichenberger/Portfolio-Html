@@ -186,7 +186,19 @@ async function handleCalWebhook(request, env) {
     const attendee = (p.attendees || [])[0] || {};
     const trigger = String(d.triggerEvent || '');
     if (!['BOOKING_CREATED', 'BOOKING_RESCHEDULED', 'BOOKING_CANCELLED'].includes(trigger)) return json({ ok: true, ignored: trigger });
-    const id = await store.bookingEvent(env.DB, { email: attendee.email, name: attendee.name, start: p.startTime, title: p.title, cancelled: trigger === 'BOOKING_CANCELLED' });
+    const meta = p.metadata || {};
+    const notes = [p.description, p.responses && p.responses.notes && p.responses.notes.value, p.additionalNotes].filter(Boolean).map(String).join(' · ').slice(0, 1000);
+    let id;
+    try {
+        id = await store.bookingEvent(env.DB, {
+            trigger, uid: p.uid, previousUid: p.rescheduleUid || p.fromReschedule || p.originalRescheduledBooking && p.originalRescheduledBooking.uid || null,
+            email: attendee.email, name: attendee.name, start: p.startTime, end: p.endTime, title: p.title,
+            location: meta.videoCallUrl || p.location || '', notes, cancelled: trigger === 'BOOKING_CANCELLED'
+        });
+    } catch (err) {
+        console.error('Cal.com-Webhook konnte nicht gespeichert werden:', err && err.message);
+        return json({ error: 'store_failed' }, 500); // Cal.com versucht es dann erneut
+    }
     return json({ ok: true, id });
 }
 

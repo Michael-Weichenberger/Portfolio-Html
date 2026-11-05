@@ -12,7 +12,7 @@
 const crypto = require('crypto');
 const Store = require('./datastore.js');
 
-const TYPES = { mahnung: 'Mahnung', akquise: 'Akquise', angebot: 'Angebot', nachfass: 'Nachfass', antwort: 'Antwort', report: 'Report', bewertung: 'Bewertung', support: 'Support', willkommen: 'Willkommen', beitrag: 'Beitrag', sonstiges: 'Sonstiges' };
+const TYPES = { mahnung: 'Mahnung', akquise: 'Akquise', angebot: 'Angebot', nachfass: 'Nachfass', antwort: 'Antwort', report: 'Report', bewertung: 'Bewertung', support: 'Support', willkommen: 'Willkommen', beitrag: 'Beitrag', termin: 'Termin', sonstiges: 'Sonstiges' };
 const EMAIL_RE = /^[^\s@<>()[\]\\,;:"]{1,64}@[a-z0-9.-]{1,180}\.[a-z]{2,24}$/i;
 const now = () => new Date().toISOString();
 

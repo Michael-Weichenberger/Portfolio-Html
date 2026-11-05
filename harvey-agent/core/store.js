@@ -289,6 +289,25 @@ async function publicReport(db, id) {
 }
 
 /* Terminbuchung (Cal.com-Webhook): Eintrag per E-Mail finden oder anlegen, Status „Termin“. */
+async function saveBooking(db, ev, leadId) {
+    if (!ev.uid) return;
+    const t = now();
+    const str = (v, n) => (v == null ? null : String(v).slice(0, n));
+    const status = ev.cancelled ? 'abgesagt' : ev.trigger === 'BOOKING_RESCHEDULED' ? 'verschoben' : 'gebucht';
+    const iso = (v) => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toISOString() : null; };
+    if (ev.cancelled) {
+        // Absage: vorhandenen Termin freigeben (auch wenn Kasi ihn noch nicht kannte)
+        await db.prepare("INSERT INTO bookings (uid, lead_id, status, start_at, end_at, title, name, email, location, notes, created_at, updated_at) VALUES (?, ?, 'abgesagt', ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (uid) DO UPDATE SET status = 'abgesagt', updated_at = excluded.updated_at, handled_at = NULL")
+            .bind(ev.uid, leadId, iso(ev.start), iso(ev.end), str(ev.title, 200), str(ev.name, 120), str(ev.email, 200), str(ev.location, 300), str(ev.notes, 1000), t, t).run();
+        return;
+    }
+    const stmts = [db.prepare('INSERT INTO bookings (uid, lead_id, status, start_at, end_at, title, name, email, location, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (uid) DO UPDATE SET status = excluded.status, start_at = excluded.start_at, end_at = excluded.end_at, title = excluded.title, location = excluded.location, notes = excluded.notes, updated_at = excluded.updated_at, handled_at = NULL')
+        .bind(ev.uid, leadId, status, iso(ev.start), iso(ev.end), str(ev.title, 200), str(ev.name, 120), str(ev.email, 200), str(ev.location, 300), str(ev.notes, 1000), t, t)];
+    // Verschiebung: alten Termin in einem Schritt als ersetzt markieren
+    if (ev.previousUid && ev.previousUid !== ev.uid) stmts.push(db.prepare("UPDATE bookings SET status = 'ersetzt', replaced_by = ?, updated_at = ? WHERE uid = ?").bind(ev.uid, t, ev.previousUid));
+    await db.batch(stmts);
+}
+
 async function bookingEvent(db, ev) {
     const email = String(ev.email || '').trim().toLowerCase().slice(0, 200);
     if (!email) return null;
@@ -297,10 +316,11 @@ async function bookingEvent(db, ev) {
     const start = ev.start ? new Date(ev.start) : null;
     const when = start && !isNaN(start) ? start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'unbekannt';
     if (ev.cancelled) {
-        if (!id) return null;
+        if (!id) { await saveBooking(db, ev, null); return null; }
         const lead = await get(db, id);
         await update(db, id, lead.status === 'termin' ? { status: 'in_arbeit' } : {}, lead);
         await log(db, id, 'booking', 'Termin abgesagt (' + when + ')');
+        await saveBooking(db, ev, id);
         return id;
     }
     if (!id) {
@@ -312,7 +332,8 @@ async function bookingEvent(db, ev) {
     if (lead.status !== 'auftrag') patch.status = 'termin';
     if (start && !isNaN(start)) patch.followUp = start.toISOString().slice(0, 10);
     await update(db, id, patch, lead);
-    await log(db, id, 'booking', 'Termin gebucht: ' + when + (ev.title ? ' · ' + String(ev.title).slice(0, 120) : ''));
+    await log(db, id, 'booking', (ev.trigger === 'BOOKING_RESCHEDULED' ? 'Termin verschoben auf ' : 'Termin gebucht: ') + when + (ev.title ? ' · ' + String(ev.title).slice(0, 120) : ''));
+    await saveBooking(db, ev, id);
     return id;
 }
 
