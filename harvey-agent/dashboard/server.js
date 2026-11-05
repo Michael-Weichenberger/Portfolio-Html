@@ -448,6 +448,14 @@ const server = http.createServer(async (req, res) => {
     }
 });
 
+// Läuft die Zentrale schon (zweites Fenster), freundlich Bescheid geben statt abzustürzen
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log('Die Kasi-Zentrale läuft bereits. Einfach im Browser öffnen: http://127.0.0.1:' + PORT);
+        process.exit(0);
+    }
+    throw err;
+});
 server.listen(PORT, '127.0.0.1', () => {
     console.log('Kasi-Zentrale läuft: http://127.0.0.1:' + PORT + '  (Strg+C beendet)');
     Activity.log('good', 'Zentrale gestartet · 127.0.0.1:' + PORT);

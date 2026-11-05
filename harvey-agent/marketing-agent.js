@@ -99,7 +99,7 @@ async function sources() {
         let s = null;
         try { s = r.source ? JSON.parse(r.source) : null; } catch (_) { s = null; }
         const key = s ? s.source + ' · ' + (s.campaign || '–') : 'direkt / unbekannt';
-        const g = by[key] || (by[key] = { key, source: s ? s.source : null, campaign: s ? s.campaign || null : null, leads: 0, paket: 0, termin: 0, auftrag: 0, valueOnce: 0, valueMonth: 0, last: null, content: {} });
+        const g = by[key] || (by[key] = { key, source: s ? s.source : null, medium: s ? s.medium || null : null, campaign: s ? s.campaign || null : null, leads: 0, paket: 0, termin: 0, auftrag: 0, valueOnce: 0, valueMonth: 0, last: null, content: {} });
         g.leads++;
         if (r.kind === 'paket') g.paket++;
         if (['termin', 'auftrag'].includes(r.status)) g.termin++;

@@ -884,7 +884,7 @@
         const stats = run.stats || [];
         const total = stats.reduce((a, s) => a + s.leads, 0);
         const PAID = ['instagram', 'meta', 'facebook'];
-        const paid = stats.filter((s) => PAID.includes(s.source)).reduce((a, s) => a + s.leads, 0);
+        const paid = stats.filter((s) => PAID.includes(s.source) && s.medium !== 'bio').reduce((a, s) => a + s.leads, 0);
         const seo = stats.filter((s) => s.source === 'website').reduce((a, s) => a + s.leads, 0);
         const spend = m.campaigns.reduce((a, c) => a + (Number(c.spend) || 0), 0);
         setCount('marketing', (run.reminders || []).length);
@@ -931,7 +931,7 @@
         $('#mkt-sources').replaceChildren(...(stats.length ? [
             h('thead', {}, h('tr', {}, ...['Herkunft', 'Anfragen', 'Termine', 'Aufträge', 'Umsatz'].map((t) => h('th', { scope: 'col', text: t })))),
             h('tbody', {}, ...stats.map((s) => h('tr', {},
-                h('th', { scope: 'row', text: s.source === 'website' && LP[s.campaign] ? 'Unterseite · ' + LP[s.campaign] : (m.campaigns.find((c) => c.id === s.campaign) || {}).name || s.key }),
+                h('th', { scope: 'row', text: s.source === 'instagram' && s.medium === 'bio' ? 'Instagram · Bio-Link' : s.source === 'website' && LP[s.campaign] ? 'Unterseite · ' + LP[s.campaign] : (m.campaigns.find((c) => c.id === s.campaign) || {}).name || s.key }),
                 h('td', { text: String(s.leads) }), h('td', { text: String(s.termin) }), h('td', { text: String(s.auftrag) }),
                 h('td', { text: s.valueOnce || s.valueMonth ? eur(s.valueOnce) + (s.valueMonth ? ' + ' + eur(s.valueMonth) + '/Mon.' : '') : '–' }))))
         ] : [h('tbody', {}, h('tr', {}, h('td', { class: 'muted', text: 'Noch keine Auswertung. „Auswertung aktualisieren“ oder der Morgenlauf holt die Zahlen.' })))]));

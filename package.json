@@ -4,7 +4,9 @@
   "description": "Willkommen auf meiner Portfolio-Website! Hier präsentiere ich eine Auswahl meiner Projekte im Bereich App-Entwicklung und Webdesign.",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dashboard": "npm --prefix harvey-agent run dashboard",
+    "kasi": "npm --prefix harvey-agent run dashboard"
   },
   "keywords": [],
   "author": "",

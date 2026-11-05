@@ -293,12 +293,19 @@
 
     /* Herkunft der Anfrage aus dem Link (z. B. ?utm_source=meta&utm_campaign=bf26).
        Wird nur aus der aktuellen Adresse gelesen und mit der Anfrage gesendet, nichts im Browser gespeichert. */
-    function campaign() {
+    const CAMPAIGN = (() => {
         const q = new URLSearchParams(location.search);
         const s = {};
         ['source', 'medium', 'campaign', 'content'].forEach((k) => { const v = q.get('utm_' + k); if (v) s[k] = v.slice(0, 60); });
+        // Adresszeile aufräumen: utm_* entfernen, alles andere (z. B. ?check=) bleibt. Die Kennung bleibt nur im Arbeitsspeicher.
+        if ([...q.keys()].some((k) => k.startsWith('utm_')) && history.replaceState) {
+            [...q.keys()].filter((k) => k.startsWith('utm_')).forEach((k) => q.delete(k));
+            const rest = q.toString();
+            try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (err) { /* egal */ }
+        }
         return s.source ? s : null;
-    }
+    })();
+    function campaign() { return CAMPAIGN; }
 
     async function saveLead(payload) {
         const src = campaign();
