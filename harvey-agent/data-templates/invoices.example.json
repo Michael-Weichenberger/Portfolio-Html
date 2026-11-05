@@ -1,0 +1,18 @@
+[
+  {
+    "number": "RE-2026-001",
+    "status": "gestellt",
+    "clientId": "K-1001",
+    "date": "2026-10-10",
+    "serviceDate": "Oktober 2026",
+    "dueDate": "2026-10-24",
+    "positions": [
+      { "text": "Digital Starter – Website", "qty": 1, "unit": "Pauschal", "net": 599 },
+      { "text": "GEO & KI-Sichtbarkeit", "qty": 1, "unit": "Pauschal", "net": 490 }
+    ],
+    "vatRate": 19,
+    "payments": [],
+    "reminders": [],
+    "notes": "Beispieldatensatz – data/invoices.json startet leer."
+  }
+]

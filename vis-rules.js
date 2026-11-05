@@ -291,7 +291,7 @@
         return evaluateSignals(opts.psi, opts.structure)
             .filter((r) => r.ok === false)
             .sort((a, b) => b.sev - a.sev || ORDER.indexOf(a.group) - ORDER.indexOf(b.group))
-            .map((r) => ({ id: r.id, area: r.group, severity: r.sev, title: r.miss.charAt(0).toUpperCase() + r.miss.slice(1) + ' fehlt',
+            .map((r) => ({ id: r.id, area: r.group, severity: r.sev, title: r.miss.charAt(0).toUpperCase() + r.miss.slice(1),
                 evidence: r.evidence || 'Nicht erfüllt: ' + r.label + '.', impact: r.impact, fix: r.fix }));
     }
 

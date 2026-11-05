@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* =============================================================================
-   HARVEY WORKER · lokaler Sichtbarkeits-Agent für MW IT-SERVICES
+   KASI WORKER · lokaler Sichtbarkeits-Agent für MW IT-SERVICES
 
    Misst eine Website (Google PageSpeed + Strukturanalyse aus core/analyze.js)
    und bewertet sie mit der gemeinsamen Signal-Checkliste aus ../vis-rules.js.
@@ -25,6 +25,7 @@ const path = require('path');
 const crypto = require('crypto');
 const VisRules = require('../vis-rules.js');
 const { normalizeTarget, analyzeSite } = require('./core/analyze.js');
+const Drafts = require('./core/drafts.js');
 
 // harvey-agent/.env einlesen (z. B. PSI_API_KEY=...). Liegt in .gitignore, kommt nie ins Repository.
 (function loadEnv() {
@@ -36,58 +37,15 @@ const { normalizeTarget, analyzeSite } = require('./core/analyze.js');
     });
 }());
 
-const SITE = 'https://mw-itservices.de';
 const OUT_DIR = path.join(__dirname, 'out');
 const REPORT_DIR = path.join(__dirname, '..', 'reports');
-const AREA = { performance: 'Mobile Ladezeit', local: 'Lokale Suche', ai: 'KI-Sichtbarkeit', https: 'Sicherheit' };
+const { AREA } = Drafts;
 const { fmt } = VisRules;
 
 function makeId(name) {
     // Nicht erratbare ID, damit Teaser-Reports nicht durchprobiert werden können.
     const hash = crypto.randomBytes(4).toString('hex');
     return name.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-|-$/g, '').slice(0, 60) + '-' + hash;
-}
-
-function buildCase(target, report, findings, psi) {
-    const top = findings.slice(0, 3);
-    const critical = findings.filter((x) => x.severity === 3).length;
-    const slow = psi && typeof psi.lcp === 'number' && psi.lcp > VisRules.THRESHOLDS.lcp;
-    const hook = slow
-        ? target.name + ' braucht auf dem Handy ' + fmt(psi.lcp, 1) + ' s, bis der Hauptinhalt steht.'
-        : report.total ? target.name + ' erfüllt nur ' + report.met + ' von ' + report.total + ' Sichtbarkeits-Signalen.'
-        : target.name + ': Messung unvollständig.';
-    const areas = [...new Set(top.map((x) => AREA[x.area]))];
-    const link = SITE + '/?check=' + target.id + '#sichtbarkeit';
-    const lines = top.map((x, i) => (i + 1) + '. ' + x.title + ': ' + x.evidence);
-    const letter = [
-        'Guten Tag,',
-        '',
-        'ich habe mir die Website ' + target.name + ' angesehen und gemessen, wie sie bei Google, auf dem Handy und bei KI-Assistenten wie ChatGPT ankommt. Drei Punkte sind mir aufgefallen:',
-        '',
-        ...lines,
-        '',
-        'Das Ergebnis der Messung können Sie selbst ansehen: ' + link,
-        '',
-        'Wenn Sie möchten, gehe ich die Punkte in 15 Minuten mit Ihnen durch, kostenlos und ohne Verpflichtung.',
-        '',
-        'Viele Grüße',
-        'Michael Weichenberger',
-        'MW IT-SERVICES'
-    ].join('\n');
-
-    return {
-        headline: hook,
-        summary: findings.length
-            ? hook + ' Insgesamt ' + findings.length + ' fehlende Signale, davon ' + critical + ' kritisch, vor allem bei ' + areas.join(', ') + '.'
-            : hook + ' Kaum Hebel, Kontakt nur bei konkretem Anlass.',
-        priority: critical >= 2 || (report.ratio !== null && report.ratio < 0.5) ? 'hoch' : findings.length >= 6 ? 'mittel' : 'niedrig',
-        areas: Object.fromEntries(Object.keys(AREA).map((k) => [k, findings.filter((x) => x.area === k).length])),
-        topFindings: top,
-        callOpener: 'Ich habe mir ' + target.name + ' angesehen. ' + (top[0] ? top[0].evidence : '') + ' Darf ich Ihnen kurz zeigen, was das für Anfragen bedeutet?',
-        letter,
-        teaserLink: link,
-        compliance: 'Werbe-E-Mails und -Anrufe an Betriebe ohne vorherige Einwilligung sind nach § 7 UWG unzulässig (Telefon B2B nur bei mutmaßlicher Einwilligung). Unbedenklich: Brief per Post, persönlicher Besuch, bestehende Kontakte oder Anfragen über den Check.'
-    };
 }
 
 function toMarkdown(r) {
@@ -153,7 +111,7 @@ async function processTarget(raw, opts) {
     const findings = VisRules.findingsFrom({ psi, structure: st });
     const result = {
         target, measuredAt, psi, psiError: site.psiError, structure: st, structureError: site.structureError,
-        findings, case: buildCase(target, teaser, findings, psi), teaser, published: false
+        findings, case: Drafts.buildCase(target, teaser, findings, psi, fmt), teaser, published: false
     };
 
     if (opts.publish) {

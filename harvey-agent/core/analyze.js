@@ -1,6 +1,6 @@
 /* =============================================================================
    CORE · Messung einer Website (ohne Abhängigkeiten)
-   Läuft in Node 18+ (Harvey-Agent) und im Cloudflare Worker (Live-Test).
+   Läuft in Node 18+ (Kasi-Agent) und im Cloudflare Worker (Live-Test).
    Liefert Rohdaten; bewertet wird ausschließlich in vis-rules.js.
    ============================================================================= */
 'use strict';

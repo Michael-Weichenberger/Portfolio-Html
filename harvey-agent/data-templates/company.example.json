@@ -1,0 +1,38 @@
+{
+  "name": "MW IT-SERVICES",
+  "owner": "Michael Weichenberger",
+  "street": "BITTE EINTRAGEN",
+  "zip": "",
+  "city": "",
+  "email": "info@mw-itservices.de",
+  "phone": "",
+  "web": "mw-itservices.de",
+  "taxNumber": "BITTE EINTRAGEN (Steuernummer oder USt-IdNr.)",
+  "vatId": "",
+  "bank": {
+    "holder": "Michael Weichenberger",
+    "iban": "BITTE EINTRAGEN",
+    "bic": "",
+    "bankName": ""
+  },
+  "invoice": {
+    "prefix": "RE",
+    "paymentTermDays": 14,
+    "vatRate": 19,
+    "smallBusiness": false,
+    "smallBusinessNote": "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."
+  },
+  "dunning": {
+    "stageDays": [14, 21, 30],
+    "minDaysBetweenReminders": 7,
+    "newDeadlineDays": 7,
+    "baseRate": {
+      "percent": 1.27,
+      "validFrom": "2025-07-01",
+      "source": "https://www.bundesbank.de/de/bundesbank/organisation/agb-und-regelungen/basiszinssatz-607820"
+    },
+    "interestPointsB2B": 9,
+    "flatFeeB2B": 40,
+    "receiptDays": 3
+  }
+}

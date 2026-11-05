@@ -1,0 +1,11 @@
+[
+  {
+    "domain": "huber-maler.de",
+    "name": "Malerbetrieb Huber",
+    "city": "Augsburg",
+    "trade": "Maler",
+    "status": "neu",
+    "contactAllowed": "brief",
+    "notes": "Beispieldatensatz – data/leads.json startet leer. contactAllowed: brief | persoenlich | bestehend | einwilligung"
+  }
+]

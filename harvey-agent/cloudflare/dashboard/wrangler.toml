@@ -1,0 +1,24 @@
+# Kasi-Dashboard (privat). Deploy: npm run dash:deploy (im Ordner harvey-agent)
+# Zugang nur über Cloudflare Access, siehe harvey-agent/README.md
+name = "mw-harvey"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "harvey-leads"
+database_id = "6d452a6c-9f08-4b39-aef1-10932e1852d9"
+
+[vars]
+# Nach dem Einrichten von Cloudflare Access eintragen (Team-Domain und Application Audience):
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
+
+# Secret (nicht hier eintragen!):  npx wrangler secret put PSI_API_KEY --config cloudflare/dashboard/wrangler.toml

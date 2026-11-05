@@ -14,39 +14,12 @@
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     /* ======================================================================
-       PREISE (netto, zzgl. 19 % MwSt.) · eine Quelle für Planer und Anfrage
+       PREISE: kommen aus offer-rules.js (eine Quelle für Planer und Harvey)
        ====================================================================== */
-    const PRICES = {
-        base: {
-            starter:   { label: 'Digital Starter', once: 599 },
-            multipage: { label: 'Multipage & Enterprise', once: 1490, from: true },
-            none:      { label: 'Keine neue Website', once: 0 }
-        },
-        extra: {
-            geo:    { label: 'GEO & KI-Sichtbarkeit', once: 490 },
-            office: { label: 'Büro-Digitalisierung', once: 800 },
-            career: { label: 'Karriereseite & Bewerberformular', once: 390, includedIn: 'multipage' },
-            gbp:    { label: 'Google-Unternehmensprofil', once: 190 }
-        },
-        care: {
-            none: { label: 'Keine Betreuung', month: 0 },
-            tech: { label: 'Technik-Wartung', month: 99 },
-            care: { label: 'Pflege & Local SEO', month: 250 },
-            plus: { label: 'Local SEO Plus', month: 399 }
-        }
-    };
-
-    // Black-Friday-Aktion: gilt für Digital Starter + Pflege & Local SEO
-    const PROMO = {
-        until: new Date('2026-11-30T23:59:59+01:00'),
-        base: 'starter',
-        care: 'care',
-        once: 479,
-        month: 199,
-        months: 6,
-        term: 12
-    };
-    const promoActive = () => Date.now() <= PROMO.until.getTime();
+    const Offer = window.OfferRules;
+    if (!Offer) throw new Error('offer-rules.js fehlt');
+    const { PRICES, PROMO } = Offer;
+    const promoActive = () => Offer.promoActive();
 
     /* ======================================================================
        GOOGLE-UNTERNEHMENSPROFIL: hier die beiden Links eintragen
@@ -58,8 +31,7 @@
         profile: '',
         review: ''
     };
-    const VAT = 0.19;
-    const gross = (n) => Math.round(n * (1 + VAT));
+    const gross = Offer.gross;
 
     /* ======================================================================
        1. NAVIGATION
@@ -174,6 +146,7 @@
        3. PROJEKT-PLANER (Stepped UI + Live-Berechnung)
        ====================================================================== */
     let plannerSummaryText = '';
+    let plannerSelection = null; // Auswahl für Harvey (Angebot im Dashboard)
 
     function initPlanner() {
         const form = $('#planner');
@@ -216,9 +189,8 @@
 
         function render() {
             const s = readState();
-            const base = PRICES.base[s.base];
-            const care = PRICES.care[s.care];
-            const promo = promoActive() && s.base === PROMO.base && s.care === PROMO.care;
+            const q = Offer.quote(s);
+            const care = PRICES.care[q.selection.care];
 
             // Karriereseite ist im Multipage-Paket enthalten
             const careerPrice = $('[data-price-career]', form);
@@ -226,19 +198,12 @@
             careerPrice.classList.toggle('is-included', careerIncluded);
             careerPrice.innerHTML = careerIncluded ? 'inklusive <small>im Multipage-Paket</small>' : '390 € <small>einmalig</small>';
 
-            const lines = [];
-            let once = promo ? PROMO.once : base.once;
-            if (s.base !== 'none') lines.push({ label: base.label, value: (base.from ? 'ab ' : '') + euro(promo ? PROMO.once : base.once), remove: 'base=none' });
-
-            s.extras.forEach((key) => {
-                const ex = PRICES.extra[key];
-                const included = ex.includedIn === s.base;
-                if (!included) once += ex.once;
-                lines.push({ label: ex.label, value: included ? 'inklusive' : euro(ex.once), muted: included, remove: 'extra=' + key });
-            });
-
-            const month = promo ? PROMO.month : care.month;
-            if (s.care !== 'none') lines.push({ label: care.label, value: euro(month) + ' / Mtl.', remove: 'care=none' });
+            const lines = q.lines.map((l) => ({
+                label: l.label,
+                value: l.month !== undefined ? euro(l.month) + ' / Mtl.' : l.included ? 'inklusive' : (l.from ? 'ab ' : '') + euro(l.once),
+                muted: l.included,
+                remove: l.key.startsWith('extra=') ? l.key : l.key.split('=')[0] + '=none'
+            }));
             if (!lines.length) lines.push({ label: 'Noch nichts ausgewählt', value: '–', muted: true });
 
             $('#summary-lines').innerHTML = lines.map((l) =>
@@ -247,19 +212,16 @@
                 + '</li>'
             ).join('');
 
-            const prefix = base.from ? 'ab ' : '';
-            $('#sum-once').innerHTML = (promo ? '<s>' + euro(base.once + (once - PROMO.once)) + '</s>' : '') + prefix + euro(once);
-            $('#sum-month').innerHTML = (promo ? '<s>' + euro(care.month) + '</s>' : '') + euro(month);
-            $('#sum-gross').textContent = 'inkl. 19 % MwSt.: ' + prefix + euro(gross(once)) + ' einmalig' + (month ? ' · ' + euro(gross(month)) + ' / Mtl.' : '');
-            $('#sum-note').textContent = promo
-                ? 'Black-Friday-Preis bis ' + PROMO.until.toLocaleDateString('de-DE') + ': ' + euro(PROMO.month) + ' in den ersten ' + PROMO.months + ' Monaten, danach ' + euro(care.month) + ' / Mtl. · ' + PROMO.term + ' Monate Laufzeit.'
-                : (base.from ? 'Der Endpreis richtet sich nach Seitenzahl und Umfang.' : '');
+            const prefix = q.from ? 'ab ' : '';
+            $('#sum-once').innerHTML = (q.promo ? '<s>' + euro(q.regularOnce) + '</s>' : '') + prefix + euro(q.once);
+            $('#sum-month').innerHTML = (q.promo ? '<s>' + euro(q.regularMonth) + '</s>' : '') + euro(q.month);
+            $('#sum-gross').textContent = 'inkl. 19 % MwSt.: ' + prefix + euro(q.onceGross) + ' einmalig' + (q.month ? ' · ' + euro(q.monthGross) + ' / Mtl.' : '');
+            $('#sum-note').textContent = q.promo
+                ? 'Black-Friday-Preis bis ' + q.promoUntil.toLocaleDateString('de-DE') + ': ' + euro(PROMO.month) + ' in den ersten ' + PROMO.months + ' Monaten, danach ' + euro(care.month) + ' / Mtl. · ' + PROMO.term + ' Monate Laufzeit.'
+                : (q.from ? 'Der Endpreis richtet sich nach Seitenzahl und Umfang.' : '');
 
-            plannerSummaryText = 'Planer: ' + lines.filter((l) => !l.muted || l.value === 'inklusive').map((l) => l.label).join(' + ')
-                + ' | einmalig ' + prefix + euro(once)
-                + (month ? ' + ' + euro(month) + '/Mtl.' : '')
-                + (promo ? ' (Black-Friday-Preis)' : '')
-                + ' | netto zzgl. 19 % MwSt.';
+            plannerSummaryText = Offer.summaryText(q);
+            plannerSelection = q.selection;
         }
 
         form.addEventListener('change', render);
@@ -282,9 +244,9 @@
         prev.addEventListener('click', () => goTo(step - 1, true));
         next.addEventListener('click', () => {
             if (step < panels.length) goTo(step + 1, true);
-            else Booking.open(plannerSummaryText);
+            else Booking.open(plannerSummaryText, plannerSelection);
         });
-        $('#planner-cta').addEventListener('click', () => Booking.open(plannerSummaryText));
+        $('#planner-cta').addEventListener('click', () => Booking.open(plannerSummaryText, plannerSelection));
 
         // Voreinstellungen aus den Leistungs-Links (data-preset="base=starter")
         const STEP_OF = { base: 1, extra: 2, care: 3 };
@@ -321,6 +283,36 @@
     };
     const CONTACT_EMAIL = 'info@mw-itservices.de';
 
+    /* Harvey: Anfrage zusätzlich im Dashboard speichern (Angebot / Report-Vorschlag).
+       Scheitert das, geht die Mail trotzdem raus, nur ohne Dashboard-Link. */
+    const HARVEY = {
+        lead: 'https://mw-sichtbarkeit.harvey-agent.workers.dev/lead',
+        report: 'https://mw-sichtbarkeit.harvey-agent.workers.dev/report?id=',
+        dashboard: 'https://mw-harvey.harvey-agent.workers.dev/#/lead/'
+    };
+
+    async function saveLead(payload) {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 8000);
+        try {
+            const res = await fetch(HARVEY.lead, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: ctrl.signal
+            });
+            if (!res.ok) return null;
+            const d = await res.json();
+            return d && typeof d.id === 'string' ? d.id : null;
+        } catch (err) {
+            console.warn('Harvey nicht erreichbar:', err.message || err);
+            return null;
+        } finally {
+            clearTimeout(t);
+        }
+    }
+    const dashboardLine = (id) => (id ? ' | Im Kasi-Dashboard: ' + HARVEY.dashboard + id : '');
+
     async function sendMail(params) {
         const res = await fetch(EMAILJS.endpoint, {
             method: 'POST',
@@ -345,6 +337,7 @@
         const submitLabel = submitBtn ? submitBtn.textContent : '';
         let sending = false;
         let lastSentAt = 0;
+        let selection = null;
 
         function reset() {
             form.reset();
@@ -354,7 +347,8 @@
             $$('[aria-invalid]', form).forEach((el) => el.removeAttribute('aria-invalid'));
         }
 
-        function open(topic) {
+        function open(topic, sel) {
+            selection = sel || null;
             if (!dialog) return;
             if (!success.hidden) reset();
             $('#pkg-input').value = topic || 'Allgemeine Anfrage';
@@ -406,6 +400,11 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Wird gesendet …';
             try {
+                const leadId = await saveLead({
+                    kind: 'paket', consent: true, topic: params.package, name: params.client_name, email: params.client_email,
+                    phone: params.client_phone, message: $('#client-msg').value.trim().slice(0, 1000), selection
+                });
+                params.client_message = (params.client_message + dashboardLine(leadId)).slice(0, 1400);
                 await sendMail(params);
                 lastSentAt = Date.now();
                 formArea.hidden = true;
@@ -749,13 +748,14 @@
             queryInput.focus();
         }
 
-        /* Vorbereiteter Report aus dem Harvey-Agent: ?check=<id> lädt reports/<id>.json.
+        /* Vorbereiteter Report aus dem Harvey-Agent: ?check=<id> lädt reports/<id>.json,
+           sonst den im Harvey-Dashboard freigegebenen Teaser vom Prüfdienst.
            Status und Score kommen fertig aus dem JSON, hier wird nichts neu bewertet. */
         function loadPrepared() {
             const id = new URLSearchParams(window.location.search).get('check');
             if (!id || !/^[a-z0-9-]{3,90}$/.test(id)) return;
             fetch('reports/' + id + '.json', { cache: 'no-cache' })
-                .then((res) => (res.ok ? res.json() : null))
+                .then((res) => (res.ok ? res.json() : fetch(HARVEY.report + encodeURIComponent(id)).then((r) => (r.ok ? r.json() : null))))
                 .then((d) => {
                     const r = Rules.sanitizeReport(d);
                     if (!r) {
@@ -831,12 +831,13 @@
             sendBtn.disabled = true;
             sendBtn.innerHTML = 'Wird gesendet …';
             try {
+                const leadId = await saveLead({ kind: 'anfrage', consent: true, url: target.url, email: email.value.trim().slice(0, 120) });
                 await sendMail({
                     package: 'Website-Test: vollständiger Report',
                     client_name: target.name.slice(0, 120),
                     client_email: email.value.trim().slice(0, 120),
                     client_phone: 'nicht angegeben',
-                    client_message: ('Bitte um den persönlichen Sichtbarkeits-Report für ' + target.url + '. ' + summary + ' DSGVO-Einwilligung: ja.').slice(0, 1500)
+                    client_message: ('Bitte um den persönlichen Sichtbarkeits-Report für ' + target.url + '. ' + summary + ' DSGVO-Einwilligung: ja.').slice(0, 1300) + dashboardLine(leadId)
                 });
                 lastSentAt = Date.now();
                 unlock.hidden = true;

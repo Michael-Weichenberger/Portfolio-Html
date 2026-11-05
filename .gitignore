@@ -5,3 +5,13 @@ harvey-agent/out/
 # Lokale Schlüssel des Harvey-Agenten
 harvey-agent/.env
 harvey-agent/node_modules/
+harvey-agent/cloudflare/**/.dev.vars
+harvey-agent/cloudflare/**/.wrangler/
+harvey-agent/.wrangler/
+harvey-agent/data/
+
+# Harvey: Kontoauszüge, Exporte und Listen nie committen
+harvey-agent/*.csv
+harvey-agent/*.xlsx
+harvey-agent/harvey-export*.json
+harvey-agent/**/*.tmp-*

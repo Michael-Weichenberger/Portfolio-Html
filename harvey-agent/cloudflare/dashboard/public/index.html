@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#1E1612">
+    <title>Kasi · MW IT-SERVICES</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E1612'/%3E%3Cpath d='M9 8v16M23 8v16M9 16h14' stroke='%23DF9A67' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="app.css?v=4">
+    <script src="app.js?v=4" defer></script>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 18 4-6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="m13 7 2-2 4 4-2 2z"/><path d="M19 3v2M20 4h-2M6 4v2M7 5H5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3.5 3.5 0 0 1 0 6.5M18 20a6 6 0 0 0-3-5.2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+</svg>
+
+<div class="app" id="app" data-view="list">
+    <aside class="side" aria-label="Navigation">
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true">H</span>
+            <span class="brand-text"><strong>Kasi</strong><small>MW IT-SERVICES</small></span>
+        </div>
+        <nav class="nav" id="nav-kinds" aria-label="Bereiche"></nav>
+        <div class="nav-group">
+            <h2 class="nav-title" id="status-title">Status</h2>
+            <nav class="nav nav-status" id="nav-status" aria-labelledby="status-title"></nav>
+        </div>
+        <div class="side-foot">
+            <a class="side-link" href="/api/export" download><svg class="ic"><use href="#i-download"/></svg><span>Datensicherung (JSON)</span></a>
+            <p>Texte: <code>core/drafts.js</code> · Preise: <code>offer-rules.js</code> · Schritte: <code>core/store.js</code></p>
+        </div>
+    </aside>
+
+    <section class="list" aria-label="Einträge">
+        <header class="list-head">
+            <h1 id="list-title">Alle Einträge</h1>
+            <form class="prospect" id="prospect-form" autocomplete="off">
+                <label class="visually-hidden" for="prospect-url">Domain für Akquise prüfen</label>
+                <input id="prospect-url" name="url" type="text" inputmode="url" placeholder="Domain prüfen, z. B. huber-maler.de" maxlength="200">
+                <button class="btn btn-primary" type="submit" id="prospect-btn"><svg class="ic"><use href="#i-plus"/></svg><span>Prüfen</span></button>
+            </form>
+            <p class="form-msg" id="prospect-msg" role="status" hidden></p>
+            <div class="search">
+                <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+                <label class="visually-hidden" for="search">Suchen</label>
+                <input id="search" type="search" placeholder="Name, Domain oder E-Mail">
+            </div>
+        </header>
+        <ul class="items" id="items" aria-live="polite"></ul>
+    </section>
+
+    <main class="detail" id="detail" tabindex="-1" aria-label="Details">
+        <div class="empty" id="detail-empty">
+            <svg class="ic ic-lg" aria-hidden="true"><use href="#i-inbox"/></svg>
+            <h2>Eintrag auswählen</h2>
+            <p>Links stehen Anfragen aus dem Website-Test und Ihre Akquise-Kontakte. Für jeden Eintrag liegt ein Mail-Vorschlag bereit, den Sie anpassen und aus Gmail senden.</p>
+        </div>
+    </main>
+</div>
+
+<template id="tpl-detail">
+    <article class="lead">
+        <header class="lead-head">
+            <button class="btn btn-ghost back" type="button" data-act="back"><svg class="ic"><use href="#i-back"/></svg><span>Liste</span></button>
+            <div class="lead-title">
+                <p class="lead-kind" data-f="kind"></p>
+                <h2 data-f="name"></h2>
+                <p class="lead-meta">
+                    <a data-f="url" target="_blank" rel="noopener noreferrer"></a>
+                    <span data-f="email"></span>
+                    <span data-f="created"></span>
+                </p>
+            </div>
+            <label class="status-pick">
+                <span class="visually-hidden">Status</span>
+                <select data-f="status"></select>
+            </label>
+        </header>
+
+        <section class="block next-block" aria-labelledby="next-h">
+            <div class="block-head"><h3 id="next-h">Wiedervorlage</h3><span class="muted" data-f="next-hint"></span></div>
+            <div class="next-row">
+                <label class="date-field"><span class="visually-hidden">Datum der Wiedervorlage</span><input type="date" data-f="follow"></label>
+                <div class="quick" role="group" aria-label="Schnell setzen">
+                    <button class="btn btn-ghost btn-sm" type="button" data-follow="1">Morgen</button>
+                    <button class="btn btn-ghost btn-sm" type="button" data-follow="3">+3 Tage</button>
+                    <button class="btn btn-ghost btn-sm" type="button" data-follow="7">+1 Woche</button>
+                    <button class="btn btn-ghost btn-sm" type="button" data-follow="14">+2 Wochen</button>
+                    <button class="btn btn-ghost btn-sm" type="button" data-follow="0" data-f="follow-done">Erledigt</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="block deal-block" data-f="deal-block" aria-labelledby="deal-h">
+            <div class="block-head"><h3 id="deal-h" data-f="deal-title">Auftrag</h3><span class="muted" data-f="deal-hint"></span></div>
+            <div class="deal-grid">
+                <label class="field-stack"><span>Wert einmalig (netto)</span><span class="money"><input type="number" min="0" step="10" inputmode="numeric" data-f="value-once"><i>€</i></span></label>
+                <label class="field-stack"><span>Betreuung pro Monat (netto)</span><span class="money"><input type="number" min="0" step="1" inputmode="numeric" data-f="value-month"><i>€</i></span></label>
+                <label class="field-stack" data-f="start-wrap"><span>Projektstart</span><input type="date" data-f="start"></label>
+            </div>
+            <div class="steps" data-f="steps-wrap">
+                <div class="steps-head"><strong>Projekt</strong><span class="muted" data-f="steps-count"></span></div>
+                <div class="bar" aria-hidden="true"><i data-f="steps-bar"></i></div>
+                <ul class="checklist" data-f="steps"></ul>
+            </div>
+        </section>
+
+        <section class="block request-block" data-f="request-block" aria-labelledby="req-h">
+            <div class="block-head"><h3 id="req-h">Anfrage</h3></div>
+            <dl class="facts">
+                <div><dt>Thema</dt><dd data-f="topic"></dd></div>
+                <div><dt>Telefon</dt><dd><a data-f="phone"></a></dd></div>
+                <div data-f="message-row"><dt>Nachricht</dt><dd data-f="message"></dd></div>
+            </dl>
+        </section>
+
+        <section class="block offer-block" data-f="offer-block" aria-labelledby="offer-h">
+            <div class="block-head"><h3 id="offer-h">Angebot</h3><span class="muted" data-f="offer-hint"></span></div>
+            <div class="offer-grid">
+                <fieldset>
+                    <legend>Website</legend>
+                    <div class="opts" data-f="opt-base"></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Zusätze</legend>
+                    <div class="opts" data-f="opt-extra"></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Betreuung</legend>
+                    <div class="opts" data-f="opt-care"></div>
+                </fieldset>
+            </div>
+            <div class="offer-sum">
+                <p><span>Einmalig</span><strong data-f="sum-once"></strong></p>
+                <p><span>Monatlich</span><strong data-f="sum-month"></strong></p>
+                <p class="muted" data-f="sum-note"></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" type="button" data-act="offer"><svg class="ic"><use href="#i-wand"/></svg><span>Angebot neu erstellen</span></button>
+                <button class="btn btn-ghost" type="button" data-act="offer-none"><span>Ohne Paket antworten</span></button>
+            </div>
+        </section>
+
+        <section class="block points-block" data-f="points-block" aria-label="Ergebnis">
+            <div class="score"><strong data-f="met"></strong><span data-f="total"></span></div>
+            <ul class="points" data-f="points"></ul>
+        </section>
+
+        <section class="block" aria-labelledby="draft-h">
+            <div class="block-head">
+                <h3 id="draft-h" data-f="draft-title">Vorschlag</h3>
+                <span class="saved" data-f="saved" aria-live="polite"></span>
+            </div>
+            <p class="note note-warn" data-f="compliance" hidden></p>
+            <label class="field">
+                <span>An</span>
+                <input type="email" data-f="to" placeholder="E-Mail-Adresse" maxlength="200">
+            </label>
+            <label class="field">
+                <span>Betreff</span>
+                <input type="text" data-f="subject" maxlength="300">
+            </label>
+            <label class="field">
+                <span class="visually-hidden">Text</span>
+                <textarea data-f="body" rows="16" spellcheck="true"></textarea>
+            </label>
+            <div class="actions">
+                <a class="btn btn-primary" data-act="gmail" target="_blank" rel="noopener"><svg class="ic"><use href="#i-send"/></svg><span>In Gmail öffnen</span></a>
+                <a class="btn" data-act="mailto"><svg class="ic"><use href="#i-mail"/></svg><span>Mail-App</span></a>
+                <button class="btn" type="button" data-act="copy"><svg class="ic"><use href="#i-copy"/></svg><span>Kopieren</span></button>
+                <button class="btn" type="button" data-act="print"><svg class="ic"><use href="#i-print"/></svg><span>Drucken</span></button>
+                <button class="btn btn-ghost" type="button" data-act="redraft"><svg class="ic"><use href="#i-wand"/></svg><span>Neu vorschlagen</span></button>
+            </div>
+            <button class="btn btn-done" type="button" data-act="sent"><svg class="ic"><use href="#i-check"/></svg><span>Als gesendet markieren</span></button>
+        </section>
+
+        <section class="block" data-f="findings-block" aria-labelledby="find-h">
+            <div class="block-head"><h3 id="find-h">Fehlende Signale</h3><span class="muted" data-f="measured"></span></div>
+            <ol class="findings" data-f="findings"></ol>
+        </section>
+
+        <section class="block" data-f="teaser-block" aria-labelledby="teaser-h">
+            <div class="block-head"><h3 id="teaser-h">Teaser-Link</h3></div>
+            <label class="toggle">
+                <input type="checkbox" data-f="published">
+                <span>Ergebnis unter dem Link öffentlich zeigen</span>
+            </label>
+            <div class="teaser-row">
+                <code data-f="teaser"></code>
+                <button class="btn btn-ghost" type="button" data-act="copy-link"><svg class="ic"><use href="#i-link"/></svg><span>Link kopieren</span></button>
+            </div>
+        </section>
+
+        <section class="block" aria-labelledby="notes-h">
+            <div class="block-head"><h3 id="notes-h">Notizen</h3></div>
+            <label class="field">
+                <span class="visually-hidden">Notizen</span>
+                <textarea data-f="notes" rows="4" placeholder="Gespräch, Rückruf, Angebot …"></textarea>
+            </label>
+        </section>
+
+        <section class="block" aria-labelledby="log-h">
+            <div class="block-head"><h3 id="log-h">Verlauf</h3></div>
+            <ol class="timeline" data-f="timeline"></ol>
+        </section>
+
+        <footer class="lead-foot">
+            <button class="btn btn-ghost" type="button" data-act="measure"><svg class="ic"><use href="#i-refresh"/></svg><span>Neu messen</span></button>
+            <button class="btn btn-ghost btn-danger" type="button" data-act="delete"><svg class="ic"><use href="#i-trash"/></svg><span>Löschen</span></button>
+        </footer>
+    </article>
+</template>
+
+<template id="tpl-overview">
+    <div class="overview">
+        <header class="ov-head">
+            <h1>Übersicht</h1>
+            <p class="muted" data-f="date"></p>
+        </header>
+        <dl class="kpis">
+            <div class="kpi" data-go="status:neu"><dt>Neue Anfragen</dt><dd data-k="fresh"></dd></div>
+            <div class="kpi" data-go="due"><dt>Heute fällig</dt><dd data-k="due"></dd></div>
+            <div class="kpi" data-go="pipeline"><dt>Offene Angebote</dt><dd data-k="open"></dd><span data-k="pipeline"></span></div>
+            <div class="kpi" data-go="kunden"><dt>Kunden</dt><dd data-k="customers"></dd><span data-k="mrr"></span></div>
+            <div class="kpi"><dt>Gewonnen diesen Monat</dt><dd data-k="wonMonthOnce"></dd><span data-k="wonMonth"></span></div>
+        </dl>
+        <div class="ov-grid">
+            <section class="block ov-due">
+                <div class="block-head"><h3>Heute zu tun</h3><span class="muted" data-f="due-count"></span></div>
+                <ul class="ov-list" data-f="due"></ul>
+            </section>
+            <section class="block">
+                <div class="block-head"><h3>Neu eingegangen</h3></div>
+                <ul class="ov-list" data-f="fresh"></ul>
+            </section>
+            <section class="block">
+                <div class="block-head"><h3>Weg zum Kunden</h3></div>
+                <ol class="funnel" data-f="funnel"></ol>
+            </section>
+            <section class="block">
+                <div class="block-head"><h3>Laufende Projekte</h3></div>
+                <ul class="ov-list" data-f="projects"></ul>
+            </section>
+            <section class="block">
+                <div class="block-head"><h3>Demnächst</h3></div>
+                <ul class="ov-list" data-f="upcoming"></ul>
+            </section>
+            <section class="block">
+                <div class="block-head"><h3>Zuletzt passiert</h3></div>
+                <ol class="timeline" data-f="recent"></ol>
+            </section>
+        </div>
+    </div>
+</template>
+
+<div class="print-area" id="print-area" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

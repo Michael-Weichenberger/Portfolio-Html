@@ -1,0 +1,31 @@
+[
+  {
+    "id": "K-1001",
+    "company": "Zimmerei Muster GmbH",
+    "contact": "Herr Max Muster",
+    "salutation": "Sehr geehrter Herr Muster",
+    "email": "info@zimmerei-muster.de",
+    "phone": "0821 000000",
+    "street": "Musterstraße 1",
+    "zip": "86150",
+    "city": "Augsburg",
+    "domains": [
+      "zimmerei-muster.de"
+    ],
+    "package": {
+      "base": "starter",
+      "extras": [
+        "geo"
+      ],
+      "care": "care"
+    },
+    "careSince": "2026-11-01",
+    "careUntil": null,
+    "notes": "Beispieldatensatz – data/clients.json startet leer.",
+    "careRate": {
+      "net": 199,
+      "until": "2027-04",
+      "note": "Black-Friday-Preis für die ersten 6 Monate, danach Listenpreis aus offer-rules.js"
+    }
+  }
+]

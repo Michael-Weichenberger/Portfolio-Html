@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#16110E">
+    <title>Kasi Zentrale</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill=%27%2316110E%27/%3E%3Cpath d='M9 8v16M23 8v16M9 16h14' stroke='%23C88A58' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="zentrale.css?v=10">
+    <!-- 3D-Orb und Bento-Raster. Versionsgenau mit Prüfsumme: wird die Datei verändert, lädt der Browser sie nicht. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11/dist/index.global.js" integrity="sha384-XXN6/S6yXj8EpXnBTw3JGR9ZM+hixGxFCLYn0FHtg9cWh0ziKmAgTPEhecbCDOmj" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="orb.js?v=10" defer></script>
+    <script src="voice.js?v=10" defer></script>
+    <script src="zentrale.js?v=10" defer></script>
+    <script src="palette.js?v=10" defer></script>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="top">
+    <a class="brand" href="#zentrale" aria-label="Kasi Zentrale, Startseite">
+        <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14M17 5l-7.5 7.5L17 19"/></svg></span>
+        <span class="brand-text"><strong>Kasi</strong><small id="company">MW IT-SERVICES</small></span>
+    </a>
+    <nav class="tabs" aria-label="Bereiche">
+        <a href="#zentrale" data-tab="zentrale">Zentrale <b data-count="outbox"></b></a>
+        <a href="#leads" data-tab="leads">Leads &amp; Scout <b data-count="leads"></b></a>
+        <a href="#finanzen" data-tab="finanzen">Finanzen <b data-count="finance"></b></a>
+        <a href="#termine" data-tab="termine">Termine <b data-count="today"></b></a>
+        <a href="#agenten" data-tab="agenten">Agenten <b data-count="agents" class="is-warn"></b></a>
+        <a href="#stammdaten" data-tab="stammdaten">Stammdaten <b data-count="setup" class="is-warn"></b></a>
+    </nav>
+    <div class="top-tools">
+        <button type="button" class="kbd-btn" id="palette-btn" aria-label="Befehle und Suche öffnen (Strg+K)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            <span>Befehl</span><kbd id="kbd-hint">Strg K</kbd>
+        </button>
+        <time class="clock" id="clock"></time>
+        <button type="button" class="icon-btn" id="mic-top" aria-label="Sprachbefehl (Alt+M)" title="Sprachbefehl (Alt+M)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+        </button>
+    </div>
+</header>
+
+<main>
+    <!-- ============ ZENTRALE ============ -->
+    <section class="view" id="zentrale" aria-labelledby="h-zentrale">
+        <h1 class="visually-hidden" id="h-zentrale">Zentrale</h1>
+        <div class="setup" id="setup" hidden></div>
+
+        <div class="hud-bar">
+            <div class="seg seg-modes" role="radiogroup" aria-label="Ansicht der Zentrale">
+                <button type="button" role="radio" data-mode="uebersicht" aria-checked="true">Übersicht</button>
+                <button type="button" role="radio" data-mode="fokus" aria-checked="false">Fokus</button>
+                <button type="button" role="radio" data-mode="agenten" aria-checked="false">Agenten</button>
+                <button type="button" role="radio" data-mode="finanzen" aria-checked="false">Finanzen</button>
+            </div>
+            <p class="hud-meta" id="hud-meta"></p>
+        </div>
+
+        <div class="bento hud grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4" id="hud" data-mode="uebersicht">
+            <!-- Core / Orb -->
+            <section class="tile tile-orb" data-area="orb" aria-labelledby="h-orb">
+                <span class="hud-tag" aria-hidden="true">Core</span>
+                <div class="orb-stage" id="orb-stage">
+                    <canvas id="orb" aria-hidden="true"></canvas>
+                    <button type="button" class="orb-hit" id="orb-hit" aria-label="Briefing abspielen"></button>
+                </div>
+                <div class="orb-copy">
+                    <h2 id="h-orb"><span id="greet">Guten Tag</span><span id="greet-name"></span></h2>
+                    <p class="orb-date" id="today"></p>
+                    <p class="orb-state" id="orb-state" role="status" aria-live="polite">Bereit</p>
+                    <div class="morning" id="morning" hidden>
+                        <p class="morning-text" id="morning-text" aria-live="polite">Morgenlauf startet …</p>
+                        <progress class="run-progress" id="morning-bar" max="1"></progress>
+                    </div>
+                    <p class="caption" id="caption"></p>
+                </div>
+                <div class="orb-actions">
+                    <button type="button" class="btn btn-glass" id="brief-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg><span>Briefing</span>
+                    </button>
+                    <button type="button" class="btn btn-mic" id="mic" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><span>Sprechen</span>
+                    </button>
+                </div>
+                <form class="cmd" id="cmd-form" autocomplete="off">
+                    <label class="visually-hidden" for="cmd">Befehl eingeben</label>
+                    <input id="cmd" name="cmd" type="text" placeholder="Befehl tippen, z. B. „Status“ oder „Termine“" enterkeyhint="send">
+                </form>
+                <div class="orb-settings">
+                    <label class="auto-brief"><input type="checkbox" id="auto-brief"> Briefing morgens automatisch</label>
+                    <label class="voice-pick"><span>Stimme</span><select id="voice-select" aria-label="Stimme für Briefing und Antworten"></select></label>
+                </div>
+            </section>
+
+            <!-- Leads & Scout -->
+            <section class="tile tile-link" data-area="leads" aria-labelledby="h-t-leads">
+                <header class="tile-head">
+                    <h2 id="h-t-leads">Leads &amp; Scout</h2>
+                    <a class="tile-go" href="#leads" aria-label="Leads &amp; Scout öffnen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                </header>
+                <div class="metric"><strong class="num-display" id="t-leads-n">0</strong><span id="t-leads-sub">neue Betriebe</span></div>
+                <p class="tile-line" id="t-leads-value"></p>
+                <ol class="mini-list" id="t-leads-list"></ol>
+                <div class="tile-foot"><button type="button" class="btn btn-sm" data-run="scout">Neue Betriebe suchen</button><button type="button" class="btn btn-sm btn-ghost" data-palette="lead">Lead anlegen</button></div>
+            </section>
+
+            <!-- Finanzen -->
+            <section class="tile tile-link" data-area="fin" aria-labelledby="h-t-fin">
+                <header class="tile-head">
+                    <h2 id="h-t-fin">Finanzen &amp; Mahnwesen</h2>
+                    <a class="tile-go" href="#finanzen" aria-label="Finanzen öffnen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                </header>
+                <div class="metric"><strong class="num-display" id="t-fin-open">0 €</strong><span>offene Posten</span></div>
+                <div class="stages" id="t-fin-stages" aria-label="Rechnungen nach Mahnstufe"></div>
+                <p class="tile-line" id="t-fin-line"></p>
+                <div class="tile-foot">
+                    <button type="button" class="btn btn-sm" data-run="monitor" title="Kontoauszug-CSV aus data/inbox/ und Postfach prüfen">Kontoauszug abgleichen</button>
+                    <button type="button" class="btn btn-sm btn-ghost" data-run="billing">Mahn-Check</button>
+                </div>
+            </section>
+
+            <!-- Termine -->
+            <section class="tile tile-link" data-area="cal" aria-labelledby="h-t-cal">
+                <header class="tile-head">
+                    <h2 id="h-t-cal">Termine</h2>
+                    <a class="tile-go" href="#termine" aria-label="Termine öffnen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                </header>
+                <ol class="agenda agenda-mini" id="t-cal-list"></ol>
+                <p class="tile-line" id="t-cal-sources"></p>
+            </section>
+
+            <!-- Als Nächstes -->
+            <section class="tile" data-area="next" aria-labelledby="h-next">
+                <header class="tile-head"><h2 id="h-next">Als Nächstes</h2></header>
+                <ul class="todo" id="next"></ul>
+            </section>
+
+            <!-- Projekte & Agenten -->
+            <section class="tile tile-link" data-area="agents" aria-labelledby="h-t-agents">
+                <header class="tile-head">
+                    <h2 id="h-t-agents">Projekte &amp; Agenten</h2>
+                    <a class="tile-go" href="#agenten" aria-label="Projekte und Agenten öffnen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                </header>
+                <ul class="sys-list" id="t-agents"></ul>
+                <p class="tile-line" id="t-agents-line"></p>
+            </section>
+
+            <!-- Postausgang -->
+            <section class="tile tile-outbox" data-area="out" id="postausgang" aria-labelledby="h-outbox">
+                <header class="tile-head">
+                    <h2 id="h-outbox">Postausgang</h2>
+                    <div class="seg" role="group" aria-label="Filter Postausgang">
+                        <button type="button" class="is-on" data-outbox="open" aria-pressed="true">Offen</button>
+                        <button type="button" data-outbox="sent" aria-pressed="false">Gesendet</button>
+                    </div>
+                </header>
+                <p class="four-eyes">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+                    Vier-Augen-Prinzip: Kasi schreibt nur vor. Gesendet wird erst nach Ihrem Klick auf „Freigeben &amp; Senden“ und der Bestätigung. Per Sprache oder Befehl wird nie gesendet.
+                </p>
+                <div class="mails" id="outbox"></div>
+            </section>
+        </div>
+    </section>
+
+    <!-- ============ LEADS & SCOUT ============ -->
+    <section class="view" id="leads" aria-labelledby="h-leads" hidden>
+        <div class="view-head">
+            <div><h1 id="h-leads">Leads &amp; Scout</h1><p class="muted" id="scout-meta"></p></div>
+            <div class="tools">
+                <button type="button" class="btn" data-run="pipeline">Akquise-Liste messen</button>
+                <button type="button" class="btn btn-primary" data-run="scout">Neue Betriebe suchen</button>
+            </div>
+        </div>
+        <div class="bento grid grid-cols-2 lg:grid-cols-4 gap-4" id="leads-kpis"></div>
+        <div class="seg seg-lg" role="tablist" aria-label="Ansicht">
+            <button type="button" role="tab" class="is-on" data-sub="vorschlaege" aria-selected="true">Vorschläge <b id="cnt-sugg"></b></button>
+            <button type="button" role="tab" data-sub="akquise" aria-selected="false">Akquise-Liste <b id="cnt-leads"></b></button>
+        </div>
+        <div data-subview="vorschlaege">
+            <div class="bento grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="scout"></div>
+        </div>
+        <div data-subview="akquise" hidden>
+            <div class="bento grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="leadgrid"></div>
+        </div>
+    </section>
+
+    <!-- ============ FINANZEN ============ -->
+    <section class="view" id="finanzen" aria-labelledby="h-fin" hidden>
+        <div class="view-head">
+            <div><h1 id="h-fin">Finanzen &amp; Mahnwesen</h1><p class="muted">Mahnstufen nach 14, 21 und 30 Tagen. Mahnungen gehen nur über den Postausgang raus.</p></div>
+            <div class="tools">
+                <button type="button" class="btn" data-run="monthly">Betreuungs-Rechnungen entwerfen</button>
+                <button type="button" class="btn btn-primary" data-run="billing">Mahn-Check ausführen</button>
+            </div>
+        </div>
+        <div class="bento grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
+            <div class="contents" id="fin-kpis"></div>
+            <section class="tile md:col-span-6 lg:col-span-4" aria-labelledby="h-bank">
+                <header class="tile-head"><h2 id="h-bank">Kontoauszug-Abgleich</h2></header>
+                <p class="tile-text">Kontoauszug als CSV in <code>harvey-agent/data/inbox/</code> legen. Kasi erkennt die Rechnungsnummer im Verwendungszweck (sonst einen eindeutigen Betrag), trägt die Zahlung ein und stoppt offene Mahnungen.</p>
+                <p class="tile-line" id="bank-last"></p>
+                <div class="tile-foot"><button type="button" class="btn btn-primary btn-sm" data-run="monitor">Jetzt abgleichen</button></div>
+            </section>
+            <section class="tile md:col-span-6 lg:col-span-12" aria-labelledby="h-books">
+                <header class="tile-head"><h2 id="h-books">Buchhaltung</h2><span class="muted small" id="books-meta"></span></header>
+                <p class="tile-text">Gestellte Rechnungen und Zahlungseingänge als Buchungssätze: DATEV-Datei für den Steuerberater in <code>harvey-agent/out/buchhaltung/</code>. Mit Lexware Office überträgt Kasi gestellte Rechnungen erst nach Ihrer Bestätigung.</p>
+                <ul class="sys-list" id="books"></ul>
+                <div class="tile-foot"><button type="button" class="btn btn-sm" data-run="buchhaltung">Buchungen vorbereiten</button><button type="button" class="btn btn-primary btn-sm" id="lexware-push" hidden>An Lexware übertragen</button></div>
+            </section>
+        </div>
+        <h2 class="section-title">Rechnungen</h2>
+        <div class="bento grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="invoices"></div>
+        <p class="hint">Neue Rechnung: <code>npm run billing -- --draft &lt;Kundennummer&gt;</code> · stellen: <code>--issue &lt;Entwurf&gt;</code></p>
+    </section>
+
+    <!-- ============ TERMINE ============ -->
+    <section class="view" id="termine" aria-labelledby="h-cal" hidden>
+        <div class="view-head">
+            <div><h1 id="h-cal">Termine</h1><p class="muted" id="cal-meta">Nächste 14 Tage aus allen angebundenen Kalendern</p></div>
+            <div class="tools"><button type="button" class="btn" id="cal-refresh">Neu laden</button></div>
+        </div>
+        <div class="bento grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <section class="tile lg:col-span-8 lg:self-start" aria-labelledby="h-agenda">
+                <header class="tile-head"><h2 id="h-agenda">Agenda</h2></header>
+                <div class="agenda-days" id="agenda"></div>
+            </section>
+            <div class="lg:col-span-4 stack">
+                <section class="tile" aria-labelledby="h-sources">
+                    <header class="tile-head"><h2 id="h-sources">Kalender</h2></header>
+                    <ul class="sources" id="sources"></ul>
+                    <form class="form form-compact" id="cal-form" novalidate>
+                        <div class="field"><label for="cal-name">Name</label><input id="cal-name" name="name" type="text" placeholder="z. B. Google · Büro" maxlength="60"></div>
+                        <div class="field"><label for="cal-kind">Art</label>
+                            <select id="cal-kind" name="kind"><option value="google">Google Kalender</option><option value="calcom">Cal.com (über Kalender-Feed)</option><option value="ics">iCal-Feed (Outlook, iCloud …)</option></select></div>
+                        <div class="field"><label for="cal-url">Geheime iCal-Adresse</label><input id="cal-url" name="url" type="url" inputmode="url" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" spellcheck="false" required></div>
+                        <p class="form-msg" id="cal-msg" role="status"></p>
+                        <button type="submit" class="btn btn-primary btn-sm">Kalender anbinden</button>
+                    </form>
+                    <details class="howto">
+                        <summary>Wo finde ich die Adresse?</summary>
+                        <p><strong>Google:</strong> calendar.google.com → Einstellungen → Kalender auswählen → „Privatadresse im iCal-Format“.</p>
+                        <p><strong>Cal.com:</strong> Buchungen landen im verbundenen Google-Kalender und erscheinen über dessen Adresse. Der Webhook setzt zusätzlich den Lead auf „Termin“.</p>
+                        <p>Die Adresse ist ein Schlüssel. Sie liegt nur in <code>data/calendars.json</code> (nicht im Repository) und wird im Browser nicht angezeigt.</p>
+                    </details>
+                </section>
+                <section class="tile" aria-labelledby="h-calcom">
+                    <header class="tile-head"><h2 id="h-calcom">Cal.com</h2></header>
+                    <ul class="checks" id="calcom"></ul>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ AGENTEN ============ -->
+    <section class="view" id="agenten" aria-labelledby="h-agenten" hidden>
+        <div class="view-head">
+            <div><h1 id="h-agenten">Projekte &amp; Agenten</h1><p class="muted" id="agents-meta">Websites, Repositories, Server und Kasis Hintergrund-Agenten</p></div>
+            <div class="tools"><button type="button" class="btn" id="agents-refresh">Jetzt prüfen</button></div>
+        </div>
+        <div class="bento grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4">
+            <section class="tile xl:col-span-7" aria-labelledby="h-sites">
+                <header class="tile-head"><h2 id="h-sites">Websites &amp; Dienste</h2><span class="muted small" id="sites-meta"></span></header>
+                <ul class="sys-list sys-lg" id="sites"></ul>
+            </section>
+            <section class="tile xl:col-span-5" aria-labelledby="h-harvey-agents">
+                <header class="tile-head"><h2 id="h-harvey-agents">Kasis Agenten</h2></header>
+                <ul class="sys-list sys-lg" id="harvey-agents"></ul>
+            </section>
+            <section class="tile xl:col-span-5" aria-labelledby="h-repos">
+                <header class="tile-head"><h2 id="h-repos">GitHub &amp; Repositories</h2></header>
+                <ul class="sys-list sys-lg" id="repos"></ul>
+            </section>
+            <section class="tile xl:col-span-4" aria-labelledby="h-docker">
+                <header class="tile-head"><h2 id="h-docker">Docker</h2></header>
+                <ul class="sys-list sys-lg" id="docker"></ul>
+            </section>
+            <section class="tile xl:col-span-3" aria-labelledby="h-machine">
+                <header class="tile-head"><h2 id="h-machine">Dieser Rechner</h2></header>
+                <div class="gauge" id="machine"></div>
+            </section>
+            <section class="tile xl:col-span-7" aria-labelledby="h-agent-list">
+                <header class="tile-head"><h2 id="h-agent-list">Vertriebs- &amp; Betreuungs-Agenten</h2>
+                    <button type="button" class="btn btn-sm btn-primary" data-run="daily" title="Alle Agenten nacheinander, nur Entwürfe und Hinweise">Morgenlauf jetzt</button></header>
+                <ul class="sys-list sys-lg" id="agent-list"></ul>
+            </section>
+            <section class="tile xl:col-span-5" aria-labelledby="h-agent-setup">
+                <header class="tile-head"><h2 id="h-agent-setup">Einrichtung</h2></header>
+                <ul class="checks" id="agent-setup"></ul>
+                <form class="form form-compact" id="bank-form" novalidate hidden>
+                    <div class="field"><label for="bank-name">Bank (Name wie bei Enable Banking)</label><input id="bank-name" name="bank" type="text" placeholder="z. B. Sparkasse Augsburg" autocomplete="off"></div>
+                    <button type="submit" class="btn btn-sm">Freigabe-Link holen</button>
+                    <div class="field"><label for="bank-code">Adresse der Zielseite nach der Freigabe</label><input id="bank-code" name="code" type="url" placeholder="https://mw-itservices.de/bank-ok?code=…" autocomplete="off" spellcheck="false"></div>
+                    <button type="button" class="btn btn-sm btn-primary" id="bank-finish">Verbindung abschließen</button>
+                    <p class="form-msg" id="bank-msg" role="status"></p>
+                </form>
+                <p class="hint">Der Morgenlauf startet beim ersten Öffnen der Zentrale am Tag. Zentrale beim Anmelden an Windows im Hintergrund starten: <code>npm run schedule:install</code></p>
+            </section>
+            <section class="tile xl:col-span-12" aria-labelledby="h-tickets">
+                <header class="tile-head"><h2 id="h-tickets">Support-Tickets</h2><span class="muted small">aus Mails von Bestandskunden · Lösungsvorschläge liegen im Postausgang</span></header>
+                <ul class="sys-list tickets" id="tickets"></ul>
+            </section>
+            <section class="tile xl:col-span-12" aria-labelledby="h-video">
+                <header class="tile-head"><h2 id="h-video">Video-Pitch</h2><span class="muted small">Website-Check als Video für den Erstkontakt per Brief oder Besuch</span></header>
+                <form class="video-form" id="video-form" novalidate>
+                    <label class="visually-hidden" for="video-domain">Domain</label>
+                    <input id="video-domain" name="domain" type="text" inputmode="url" placeholder="huber-maler.de" autocomplete="off" spellcheck="false">
+                    <button type="submit" class="btn btn-primary btn-sm">Video aufnehmen</button>
+                </form>
+                <ul class="sys-list" id="videos"></ul>
+                <p class="hint">Aufnahme mit Ihrem Chrome bzw. Edge, ohne Ton. Ergebnis und Sprechtext in <code>harvey-agent/out/video/&lt;domain&gt;/</code>. Per Mail nur mit Einwilligung (§ 7 UWG).</p>
+            </section>
+        </div>
+        <p class="hint">Was überwacht wird, steht in <code>harvey-agent/data/projects.json</code> (Websites, Repository-Pfade, Docker an/aus). Für private GitHub-Repositories <code>GITHUB_TOKEN</code> in <code>.env</code> eintragen.</p>
+    </section>
+
+    <!-- ============ STAMMDATEN ============ -->
+    <section class="view" id="stammdaten" aria-labelledby="h-kunden" hidden>
+        <div class="view-head"><div><h1 id="h-kunden">Kunden &amp; Stammdaten</h1><p class="muted" id="clients-meta"></p></div></div>
+        <div class="bento grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <section class="tile lg:col-span-5 lg:self-start" aria-labelledby="h-clients">
+                <header class="tile-head"><h2 id="h-clients">Kunden</h2></header>
+                <ul class="clients" id="clients"></ul>
+            </section>
+            <section class="tile lg:col-span-7" aria-labelledby="h-company">
+                <header class="tile-head"><h2 id="h-company">Firmendaten</h2><span class="muted small">für Rechnungen, Mahnungen und das Briefing</span></header>
+                <form class="form" id="company-form" novalidate>
+                    <fieldset><legend>Unternehmen</legend><div class="fields" data-group="company"></div></fieldset>
+                    <fieldset><legend>Steuer &amp; Bank</legend><div class="fields" data-group="bank"></div></fieldset>
+                    <fieldset><legend>Rechnung &amp; Mahnung</legend><div class="fields" data-group="billing"></div></fieldset>
+                    <fieldset><legend>Zentrale</legend><div class="fields" data-group="zentrale"></div></fieldset>
+                    <div class="form-foot">
+                        <p class="form-msg" id="company-msg" role="status"></p>
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </section>
+</main>
+
+<dialog class="dialog" id="run-dialog" aria-labelledby="run-title">
+    <h2 id="run-title">Läuft …</h2>
+    <p class="run-meta muted small" id="run-meta" aria-live="polite"></p>
+    <progress class="run-progress" id="run-progress" hidden></progress>
+    <pre id="run-output">Bitte warten.</pre>
+    <form method="dialog"><button class="btn" type="submit">Schließen</button></form>
+</dialog>
+<!-- Live-Aktivität: Terminal-Ticker am Rand -->
+<aside class="stream" id="stream" aria-label="Live-Aktivität">
+    <button type="button" class="stream-head" id="stream-toggle" aria-expanded="true" aria-controls="stream-log">
+        <span class="live-dot" aria-hidden="true"></span><span>Live-Aktivität</span><span class="stream-last" id="stream-last"></span>
+    </button>
+    <ol class="stream-log" id="stream-log" aria-live="off"></ol>
+</aside>
+
+<!-- Command Palette (Strg+K) -->
+<dialog class="palette" id="palette" aria-label="Befehle und Suche">
+    <div class="pal-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input id="pal-input" type="text" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" placeholder="Befehl oder Suche … z. B. „Lead anlegen“, „Rechnung“, „Huber“" autocomplete="off" spellcheck="false">
+        <kbd>Esc</kbd>
+    </div>
+    <div class="pal-body" id="pal-body">
+        <ul class="pal-list" id="pal-list" role="listbox" aria-label="Treffer"></ul>
+    </div>
+    <p class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> wählen</span><span><kbd>Enter</kbd> ausführen</span><span>Senden nur im Postausgang per Klick</span></p>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

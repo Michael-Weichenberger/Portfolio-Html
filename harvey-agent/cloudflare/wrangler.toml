@@ -17,4 +17,10 @@ namespace_id = "1001"
   limit = 10
   period = 60
 
+# Anfragen für das Kasi-Dashboard (EU-Datenbank, gemeinsam mit cloudflare/dashboard)
+[[d1_databases]]
+binding = "DB"
+database_name = "harvey-leads"
+database_id = "6d452a6c-9f08-4b39-aef1-10932e1852d9"
+
 # Secret (nicht hier eintragen!):  npx wrangler secret put PSI_API_KEY --config cloudflare/wrangler.toml
