@@ -88,6 +88,7 @@ Alle Agenten schreiben nur Entwürfe und Hinweise. Gesendet oder veröffentlicht
 | Onboarding | `npm run onboarding` | neue Aufträge aus dem Web-Dashboard als Kunde anlegen, Projektordner `out/kunden/` (Checkliste, Material, Zugänge ohne Passwörter, Projektplan), Willkommensmail als Entwurf | Cloudflare-Login |
 | Buchhaltung | `npm run buchhaltung` | Rechnungen und Zahlungen als Buchungssätze: DATEV-Buchungsstapel und Liste in `out/buchhaltung/<Monat>/`; Übergabe an Lexware Office nur auf Klick (`--push`) | optional Lexware |
 | Beiträge | `npm run beitraege` | jede Woche ein Beitrag fürs eigene Google-Profil und für LinkedIn mit Bild im Website-Look (`out/beitraege/`); Google nach Freigabe, LinkedIn kopieren und selbst posten | optional Google |
+| Marketing | `npm run marketing` · `npm run anzeigenbilder` | Anfragen je Kampagne und Unterseite (Herkunft aus dem Link, `utm_*`), Unterseiten erreichbar?, Bewertungs-Erinnerungen; Anzeigenbilder im Website-Look für Feed und Story in `out/marketing/`. Ansicht „Marketing“ in der Zentrale mit Marke, Kampagnen, Texten und Links zum Kopieren | Cloudflare-Login |
 
 Der Morgenlauf startet von selbst, wenn Sie die Zentrale zum ersten Mal am Tag öffnen, und höchstens einmal am Tag. Damit Sie nicht jedes Mal das Terminal brauchen: `npm run schedule:install` startet die Zentrale beim Anmelden an Windows im Hintergrund (Aufgabe „Kasi Zentrale“, entfernen mit `npm run schedule:remove`). Dann genügt ein Lesezeichen auf http://127.0.0.1:5590.
 

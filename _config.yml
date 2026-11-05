@@ -1,0 +1,11 @@
+# GitHub Pages (Jekyll): diese Ordner und Dateien gehören nicht auf die Website.
+# Achtung: Diese Liste ersetzt Jekylls Standardliste, deshalb steht node_modules mit drin.
+exclude:
+  - harvey-agent
+  - node_modules
+  - package.json
+  - package-lock.json
+  - README.md
+  - README_LAUNCH.txt
+  - Portfolio-Html-main.iml
+  - Portfolio.png

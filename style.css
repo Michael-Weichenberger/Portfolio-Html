@@ -1943,7 +1943,8 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .legal-block h2 span { font-size: 1rem; font-style: italic; color: var(--copper-ink); min-width: 28px; }
 .legal-block p { color: var(--text-muted); margin-bottom: 12px; max-width: 68ch; }
 .legal-block p:last-child { margin-bottom: 0; }
-.legal-block a { color: var(--copper-ink); }
+.legal-block a:not(.btn) { color: var(--copper-ink); }
+.legal-highlight a:not(.btn) { color: var(--copper-pale); }
 .legal-block strong { color: var(--text-main); font-weight: 600; }
 
 .legal-highlight {
@@ -2092,3 +2093,23 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .vis-point.is-blurred .vis-veil { border-color: color-mix(in srgb, var(--state, #E5A976) 22%, transparent); }
 .vis-point-lock { width: 12px; height: 12px; margin-left: 4px; opacity: .7; }
 .hero-check .vis-point.is-open.is-good, .hero-check .vis-point.is-open.is-warn, .hero-check .vis-point.is-open.is-bad { box-shadow: inset 3px 0 0 var(--state); }
+
+/* ---------- Regions- und Branchenseiten ---------- */
+.lp-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.lp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-width: 68ch; }
+.lp-list li { position: relative; padding-left: 30px; color: var(--text-muted); }
+.lp-list li::before { content: ""; position: absolute; left: 0; top: .72em; width: 16px; height: 2px; background: linear-gradient(90deg, var(--copper-dark), var(--copper-bright)); }
+.lp-prices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin-top: 18px; max-width: 68ch; }
+.lp-prices > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.lp-prices dt { color: var(--text-muted); }
+.lp-prices dd { margin: 0; font-weight: 600; color: var(--text-main); white-space: nowrap; }
+.lp-q { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; margin: 22px 0 6px; color: var(--text-main); }
+.lp-cta .lp-hero-cta { margin-top: 20px; }
+.lp-related { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: baseline; padding-top: 36px; }
+.lp-related .sub-toc-title { width: 100%; margin-bottom: 0; }
+.footer-lp { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: .85rem; }
+.footer-lp a { color: var(--text-on-dark-muted); text-decoration: none; }
+.footer-lp a:hover, .footer-lp a[aria-current="page"] { color: var(--copper-pale); }
+@media (max-width: 640px) { .lp-prices { grid-template-columns: 1fr; } .lp-hero-cta .btn { width: 100%; justify-content: center; } }
+.region-more { margin: 18px 0 0; font-size: .9rem; color: var(--text-muted); }
+.region-more a { color: var(--copper-ink); }

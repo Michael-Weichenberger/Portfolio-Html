@@ -25,6 +25,11 @@ Persönlich vor Ort im Großraum Augsburg: Langweid am Lech, Augsburg, Gersthofe
 - Domain, Inhalte und Code gehören dem Kunden
 - Websites ohne Tracker, ohne Cookies und ohne externe Schriften
 
+## Referenzen
+
+- Dörfer GmbH (Mittelstand): Web-Relaunch, regionales SEO und laufende IT-Betreuung, https://www.doerfer-gmbh.de
+- mw-itservices.de: komplette Eigenentwicklung ohne Baukasten, mit Projekt-Planer, Live-Website-Check und ohne Tracker
+
 ## Kontakt
 
 - Website: https://mw-itservices.de/
@@ -36,5 +41,9 @@ Persönlich vor Ort im Großraum Augsburg: Langweid am Lech, Augsburg, Gersthofe
 ## Seiten
 
 - [Startseite mit Leistungen, Projekt-Planer und FAQ](https://mw-itservices.de/)
+- [Webdesign Augsburg: persönlich vor Ort im Raum Augsburg](https://mw-itservices.de/webdesign-augsburg/)
+- [Webdesign München: Websites für Münchner Handwerksbetriebe](https://mw-itservices.de/webdesign-muenchen/)
+- [Website für Malerbetriebe, von einem gelernten Maler und Lackierer](https://mw-itservices.de/website-fuer-maler/)
+- [Website für Handwerksbetriebe: Elektro, SHK, Schreiner, Zimmerer, Dachdecker](https://mw-itservices.de/website-fuer-handwerksbetriebe/)
 - [Impressum](https://mw-itservices.de/impressum.html)
 - [Datenschutzerklärung](https://mw-itservices.de/datenschutz.html)

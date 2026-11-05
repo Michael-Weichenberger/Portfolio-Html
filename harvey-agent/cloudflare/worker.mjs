@@ -97,6 +97,17 @@ async function handleAnalyze(url, env, ctx, cors) {
 
 /* Report-Anfrage: E-Mail + Einwilligung + geprüfte Adresse. Die Messung kommt aus
    dem Cache des gerade gelaufenen Tests; fehlt sie, misst das Dashboard nach. */
+/* Herkunft aus den Kampagnen-Parametern des Links (utm_*). Nur kurze, harmlose Werte. */
+function cleanSource(s) {
+    if (!s || typeof s !== 'object') return null;
+    const out = {};
+    for (const k of ['source', 'medium', 'campaign', 'content']) {
+        const v = String(s[k] == null ? '' : s[k]).toLowerCase().trim().slice(0, 60);
+        if (/^[a-z0-9._-]+$/.test(v)) out[k] = v;
+    }
+    return out.source ? out : null;
+}
+
 async function handleLead(request, env, cors) {
     if (!env.DB) return json({ error: 'unavailable' }, 503, cors.headers);
     let d;
@@ -117,7 +128,7 @@ async function handleLead(request, env, cors) {
     const ev = store.evaluate('anfrage', target, id, hit);
     await store.insert(env.DB, {
         id, kind: 'anfrage', name: target.name, url: target.url, email, consentAt: new Date().toISOString(),
-        report: ev.report, findings: ev.findings, measuredAt: ev.measuredAt, subject: ev.subject, body: ev.body
+        report: ev.report, findings: ev.findings, measuredAt: ev.measuredAt, subject: ev.subject, body: ev.body, source: cleanSource(d.source)
     });
     return json({ id }, 201, cors.headers);
 }
@@ -132,7 +143,7 @@ async function handlePackage(d, email, env, cors) {
     const entry = { kind: 'paket', name, email, phone: str(d.phone, 40), topic: str(d.topic, 400), message: str(d.message, 1000), selection };
     const id = store.makeId(name);
     const draft = store.draftFor('paket', entry);
-    await store.insert(env.DB, { ...entry, id, url: '', subject: draft.subject, body: draft.body });
+    await store.insert(env.DB, { ...entry, id, url: '', subject: draft.subject, body: draft.body, source: cleanSource(d.source) });
     return json({ id }, 201, cors.headers);
 }
 

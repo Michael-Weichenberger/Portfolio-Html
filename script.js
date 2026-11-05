@@ -291,7 +291,18 @@
         dashboard: 'https://mw-harvey.harvey-agent.workers.dev/#/lead/'
     };
 
+    /* Herkunft der Anfrage aus dem Link (z. B. ?utm_source=meta&utm_campaign=bf26).
+       Wird nur aus der aktuellen Adresse gelesen und mit der Anfrage gesendet, nichts im Browser gespeichert. */
+    function campaign() {
+        const q = new URLSearchParams(location.search);
+        const s = {};
+        ['source', 'medium', 'campaign', 'content'].forEach((k) => { const v = q.get('utm_' + k); if (v) s[k] = v.slice(0, 60); });
+        return s.source ? s : null;
+    }
+
     async function saveLead(payload) {
+        const src = campaign();
+        if (src) payload = { ...payload, source: src };
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 8000);
         try {

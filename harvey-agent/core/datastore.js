@@ -29,8 +29,8 @@ const ROOT = path.join(__dirname, '..');
 const DATA_DIR = process.env.HARVEY_DATA_DIR || path.join(ROOT, 'data');
 const TEMPLATE_DIR = path.join(ROOT, 'data-templates');
 const BACKUP_DIR = path.join(DATA_DIR, '.backup');
-const FILES = ['company', 'clients', 'leads', 'invoices', 'outbox', 'scout', 'events', 'monitor', 'calendars', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'tickets'];
-const OBJECT_FILES = ['company', 'scout', 'monitor', 'projects', 'google', 'bank', 'watch', 'geo', 'agents'];
+const FILES = ['company', 'clients', 'leads', 'invoices', 'outbox', 'scout', 'events', 'monitor', 'calendars', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'tickets', 'marketing'];
+const OBJECT_FILES = ['company', 'scout', 'monitor', 'projects', 'google', 'bank', 'watch', 'geo', 'agents', 'marketing'];
 
 function file(name) {
     if (!FILES.includes(name)) throw new Error('Unbekannte Datei: ' + name);

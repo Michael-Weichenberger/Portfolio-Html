@@ -134,12 +134,13 @@ const CREATED_TEXT = { anfrage: 'Report über den Website-Test angefordert', pak
 
 async function insert(db, e) {
     const t = now();
-    await db.prepare(`INSERT INTO leads (id, kind, status, created_at, updated_at, name, url, email, consent_at, report, findings, measured_at, subject, body, published, phone, topic, message, selection)
-        VALUES (?, ?, 'neu', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    await db.prepare(`INSERT INTO leads (id, kind, status, created_at, updated_at, name, url, email, consent_at, report, findings, measured_at, subject, body, published, phone, topic, message, selection, source)
+        VALUES (?, ?, 'neu', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .bind(e.id, e.kind, t, t, e.name, e.url || '', e.email || null, e.consentAt || null,
             e.report ? JSON.stringify(e.report) : null, JSON.stringify(e.findings || []), e.measuredAt || null,
             e.subject || null, e.body || null, e.published ? 1 : 0,
-            e.phone || null, e.topic || null, e.message || null, e.selection ? JSON.stringify(e.selection) : null)
+            e.phone || null, e.topic || null, e.message || null, e.selection ? JSON.stringify(e.selection) : null,
+            e.source ? JSON.stringify(e.source) : null)
         .run();
     await log(db, e.id, 'created', CREATED_TEXT[e.kind] || 'Angelegt');
     return e.id;

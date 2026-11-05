@@ -395,6 +395,31 @@ legend { font-size: 13px; font-weight: 600; color: var(--copper-hi); margin-bott
 /* ---------- Dialog & Toast ---------- */
 .dialog { width: min(720px, calc(100vw - 32px)); border-radius: var(--radius); border: 1px solid rgba(200, 138, 88, 0.3); background-color: var(--obsidian-2); background-image: var(--wood-grain), linear-gradient(160deg, var(--obsidian-3), var(--obsidian)); background-size: 640px 640px, auto; color: var(--text); padding: 22px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9); }
 .dialog::backdrop { background: rgba(10, 7, 5, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.campaign { border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; background: rgba(10, 7, 5, .18); }
+.campaign + .campaign { margin-top: 14px; }
+.campaign-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.campaign-head h3 { margin: 0 0 4px; font-size: 1.2rem; }
+.campaign-ctl { display: flex; gap: 12px; flex-wrap: wrap; }
+.campaign-ctl label { display: grid; gap: 4px; }
+.campaign-ctl select, .campaign-ctl input { min-width: 120px; }
+.campaign-result { margin: 0; font-variant-numeric: tabular-nums; color: var(--copper-pale); }
+.ads { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.ad { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.ad h4 { margin: 0; font-size: 1rem; }
+.ad-text { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-2); overflow-wrap: anywhere; }
+.ad-pics { display: flex; gap: 8px; align-items: flex-end; }
+.ad-pics img { display: block; width: 110px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.ad-pics img.is-story { width: 62px; height: 110px; }
+.ad .btns, .brand-form .btns { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.brand-form { display: grid; gap: 10px; }
+.brand-form textarea { width: 100%; min-height: 0; height: auto; resize: vertical; }
+.brand-form .btns { justify-content: flex-end; }
+.table-wrap { overflow-x: auto; }
+.mkt-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.mkt-table th, .mkt-table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.mkt-table thead th { font-weight: 600; color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.mkt-table tbody th { font-weight: 500; white-space: normal; }
+#review-list .btns { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .post-img { display: block; width: 180px; height: 180px; border-radius: 12px; border: 1px solid var(--line); margin: 4px 0 12px; object-fit: cover; }
 .tickets .btns { display: inline-flex; gap: 6px; }
 .morning { margin-top: 10px; max-width: 320px; }

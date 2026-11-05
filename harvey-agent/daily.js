@@ -83,7 +83,8 @@ function run(file, extra) {
         ['Heiße Leads', 'alert-agent.js'],
         ['Bewertungen', 'reviews-agent.js'],
         ['Onboarding', 'onboarding-agent.js'],
-        ['Buchhaltung', 'accounting-agent.js']
+        ['Buchhaltung', 'accounting-agent.js'],
+        ['Marketing-Auswertung', 'marketing-agent.js']
     ];
     if (d.getDay() === 1) steps.push(['Beiträge der Woche', 'content-agent.js']);
     if (d.getDate() === 1) {

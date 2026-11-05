@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS leads (
     value_month INTEGER,                       -- Betreuung netto pro Monat
     won_at      TEXT,
     start_at    TEXT,
+    source      TEXT,                          -- Herkunft (Kampagnen-Parameter), JSON
     checklist   TEXT                           -- erledigte Projektschritte (JSON)
 );
 CREATE INDEX IF NOT EXISTS idx_leads_follow ON leads (follow_up);

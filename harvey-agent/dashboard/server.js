@@ -161,10 +161,21 @@ function state() {
         outbox: Outbox.all().filter((e) => e.status !== 'verworfen').slice(-200).reverse()
             .map((e) => ({ ...e, blocker: e.status === 'gesendet' ? null : Outbox.blocker(e), sendMissing: e.status === 'gesendet' ? [] : Dispatch.missing(e) })),
         events: Events.recent(40),
+        marketing: marketingState(),
         tickets: require('../core/support.js').all().filter((t) => t.status !== 'erledigt' || Date.now() - Date.parse(t.doneAt || t.createdAt) < 7 * 86400000).slice(0, 60),
         agents: agentState()
     };
 }
+
+/* Marketing: Marke, Kampagnen, Auswertung (data/marketing.json + letzter Lauf) */
+function marketingState() {
+    let m = Store.load('marketing');
+    if (!m || !m.brand) { m = require('../marketing-agent.js').defaults(); Store.save('marketing', m); }
+    const run = (require('../core/runlog.js').all().marketing) || {};
+    const clients = Store.load('clients').map((c) => ({ id: c.id, company: c.company, careSince: c.careSince || null, reviewAskedAt: c.reviewAskedAt || null, reference: c.reference === true }));
+    return { ...m, run: { lastRun: run.lastRun || null, summary: run.summary || '', ...(run.data || {}) }, clients };
+}
+const BRAND_FIELDS = ['positioning', 'promise', 'audience', 'proof', 'tone', 'colors'];
 
 /* Stand und Einrichtung aller Agenten (ohne geheime Werte) */
 const AGENTS = [
@@ -180,7 +191,8 @@ const AGENTS = [
     ['video', 'Video-Pitch', 'Website-Check als Video für den Erstkontakt', null],
     ['onboarding', 'Onboarding', 'Neue Kunden: Ordner, Checkliste, Willkommensmail', 'onboarding'],
     ['accounting', 'Buchhaltung', 'DATEV-Export, Übergabe an Lexware Office', 'buchhaltung'],
-    ['content', 'Beiträge', 'Jede Woche Google-Profil und LinkedIn', 'beitraege']
+    ['content', 'Beiträge', 'Jede Woche Google-Profil und LinkedIn', 'beitraege'],
+    ['marketing', 'Marketing', 'Anfragen je Kampagne und Seite, Bewertungs-Erinnerungen', 'marketing']
 ];
 function agentState() {
     const AI = require('../core/ai.js');
@@ -307,6 +319,35 @@ async function api(req, res, url) {
             }
         }
     }
+    if (parts[0] === 'marketing') {
+        const m = marketingState();
+        delete m.run; delete m.clients;
+        if (parts[1] === 'brand') {
+            for (const k of BRAND_FIELDS) if (typeof body[k] === 'string') m.brand[k] = body[k].slice(0, 1200);
+            if (Array.isArray(body.claims)) m.brand.claims = body.claims.map((x) => String(x).slice(0, 160)).filter(Boolean).slice(0, 8);
+            Store.save('marketing', m);
+            return send(res, 200, { ok: true });
+        }
+        if (parts[1] === 'campaign' && parts[2]) {
+            const c = m.campaigns.find((x) => x.id === parts[2]);
+            if (!c) return send(res, 404, { error: 'Kampagne nicht gefunden' });
+            if (['entwurf', 'aktiv', 'pausiert', 'beendet'].includes(body.status)) c.status = body.status;
+            if (body.spend !== undefined) { const v = Number(body.spend); if (!(v >= 0 && v < 1e6)) return send(res, 400, { error: 'Ausgaben ungültig' }); c.spend = Math.round(v * 100) / 100; }
+            if (body.budgetDay !== undefined) { const v = Number(body.budgetDay); if (!(v >= 0 && v < 1e5)) return send(res, 400, { error: 'Budget ungültig' }); c.budgetDay = v; }
+            Store.save('marketing', m);
+            return send(res, 200, c);
+        }
+        if (parts[1] === 'client' && parts[2]) {
+            const clients = Store.load('clients');
+            const c = clients.find((x) => x.id === parts[2]);
+            if (!c) return send(res, 404, { error: 'Kunde nicht gefunden' });
+            if (body.asked === true) c.reviewAskedAt = new Date().toISOString().slice(0, 10);
+            if (typeof body.reference === 'boolean') c.reference = body.reference;
+            Store.save('clients', clients);
+            return send(res, 200, { ok: true });
+        }
+        return send(res, 404, { error: 'unbekannt' });
+    }
     if (parts[0] === 'accounting' && parts[1] === 'push') {
         // Übergabe an Lexware Office: nur mit ausdrücklicher Bestätigung aus der Zentrale
         if (body.confirm !== true) return send(res, 400, { error: 'Übertragung nicht bestätigt.' });
@@ -326,7 +367,8 @@ async function api(req, res, url) {
         const jobs = { billing: ['billing-agent.js', []], monitor: ['monitor-agent.js', []], pipeline: ['pipeline-agent.js', ['--limit', '5']], scout: ['scout-agent.js', ['--limit', '8']], monthly: ['billing-agent.js', ['--monthly']],
             followup: ['followup-agent.js', []], termine: ['appointment-agent.js', ['--days', '3']], watch: ['watch-agent.js', ['--links']], report: ['watch-agent.js', ['--report']], roi: ['watch-agent.js', ['--quarter']],
             inbox: ['inbox-agent.js', []], alert: ['alert-agent.js', []], geo: ['geo-agent.js', []], reviews: ['reviews-agent.js', []], daily: ['daily.js', []],
-            onboarding: ['onboarding-agent.js', []], buchhaltung: ['accounting-agent.js', []], beitraege: ['content-agent.js', ['--force']] };
+            onboarding: ['onboarding-agent.js', []], buchhaltung: ['accounting-agent.js', []], beitraege: ['content-agent.js', ['--force']],
+            marketing: ['marketing-agent.js', []], anzeigenbilder: ['marketing-agent.js', ['--creatives']] };
         const job = jobs[parts[1]];
         if (!job) return send(res, 404, { error: 'unbekannt' });
         if (parts[1] === 'daily') {
@@ -386,6 +428,11 @@ const server = http.createServer(async (req, res) => {
             try { await require('../core/google.js').exchange(url.searchParams.get('code') || '', url.searchParams.get('state') || ''); Activity.log('good', '✓ Google verbunden'); }
             catch (err) { msg = 'Google-Verbindung fehlgeschlagen: ' + err.message; }
             return send(res, 200, '<!doctype html><meta charset=utf-8><title>Kasi</title><body style="font:16px system-ui;background:#16110E;color:#F4F0E8;padding:40px"><p>' + msg.replace(/[<>&]/g, '') + '</p><p><a style="color:#DF9A67" href="/#agenten">Zur Zentrale</a></p>', 'text/html; charset=utf-8');
+        }
+        const ad = url.pathname.match(/^\/out\/marketing\/([a-z0-9-]{2,40})\/([a-z0-9-]{2,40}-(?:feed|story))\.png$/);
+        if (ad) {
+            const p = path.join(ROOT, 'out', 'marketing', ad[1], ad[2] + '.png');
+            return fs.existsSync(p) ? send(res, 200, fs.readFileSync(p), 'image/png') : send(res, 404, 'Nicht gefunden', 'text/plain; charset=utf-8');
         }
         const img = url.pathname.match(/^\/out\/beitraege\/(\d{4}-W\d{2})\/bild\.png$/);
         if (img) {

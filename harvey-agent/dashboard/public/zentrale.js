@@ -58,7 +58,7 @@
     }
 
     /* ---------- Navigation ---------- */
-    const TABS = ['zentrale', 'leads', 'finanzen', 'termine', 'agenten', 'stammdaten'];
+    const TABS = ['zentrale', 'leads', 'finanzen', 'termine', 'agenten', 'marketing', 'stammdaten'];
     const ALIAS = { dashboard: 'zentrale', kunden: 'stammdaten' };
     function route() {
         let id = (location.hash || '#zentrale').slice(1);
@@ -609,7 +609,7 @@
 
     /* ---------- Läufe ---------- */
     const RUNS = { monitor: 'Kontoauszug-Abgleich', billing: 'Mahn-Check', scout: 'Neue Betriebe suchen', monthly: 'Betreuungs-Rechnungen', pipeline: 'Akquise-Liste messen',
-        followup: 'Nachfass', termine: 'Termin-Vorbereitung', watch: 'Website-Wächter', report: 'Betreuungsberichte', roi: 'Quartals-ROI', inbox: 'Posteingang', alert: 'Heiße Leads', geo: 'KI-Sichtbarkeit', reviews: 'Bewertungen', daily: 'Morgenlauf', onboarding: 'Onboarding', buchhaltung: 'Buchhaltung', beitraege: 'Beiträge der Woche' };
+        followup: 'Nachfass', termine: 'Termin-Vorbereitung', watch: 'Website-Wächter', report: 'Betreuungsberichte', roi: 'Quartals-ROI', inbox: 'Posteingang', alert: 'Heiße Leads', geo: 'KI-Sichtbarkeit', reviews: 'Bewertungen', daily: 'Morgenlauf', onboarding: 'Onboarding', buchhaltung: 'Buchhaltung', beitraege: 'Beiträge der Woche', marketing: 'Marketing-Auswertung', anzeigenbilder: 'Anzeigenbilder' };
     let running = null;
     async function run(job, skipConfirm) {
         if (!RUNS[job]) return;
@@ -680,7 +680,7 @@
             return false;
         }
         $('#company').textContent = data.company.name;
-        renderSetup(); renderZentrale(); renderLeads(); renderFinance(); renderClients(); renderCompany(); renderAgents(); renderTickets(); renderBooks();
+        renderSetup(); renderZentrale(); renderLeads(); renderFinance(); renderClients(); renderCompany(); renderAgents(); renderTickets(); renderBooks(); renderMarketing();
         if (agenda) renderAgenda();
         return true;
     }
@@ -868,6 +868,110 @@
         await api('run/buchhaltung', {}).catch(() => {});
         load();
     });
+    /* ---------- Marketing ---------- */
+    const LP = { 'webdesign-augsburg': 'Webdesign Augsburg', 'webdesign-muenchen': 'Webdesign München', 'website-fuer-maler': 'Website für Maler', 'website-fuer-handwerksbetriebe': 'Website für Handwerksbetriebe' };
+    const CSTATE = { entwurf: 'Entwurf', aktiv: 'läuft', pausiert: 'pausiert', beendet: 'beendet' };
+    const BRAND = [['positioning', 'Positionierung'], ['promise', 'Versprechen'], ['audience', 'Zielgruppe'], ['proof', 'Belege'], ['tone', 'Tonalität'], ['colors', 'Farben & Schrift']];
+    const n1 = (n, one, many) => (n || 0) + ' ' + ((n || 0) === 1 ? one : many);
+    const eur = (n) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0);
+    async function copyText(text, label) {
+        try { await navigator.clipboard.writeText(text); toast((label || 'Text') + ' kopiert'); } catch (_) { toast('Kopieren nicht möglich', true); }
+    }
+    function renderMarketing() {
+        const m = data.marketing;
+        if (!m) return;
+        const run = m.run || {};
+        const stats = run.stats || [];
+        const total = stats.reduce((a, s) => a + s.leads, 0);
+        const PAID = ['instagram', 'meta', 'facebook'];
+        const paid = stats.filter((s) => PAID.includes(s.source)).reduce((a, s) => a + s.leads, 0);
+        const seo = stats.filter((s) => s.source === 'website').reduce((a, s) => a + s.leads, 0);
+        const spend = m.campaigns.reduce((a, c) => a + (Number(c.spend) || 0), 0);
+        setCount('marketing', (run.reminders || []).length);
+        $('#mkt-meta').textContent = run.lastRun ? 'Stand ' + ago(run.lastRun) + ' · ' + run.summary : 'Noch keine Auswertung. Läuft im Morgenlauf mit.';
+        $('#mkt-kpis').replaceChildren(...[
+            ['Anfragen gesamt', String(total), 'aus dem Web-Dashboard'],
+            ['über Anzeigen', String(paid), spend ? eur(spend) + ' ausgegeben' + (paid ? ' · ' + eur(spend / paid) + ' je Anfrage' : '') : 'noch keine Ausgaben eingetragen'],
+            ['über Unterseiten', String(seo), 'Regionen und Branchen'],
+            ['Bewertungen offen', String((run.reminders || []).length), 'persönlich anfragen']
+        ].map(([t, v, sub]) => stat(t, v, sub, { cls: 'lg:col-span-3' })));
+
+        const imgs = run.creatives || [];
+        $('#campaigns').replaceChildren(...m.campaigns.map((c) => {
+            const r = c.result || {};
+            const status = h('select', { 'aria-label': 'Status der Kampagne' }, ...Object.entries(CSTATE).map(([k, v]) => h('option', { value: k, selected: c.status === k ? 'selected' : null }, v)));
+            const spendIn = h('input', { type: 'number', min: '0', step: '1', value: String(c.spend || 0), inputmode: 'decimal', 'aria-label': 'Ausgaben bisher in Euro' });
+            const save = async () => { try { await api('marketing/campaign/' + c.id, { status: status.value, spend: spendIn.value }); toast('Kampagne gespeichert'); load(); } catch (err) { toast(err.message, true); } };
+            status.addEventListener('change', save);
+            spendIn.addEventListener('change', save);
+            return h('article', { class: 'campaign' },
+                h('header', { class: 'campaign-head' },
+                    h('div', {}, h('h3', { text: c.name }), h('p', { class: 'muted small', text: c.start + ' bis ' + c.end + ' · ' + eur(c.budgetDay) + ' pro Tag · Ziel: ' + c.objective })),
+                    h('div', { class: 'campaign-ctl' }, h('label', {}, h('span', { class: 'small muted', text: 'Status' }), status), h('label', {}, h('span', { class: 'small muted', text: 'Ausgaben €' }), spendIn))),
+                h('p', { class: 'campaign-result', text: n1(r.leads, 'Anfrage', 'Anfragen') + ' · ' + n1(r.termin, 'Termin', 'Termine') + ' · ' + n1(r.auftrag, 'Auftrag', 'Aufträge') + (r.costPerLead ? ' · ' + eur(r.costPerLead) + ' je Anfrage' : '') }),
+                h('div', { class: 'ads' }, ...(c.ads || []).map((ad) => {
+                    const pics = imgs.filter((f) => f.includes('/' + c.id + '/' + ad.id + '-'));
+                    const n = stats.find((s) => s.campaign === c.id);
+                    const hits = n && n.content ? n.content[ad.id] || 0 : 0;
+                    return h('div', { class: 'ad' },
+                        pics.length ? h('div', { class: 'ad-pics' }, ...pics.map((f) => h('a', { href: '/' + f, target: '_blank', rel: 'noopener', title: 'Bild öffnen' }, h('img', { src: '/' + f, alt: 'Anzeigenbild ' + ad.title + (f.includes('story') ? ' (Story)' : ' (Feed)'), loading: 'lazy', class: f.includes('story') ? 'is-story' : '' })))) : h('p', { class: 'muted small', text: 'Noch keine Bilder: „Anzeigenbilder erstellen“' }),
+                        h('h4', { text: ad.headline }),
+                        h('p', { class: 'ad-text', text: ad.primary }),
+                        h('p', { class: 'muted small', text: 'Beschreibung: ' + ad.description + ' · Button: ' + ad.cta + ' · ' + hits + (hits === 1 ? ' Anfrage' : ' Anfragen') }),
+                        h('div', { class: 'btns' },
+                            h('button', { type: 'button', class: 'btn btn-sm', onclick: () => copyText(ad.primary, 'Anzeigentext') }, 'Text kopieren'),
+                            h('button', { type: 'button', class: 'btn btn-sm', onclick: () => copyText(ad.headline, 'Überschrift') }, 'Überschrift'),
+                            h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => copyText(ad.url, 'Link') }, 'Link kopieren')));
+                })),
+                h('details', { class: 'sys-notes' }, h('summary', { text: 'Zielgruppe & Einstellungen' }), h('ul', {}, c.targeting.map((t) => h('li', { text: t })))),
+                h('details', { class: 'sys-notes' }, h('summary', { text: 'Checkliste vor dem Start' }), h('ul', {}, c.checklist.map((t) => h('li', { text: t })))));
+        }));
+
+        $('#mkt-sources-meta').textContent = stats.length ? 'Anfragen seit Start des Web-Dashboards' : '';
+        $('#mkt-sources').replaceChildren(...(stats.length ? [
+            h('thead', {}, h('tr', {}, ...['Herkunft', 'Anfragen', 'Termine', 'Aufträge', 'Umsatz'].map((t) => h('th', { scope: 'col', text: t })))),
+            h('tbody', {}, ...stats.map((s) => h('tr', {},
+                h('th', { scope: 'row', text: s.source === 'website' && LP[s.campaign] ? 'Unterseite · ' + LP[s.campaign] : (m.campaigns.find((c) => c.id === s.campaign) || {}).name || s.key }),
+                h('td', { text: String(s.leads) }), h('td', { text: String(s.termin) }), h('td', { text: String(s.auftrag) }),
+                h('td', { text: s.valueOnce || s.valueMonth ? eur(s.valueOnce) + (s.valueMonth ? ' + ' + eur(s.valueMonth) + '/Mon.' : '') : '–' }))))
+        ] : [h('tbody', {}, h('tr', {}, h('td', { class: 'muted', text: 'Noch keine Auswertung. „Auswertung aktualisieren“ oder der Morgenlauf holt die Zahlen.' })))]));
+
+        const pages = run.pages || Object.keys(LP).map((slug) => ({ slug }));
+        $('#lp-pages').replaceChildren(...pages.map((p) => {
+            const n = stats.find((s) => s.source === 'website' && s.campaign === p.slug);
+            return sysRow(p.ok === undefined ? 'off' : p.ok ? 'good' : 'bad', LP[p.slug] || p.slug, 'mw-itservices.de/' + p.slug + '/' + (n ? ' · ' + n.leads + (n.leads === 1 ? ' Anfrage' : ' Anfragen') : ''),
+                p.ok === undefined ? 'noch nicht geprüft' : p.ok ? p.ms + ' ms' : 'nicht erreichbar',
+                h('a', { class: 'btn btn-sm btn-ghost', href: 'https://mw-itservices.de/' + p.slug + '/', target: '_blank', rel: 'noopener noreferrer' }, 'Öffnen'));
+        }));
+
+        const form = $('#brand-form');
+        if (!form.dataset.dirty) {
+            form.replaceChildren(...BRAND.map(([k, label]) => h('label', { class: 'row row-top' }, h('span', { text: label }), (() => { const t = h('textarea', { name: k, rows: '2' }); t.value = m.brand[k] || ''; return t; })())),
+                h('label', { class: 'row row-top' }, h('span', { text: 'Slogans (je Zeile einer)' }), (() => { const t = h('textarea', { name: 'claims', rows: '3' }); t.value = (m.brand.claims || []).join('\n'); return t; })()),
+                h('div', { class: 'btns' }, h('span', { class: 'muted small', id: 'brand-msg' }), h('button', { type: 'submit', class: 'btn btn-primary btn-sm' }, 'Marke speichern')));
+        }
+
+        const rem = new Set((run.reminders || []).map((r) => r.id));
+        $('#review-list').replaceChildren(...(m.clients.length ? m.clients.map((c) => sysRow(c.reviewAskedAt ? 'good' : rem.has(c.id) ? 'warn' : 'off', c.company,
+            (c.reviewAskedAt ? 'Bewertung angefragt am ' + c.reviewAskedAt : rem.has(c.id) ? 'jetzt persönlich nach einer Bewertung fragen' : 'nach dem Livegang fragen') + ' · Referenz ' + (c.reference ? 'freigegeben' : 'nicht freigegeben'), '',
+            h('span', { class: 'btns' },
+                c.reviewAskedAt ? null : h('button', { type: 'button', class: 'btn btn-sm', onclick: () => mktClient(c.id, { asked: true }) }, 'Gefragt'),
+                h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => mktClient(c.id, { reference: !c.reference }) }, c.reference ? 'Freigabe zurücknehmen' : 'Referenz freigegeben'))))
+            : [h('li', { class: 'is-empty', text: 'Noch keine Kunden. Nach dem ersten Auftrag erscheinen sie hier.' })]));
+    }
+    async function mktClient(id, body) {
+        try { await api('marketing/client/' + id, body); toast('Gespeichert'); load(); } catch (err) { toast(err.message, true); }
+    }
+    $('#brand-form').addEventListener('input', () => { $('#brand-form').dataset.dirty = '1'; });
+    $('#brand-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        const body = {};
+        BRAND.forEach(([k]) => { body[k] = f.elements[k].value; });
+        body.claims = f.elements.claims.value.split('\n').map((x) => x.trim()).filter(Boolean);
+        try { await api('marketing/brand', body); delete f.dataset.dirty; $('#brand-msg').textContent = 'Gespeichert'; load(); } catch (err) { $('#brand-msg').textContent = err.message; }
+    });
+
     async function connectGoogle() {
         try { const r = await api('google/connect', {}); window.open(r.url, '_blank', 'noopener'); toast('Google-Anmeldung im neuen Fenster abschließen, dann hier neu laden.'); } catch (err) { toast(err.message, true); }
     }

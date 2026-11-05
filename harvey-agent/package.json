@@ -38,7 +38,9 @@
     "schedule:remove": "node daily.js --remove",
     "onboarding": "node onboarding-agent.js",
     "buchhaltung": "node accounting-agent.js",
-    "beitraege": "node content-agent.js"
+    "beitraege": "node content-agent.js",
+    "marketing": "node marketing-agent.js",
+    "anzeigenbilder": "node marketing-agent.js --creatives"
   },
   "devDependencies": {
     "wrangler": "^4.157.0"

@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
     <url>
         <loc>https://mw-itservices.de/</loc>
-        <lastmod>2026-11-03</lastmod>
+        <lastmod>2026-11-06</lastmod>
         <image:image><image:loc>https://mw-itservices.de/assets/opt/portrait-michael-weichenberger.jpg</image:loc></image:image>
     </url>
     <url>
@@ -11,6 +11,22 @@
     </url>
     <url>
         <loc>https://mw-itservices.de/datenschutz.html</loc>
-        <lastmod>2026-11-03</lastmod>
+        <lastmod>2026-11-06</lastmod>
+    </url>
+    <url>
+        <loc>https://mw-itservices.de/webdesign-augsburg/</loc>
+        <lastmod>2026-11-06</lastmod>
+    </url>
+    <url>
+        <loc>https://mw-itservices.de/webdesign-muenchen/</loc>
+        <lastmod>2026-11-06</lastmod>
+    </url>
+    <url>
+        <loc>https://mw-itservices.de/website-fuer-maler/</loc>
+        <lastmod>2026-11-06</lastmod>
+    </url>
+    <url>
+        <loc>https://mw-itservices.de/website-fuer-handwerksbetriebe/</loc>
+        <lastmod>2026-11-06</lastmod>
     </url>
 </urlset>
