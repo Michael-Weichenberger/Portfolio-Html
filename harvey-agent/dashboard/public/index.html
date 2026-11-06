@@ -2,20 +2,26 @@
 <html lang="de">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#16110E">
     <title>Kasi Zentrale</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kasi">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill=%27%2316110E%27/%3E%3Cpath d='M9 8v16M23 8v16M9 16h14' stroke='%23C88A58' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="zentrale.css?v=17">
+    <link rel="stylesheet" href="zentrale.css?v=26">
     <!-- 3D-Orb und Bento-Raster. Versionsgenau mit Prüfsumme: wird die Datei verändert, lädt der Browser sie nicht. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11/dist/index.global.js" integrity="sha384-XXN6/S6yXj8EpXnBTw3JGR9ZM+hixGxFCLYn0FHtg9cWh0ziKmAgTPEhecbCDOmj" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="orb.js?v=17" defer></script>
-    <script src="voice.js?v=17" defer></script>
-    <script src="zentrale.js?v=17" defer></script>
-    <script src="palette.js?v=17" defer></script>
+    <script src="orb.js?v=26" defer></script>
+    <script src="voice.js?v=26" defer></script>
+    <script src="zentrale.js?v=26" defer></script>
+    <script src="palette.js?v=26" defer></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -45,6 +51,32 @@
         </button>
     </div>
 </header>
+
+<!-- Handy: feste App-Leiste unten (nur unter 641 px sichtbar) -->
+<nav class="mobar" aria-label="Bereiche (Handy)">
+    <a href="#zentrale" data-tab="zentrale"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg><span>Zentrale</span><b data-count="outbox"></b></a>
+    <a href="#termine" data-tab="termine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Termine</span><b data-count="today"></b></a>
+    <button type="button" class="mobar-mic" id="mic-bar" aria-label="Sprachbefehl"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+    <a href="#leads" data-tab="leads"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.8-3.3 3.2-5 6-5s5.2 1.7 6 5M16 5.5a3.2 3.2 0 0 1 0 6.2M18.5 14.8c1.4.8 2.2 2.4 2.5 4.7"/></svg><span>Leads</span><b data-count="leads"></b></a>
+    <button type="button" class="mobar-more" id="mobar-more" aria-expanded="false" aria-controls="mobar-sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Mehr</span><b data-count="setup" class="is-warn"></b></button>
+</nav>
+<section class="voice-panel" id="voice-panel" aria-label="Sprachbefehl" aria-live="polite" hidden>
+    <header><span class="vp-dot" aria-hidden="true"></span><span id="vp-state">Bereit</span><button type="button" class="vp-close" id="vp-close" aria-label="Schließen">×</button></header>
+    <p class="vp-heard" id="vp-heard"></p>
+    <p class="vp-answer" id="vp-answer"></p>
+    <button type="button" class="btn btn-sm vp-play" id="vp-play" hidden>▶ Antwort vorlesen</button>
+    <form class="vp-form" id="vp-form" autocomplete="off">
+        <input id="vp-cmd" type="text" enterkeyhint="send" placeholder="Oder tippen: Tagesbericht, Termine, Status …" aria-label="Befehl eintippen">
+        <button type="submit" class="btn btn-primary btn-sm">Los</button>
+    </form>
+</section>
+<div class="mobar-sheet" id="mobar-sheet" hidden>
+    <a href="#finanzen" data-tab="finanzen">Finanzen <b data-count="finance"></b></a>
+    <a href="#marketing" data-tab="marketing">Marketing <b data-count="marketing"></b></a>
+    <a href="#agenten" data-tab="agenten">Agenten <b data-count="agents" class="is-warn"></b></a>
+    <a href="#stammdaten" data-tab="stammdaten">Stammdaten <b data-count="setup" class="is-warn"></b></a>
+    <button type="button" class="mobar-report" id="mobar-report">Tagesbericht</button>
+</div>
 
 <main>
     <!-- ============ ZENTRALE ============ -->
@@ -407,6 +439,11 @@
     </section>
 </main>
 
+<dialog class="dialog report-dialog" id="report-dialog" aria-labelledby="report-title">
+    <h2 id="report-title">Tagesbericht</h2>
+    <ul class="report-list" id="report-body"></ul>
+    <form method="dialog" class="btns"><button class="btn btn-ghost" type="submit">Schließen</button></form>
+</dialog>
 <dialog class="dialog" id="run-dialog" aria-labelledby="run-title">
     <h2 id="run-title">Läuft …</h2>
     <p class="run-meta muted small" id="run-meta" aria-live="polite"></p>

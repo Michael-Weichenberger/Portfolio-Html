@@ -34,9 +34,16 @@ const Run = require('../core/runlog.js');
 
 const PORT = Number(process.env.HARVEY_DASHBOARD_PORT) || 5590;
 const HOSTS = ['127.0.0.1:' + PORT, 'localhost:' + PORT];
+/* Handy über Tailscale: „tailscale serve“ reicht https://<pc>.<tailnet>.ts.net nur im eigenen
+   privaten Netz an 127.0.0.1 weiter. Die Zentrale lauscht weiter nur auf 127.0.0.1.
+   KASI_REMOTE_HOST = Name des PCs im Tailnet, KASI_REMOTE_USER = erlaubte Tailscale-Konten (Komma). */
+const REMOTE_HOST = String(process.env.KASI_REMOTE_HOST || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+const REMOTE_USERS = String(process.env.KASI_REMOTE_USER || '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+if (REMOTE_HOST) HOSTS.push(REMOTE_HOST);
+const ORIGINS = HOSTS.map((h) => 'http://' + h).concat(REMOTE_HOST ? ['https://' + REMOTE_HOST] : []);
 const PUBLIC = path.join(__dirname, 'public');
 const ROOT = path.join(__dirname, '..');
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 const SEC = {
     'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store',
     // Tailwind erzeugt seine Klassen im Browser als <style>-Block, daher 'unsafe-inline' nur für Styles
@@ -451,10 +458,15 @@ async function api(req, res, url) {
 }
 
 const server = http.createServer(async (req, res) => {
-    // Nur direkte Aufrufe von diesem Rechner
-    if (!HOSTS.includes(req.headers.host || '')) return send(res, 421, 'Falscher Host', 'text/plain; charset=utf-8');
+    // Nur direkte Aufrufe von diesem Rechner oder über Tailscale aus dem eigenen privaten Netz
+    if (!HOSTS.includes((req.headers.host || '').toLowerCase())) return send(res, 421, 'Falscher Host', 'text/plain; charset=utf-8');
+    const tsUser = String(req.headers['tailscale-user-login'] || '').toLowerCase();
+    if (tsUser || (REMOTE_HOST && (req.headers.host || '').toLowerCase() === REMOTE_HOST)) {
+        // über Tailscale: nur, wenn eingerichtet und das Konto freigegeben ist
+        if (!REMOTE_HOST || !tsUser || (REMOTE_USERS.length && !REMOTE_USERS.includes(tsUser))) return send(res, 403, 'Kein Zugriff für dieses Konto', 'text/plain; charset=utf-8');
+    }
     const origin = req.headers.origin;
-    if (req.method !== 'GET' && (!origin || !HOSTS.map((h) => 'http://' + h).includes(origin))) return send(res, 403, { error: 'origin' });
+    if (req.method !== 'GET' && (!origin || !ORIGINS.includes(origin))) return send(res, 403, { error: 'origin' });
     if (req.method !== 'GET' && req.headers['x-harvey'] !== '1') return send(res, 403, { error: 'header' });
     const url = new URL(req.url, 'http://' + req.headers.host);
     try {
@@ -511,7 +523,7 @@ server.on('error', (err) => {
 });
 server.listen(PORT, '127.0.0.1', () => {
     console.log('Kasi-Zentrale läuft: http://127.0.0.1:' + PORT + '  (Strg+C beendet)');
-    Activity.log('good', 'Zentrale gestartet · 127.0.0.1:' + PORT);
+    Activity.log('good', 'Zentrale gestartet · 127.0.0.1:' + PORT + (REMOTE_HOST ? ' · Handy: https://' + REMOTE_HOST : ''));
     // Heiße Leads alle 10 Minuten prüfen, solange die Zentrale läuft (nur lesen und Hinweis an Sie)
     const alertLoop = () => runScript('alert-agent.js', [], true).catch(() => {});
     setTimeout(alertLoop, 20000);

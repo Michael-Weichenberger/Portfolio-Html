@@ -65,7 +65,10 @@
         id = ALIAS[id] || id;
         if (!TABS.includes(id)) id = 'zentrale';
         $$('.view').forEach((v) => { v.hidden = v.id !== id; });
-        $$('.tabs a').forEach((a) => {
+        const sheetTabs = ['finanzen', 'marketing', 'agenten', 'stammdaten'];
+        const more = $('#mobar-more');
+        if (more) { more.classList.toggle('is-active', sheetTabs.includes(id)); more.setAttribute('aria-expanded', 'false'); $('#mobar-sheet').hidden = true; }
+        $$('.tabs a, .mobar a, .mobar-sheet a').forEach((a) => {
             const on = a.dataset.tab === id;
             a.classList.toggle('is-active', on);
             if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -80,8 +83,7 @@
     }
 
     function setCount(name, n) {
-        const b = $('[data-count="' + name + '"]');
-        if (b) b.textContent = n ? String(n) : '';
+        $$('[data-count="' + name + '"]').forEach((b) => { b.textContent = n ? String(n) : ''; });
     }
 
     function tick() {
@@ -811,7 +813,12 @@
         pullStream();
     }
     $('#agents-refresh').addEventListener('click', async (ev) => {
-        const b = ev.currentTarget; b.disabled = true; await loadProjects(true); b.disabled = false; toast('Geprüft');
+        const b = ev.currentTarget; const label = b.textContent;
+        b.disabled = true; b.textContent = 'Prüft …';
+        await loadProjects(true);
+        b.disabled = false; b.textContent = label;
+        const s = (projects && projects.sites) || [];
+        toast('Geprüft ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + (s.length ? ' · ' + s.filter((x) => x.ok).length + ' von ' + s.length + ' Diensten erreichbar' : ''));
     });
 
     /* ---------- Live-Aktivität (Ticker am Rand) ---------- */
@@ -1115,6 +1122,17 @@
         openMail(id) { open.add(id); outboxFilter = 'open'; renderOutbox(); go('zentrale', 'postausgang'); } };
 
     window.addEventListener('hashchange', route);
+    // Handy-Leiste: „Mehr“ klappt die übrigen Bereiche auf, Mikrofon startet den Sprachbefehl
+    (() => {
+        const more = $('#mobar-more'), sheet = $('#mobar-sheet'), mic = $('#mic-bar');
+        if (!more) return;
+        more.addEventListener('click', () => { const open = sheet.hidden; sheet.hidden = !open; more.setAttribute('aria-expanded', String(open)); });
+        document.addEventListener('click', (e) => { if (!sheet.hidden && !sheet.contains(e.target) && !more.contains(e.target)) { sheet.hidden = true; more.setAttribute('aria-expanded', 'false'); } });
+        mic.addEventListener('click', () => { if (window.KasiVoice) window.KasiVoice.listen(); });
+        $('#mobar-report').addEventListener('click', () => { sheet.hidden = true; more.setAttribute('aria-expanded', 'false'); if (window.KasiReport) window.KasiReport.show(); });
+        const top = $('#mic-top');
+        if (top) new MutationObserver(() => mic.classList.toggle('is-live', top.classList.contains('is-live'))).observe(top, { attributes: true, attributeFilter: ['class'] });
+    })();
     window.addEventListener('beforeunload', (e) => { captureDrafts(); if (drafts.size || formDirty) e.preventDefault(); });
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
     route();

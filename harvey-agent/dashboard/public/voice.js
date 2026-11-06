@@ -32,12 +32,30 @@
     const micTop = $('#mic-top');
     const briefBtn = $('#brief-btn');
 
+    /* Sprach-Panel (vor allem am Handy, wo die Kugel ausgeblendet ist) */
+    const vp = { box: $('#voice-panel'), state: $('#vp-state'), heard: $('#vp-heard'), answer: $('#vp-answer') };
+    const isPhone = () => window.matchMedia('(max-width: 640px)').matches;
+    function panel(open) { if (vp.box) vp.box.hidden = !open; }
     function setState(text, mode) {
         if (stateEl) stateEl.textContent = text;
+        if (vp.state) vp.state.textContent = text;
         orb().mode(mode || 'idle');
         document.body.dataset.voice = mode || 'idle';
     }
     function caption(text) { if (captionEl) captionEl.textContent = text || ''; }
+    function heard(text) { if (vp.heard) vp.heard.textContent = text || ''; }
+    let lastAnswer = '';
+    function answer(text) { if (text) lastAnswer = text; if (vp.answer) vp.answer.textContent = text || ''; if (text && isPhone()) panel(true); playBtn(false); }
+    function playBtn(show) { const b = $('#vp-play'); if (b) b.hidden = !show; }
+    /* iPhone: Sprachausgabe einmal durch einen echten Fingertipp freischalten (leise, nicht hörbar) */
+    let unlocked = false;
+    function unlockAudio() {
+        if (unlocked || !synth) return;
+        unlocked = true;
+        try { const u = new SpeechSynthesisUtterance('Kasi'); u.volume = 0; u.rate = 2; u.lang = 'de-DE'; synth.speak(u); } catch (err) { unlocked = false; }
+    }
+    document.addEventListener('pointerdown', unlockAudio, { capture: true, once: false });
+    document.addEventListener('touchend', unlockAudio, { capture: true, once: false });
 
     /* ---------- Zahlen und Zeiten für die Sprachausgabe ---------- */
     const n0 = (n) => Math.round(n || 0).toLocaleString('de-DE');
@@ -153,6 +171,63 @@
         ].filter(Boolean).join(' ');
     }
 
+    /* Tagesbericht: was heute passiert ist, was offen bleibt, was morgen ansteht */
+    async function dailyReport() {
+        const h = H();
+        const data = h && h.data();
+        if (!data) return { text: 'Die Daten sind noch nicht geladen.', parts: [] };
+        const today = dayKey(Date.now());
+        const isToday = (iso) => iso && dayKey(iso) === today;
+        const parts = [];
+        // Ereignisse von heute, nach Art gezählt
+        const evs = (data.events || []).filter((e) => isToday(e.at));
+        const byLabel = {};
+        evs.forEach((e) => { byLabel[e.label] = (byLabel[e.label] || 0) + 1; });
+        const evText = Object.entries(byLabel).sort((a, b) => b[1] - a[1]).map(([l, n]) => (n > 1 ? n0(n) + '-mal ' : '') + l).join(', ');
+        // Neue Anfragen von der Website
+        let inq = [];
+        try { const r = await h.api('inquiries'); inq = (r.rows || r || []).filter((x) => isToday(x.createdAt)); } catch (err) { /* ohne Web-Dashboard */ }
+        if (inq.length) parts.push(['Anfragen', (inq.length === 1 ? 'Eine neue Anfrage' : n0(inq.length) + ' neue Anfragen') + ' von der Website: ' + inq.slice(0, 3).map((x) => x.name || x.email).join(', ') + '.']);
+        else parts.push(['Anfragen', 'Heute keine neue Anfrage über die Website.']);
+        // Versendete Mails
+        const sent = (data.outbox || []).filter((m) => m.status === 'gesendet' && isToday(m.sentAt));
+        if (sent.length) parts.push(['Gesendet', (sent.length === 1 ? 'Eine Mail' : n0(sent.length) + ' Mails') + ' nach Ihrer Freigabe verschickt.']);
+        if (evText) parts.push(['Ereignisse', evText + '.']);
+        // Agenten
+        const runs = ((data.agents && data.agents.list) || []).filter((a) => isToday(a.lastRun));
+        const failed = runs.filter((a) => !a.ok);
+        if (runs.length) parts.push(['Agenten', n0(runs.length) + (runs.length === 1 ? ' Agent ist' : ' Agenten sind') + ' heute gelaufen' + (failed.length ? ', mit Problemen: ' + failed.map((a) => a.name).join(', ') + '.' : ', alle ohne Fehler.')]);
+        // Offen
+        const open = [];
+        if (data.kpis.outbox) open.push((data.kpis.outbox === 1 ? 'eine Mail wartet' : n0(data.kpis.outbox) + ' Mails warten') + ' auf Freigabe');
+        if (data.kpis.overdue) open.push((data.kpis.overdue === 1 ? 'eine Rechnung ist' : n0(data.kpis.overdue) + ' Rechnungen sind') + ' überfällig');
+        const tickets = (data.tickets || []).filter((t) => t.status !== 'erledigt');
+        if (tickets.length) open.push(n0(tickets.length) + (tickets.length === 1 ? ' Support-Ticket ist' : ' Support-Tickets sind') + ' offen');
+        parts.push(['Offen', open.length ? open.join(', ') + '.' : 'Nichts Dringendes offen.']);
+        // Morgen
+        const ag = h.agenda();
+        if (ag) {
+            const tomorrow = dayKey(Date.now() + 86400000);
+            const tm = ag.events.filter((e) => (e.kind !== 'harvey' || /^Termin/.test(e.title)) && dayKey(e.start) === tomorrow);
+            parts.push(['Morgen', tm.length ? (tm.length === 1 ? 'Ein Termin: ' : n0(tm.length) + ' Termine, zuerst ') + (tm[0].allDay ? '' : 'um ' + timeSay(tm[0].start) + ' ') + tm[0].title + '.' : 'Morgen sind keine Termine eingetragen.']);
+        }
+        const now = new Date();
+        const intro = 'Tagesbericht für ' + now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) + '.';
+        return { text: [intro, ...parts.map((p) => p[1])].join(' '), parts, intro };
+    }
+    async function showReport() {
+        const r = await dailyReport();
+        const dlg = $('#report-dialog');
+        if (dlg) {
+            $('#report-title').textContent = r.intro || 'Tagesbericht';
+            $('#report-body').replaceChildren(...r.parts.map(([k, v]) => { const li = document.createElement('li'); const b = document.createElement('b'); b.textContent = k; const s = document.createElement('span'); s.textContent = v; li.append(b, s); return li; }));
+            if (!dlg.open) dlg.showModal();
+            if (!dlg.dataset.bound) { dlg.dataset.bound = '1'; dlg.addEventListener('close', () => stopSpeaking()); }
+        }
+        return speak(r.text);
+    }
+    window.KasiReport = { show: showReport, text: dailyReport };
+
     function statusText() {
         const data = H() && H().data();
         if (!data) return 'Die Daten sind noch nicht geladen.';
@@ -212,6 +287,7 @@
     function speak(text) {
         return new Promise((resolve) => {
             caption(text);
+            answer(text);
             if (!synth) { setState('Sprachausgabe wird von diesem Browser nicht unterstützt', 'idle'); return resolve('unsupported'); }
             synth.cancel();
             const token = ++speakToken;
@@ -235,14 +311,14 @@
                 u.onend = next;
                 u.onerror = (ev) => {
                     if (token !== speakToken) return resolve('cancelled');
-                    if (ev.error === 'not-allowed' || (!started && ev.error !== 'interrupted' && ev.error !== 'canceled')) { setState('Ton gesperrt', 'waiting'); return resolve('blocked'); }
+                    if (ev.error === 'not-allowed' || (!started && ev.error !== 'interrupted' && ev.error !== 'canceled')) { setState(isPhone() ? 'Ton gesperrt · zum Vorlesen tippen' : 'Ton gesperrt', 'waiting'); playBtn(true); return resolve('blocked'); }
                     next();
                 };
                 synth.speak(u);
             };
             next();
             // Manche Browser melden die Sperre gar nicht: nach 2,5 s ohne Start als gesperrt werten
-            setTimeout(() => { if (!started && token === speakToken && i <= 1) { synth.cancel(); speakToken++; setState('Ton gesperrt', 'waiting'); resolve('blocked'); } }, 2500);
+            setTimeout(() => { if (!started && token === speakToken && i <= 1) { synth.cancel(); speakToken++; setState(isPhone() ? 'Ton gesperrt · zum Vorlesen tippen' : 'Ton gesperrt', 'waiting'); playBtn(true); resolve('blocked'); } }, 2500);
         });
     }
     function stopSpeaking() { speakToken++; if (synth) synth.cancel(); setState('Bereit', 'idle'); }
@@ -260,7 +336,7 @@
     }
 
     /* ---------- Befehle ---------- */
-    const HELP = 'Sag zum Beispiel: Status, Briefing, Termine, Finanzen, Leads, Agenten, Fokus, Postausgang, Lead anlegen, Rechnung erstellen, Kontoauszug abgleichen, Mahn-Check oder Stopp.';
+    const HELP = 'Sag zum Beispiel: Tagesbericht, Status, Briefing, Termine, Finanzen, Leads, Agenten, Fokus, Postausgang, Lead anlegen, Rechnung erstellen, Kontoauszug abgleichen, Mahn-Check oder Stopp.';
     const COMMANDS = [
         [/^(stopp?|halt|ruhe|leise|abbrechen)\b/, () => { stopSpeaking(); caption(''); }],
         [/(hilfe|was kannst du|befehle)/, () => speak(HELP)],
@@ -273,6 +349,7 @@
         [/(befehl|palette|suche)/, () => window.HarveyPalette.open()],
         [/(fokus)/, () => { H().go('zentrale'); H().setMode('fokus'); speak('Fokus. ' + outboxText(H().data())); }],
         [/(agent|projekt|server|docker|github|phoenix)/, () => { H().go('zentrale'); H().setMode('agenten'); speak(projectsText()); }],
+        [/(tagesbericht|tages.?bilanz|bericht|was (war|lief|gab es|ist passiert)|heute passiert|feierabend)/, () => showReport()],
         [/(briefing|zusammenfassung|guten morgen)/, () => playBriefing(false)],
         [/(status|lage|wie sieht|überblick)/, () => speak(statusText())],
         [/(termin|kalender|heute an)/, () => { H().go('termine'); speak(agendaText(H().agenda())); }],
@@ -287,6 +364,7 @@
         const t = String(text || '').toLowerCase().replace(/^(hey |hallo |ok )?harvey[,]?\s*/, '').trim();
         if (!t) return;
         caption('„' + text + '“');
+        heard('„' + text + '“');
         if (!H() || !H().data()) return speak('Einen Moment, die Daten laden noch.');
         const hit = COMMANDS.find(([re]) => re.test(t));
         if (hit) hit[1](t);
@@ -296,6 +374,8 @@
     /* ---------- Spracheingabe ---------- */
     let rec = null;
     let listening = false;
+    let starting = false;
+    let lastTap = 0;
     let meter = null;
 
     async function startMeter() {
@@ -328,12 +408,17 @@
 
     function listen() {
         if (!Recognition) {
-            setState('Spracheingabe: bitte Chrome oder Edge verwenden', 'idle');
-            caption('Dieser Browser unterstützt keine Spracheingabe. Befehle lassen sich unten eintippen.');
-            const cmd = $('#cmd'); if (cmd) cmd.focus();
+            setState('Spracheingabe nicht verfügbar', 'idle');
+            caption('Dieser Browser unterstützt keine Spracheingabe. Befehle lassen sich eintippen.');
+            heard('Spracheingabe geht hier nicht. Tippen Sie den Befehl unten ein, oder nutzen Sie das Diktier-Mikrofon der Tastatur.');
+            panel(true);
+            const cmd = isPhone() ? $('#vp-cmd') : $('#cmd'); if (cmd) cmd.focus();
             return;
         }
-        if (listening) { rec && rec.stop(); return; }
+        if (listening || starting) { try { rec && rec.stop(); } catch (err) { /* schon beendet */ } return; }
+        if (Date.now() - lastTap < 700) return; // schnelle Doppel-Tipps ignorieren
+        lastTap = Date.now();
+        starting = true;
         stopSpeaking();
         rec = new Recognition();
         rec.lang = 'de-DE';
@@ -341,24 +426,37 @@
         rec.maxAlternatives = 1;
         rec.continuous = false;
         let final = '';
-        rec.onstart = () => { setMic(true); setState('Hört zu …', 'listening'); caption(''); startMeter(); };
+        let interimLast = '';
+        if (isPhone()) { panel(true); heard(''); answer(''); }
+        let done = false;
+        rec.onstart = () => { starting = false; setMic(true); setState('Hört zu … jetzt sprechen', 'listening'); caption(''); heard('…'); if (!isPhone()) startMeter(); };
         rec.onresult = (ev) => {
+            // immer aus allen Ergebnissen neu zusammensetzen (Safari meldet Teile mehrfach)
             let interim = '';
-            for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            final = '';
+            for (let i = 0; i < ev.results.length; i++) {
                 if (ev.results[i].isFinal) final += ev.results[i][0].transcript; else interim += ev.results[i][0].transcript;
             }
+            if (interim) interimLast = interim;
             caption(final || interim);
+            heard(final || interim);
         };
         rec.onerror = (ev) => {
             const msg = { 'not-allowed': 'Mikrofon nicht freigegeben. In der Adresszeile erlauben.', 'service-not-allowed': 'Spracherkennung in diesem Browser gesperrt.', 'no-speech': 'Nichts gehört.', 'audio-capture': 'Kein Mikrofon gefunden.', network: 'Spracherkennung braucht eine Internetverbindung.' }[ev.error];
-            if (msg) caption(msg);
+            if (msg) { caption(msg); heard(msg); setState('Fehler', 'idle'); }
         };
         rec.onend = () => {
+            starting = false;
+            if (done) return; // manche Browser melden das Ende doppelt
+            done = true;
             setMic(false);
             stopMeter();
-            if (final.trim()) { setState('Verstanden', 'thinking'); handle(final.trim()); } else if (document.body.dataset.voice === 'listening') setState('Bereit', 'idle');
+            const said = (final || interimLast).trim();
+            if (said) { setState('Verstanden', 'thinking'); if (isPhone()) setTimeout(() => handle(said), 450); else handle(said); }
+            else { if (document.body.dataset.voice === 'listening') setState('Bereit', 'idle'); if (vp.heard && vp.heard.textContent === '…') heard('Nichts verstanden. Nochmal aufs Mikrofon tippen oder den Befehl eintippen.'); }
         };
-        try { rec.start(); } catch (err) { setMic(false); }
+        try { rec.start(); } catch (err) { starting = false; setMic(false); }
+        setTimeout(() => { starting = false; }, 4000);
     }
 
     /* ---------- Bedienelemente ---------- */
@@ -370,6 +468,13 @@
     if (hit) hit.addEventListener('click', () => { orb().pulse(0.8); if (document.body.dataset.voice === 'speaking') stopSpeaking(); else playBriefing(false); });
     const form = $('#cmd-form');
     if (form) form.addEventListener('submit', (ev) => { ev.preventDefault(); const i = $('#cmd'); const v = i.value.trim(); i.value = ''; handle(v); });
+    const vpForm = $('#vp-form');
+    if (vpForm) vpForm.addEventListener('submit', (ev) => { ev.preventDefault(); const i = $('#vp-cmd'); const v = i.value.trim(); i.value = ''; i.blur(); handle(v); });
+    const vpPlay = $('#vp-play');
+    if (vpPlay) vpPlay.addEventListener('click', () => { unlocked = false; unlockAudio(); if (lastAnswer) speak(lastAnswer); });
+    const vpClose = $('#vp-close');
+    if (vpClose) vpClose.addEventListener('click', () => { stopSpeaking(); if (listening && rec) rec.stop(); panel(false); });
+    window.KasiVoice = { listen, handle, panel };
 
     const auto = $('#auto-brief');
     if (auto) {
