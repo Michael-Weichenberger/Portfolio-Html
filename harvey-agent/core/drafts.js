@@ -106,6 +106,68 @@ function replyDraft(opts) {
     return { subject: fill(b.subject, vars), body: body.join('\n') };
 }
 
+/* Aufbau der Website in einem Satz (aus der Diagnose) */
+function stackText(st) {
+    if (!st) return '';
+    const parts = [];
+    if (st.cms) parts.push('gebaut mit ' + st.cms + (st.version ? ' ' + st.version : ''));
+    if (st.builder) parts.push('Seitenbaukasten ' + st.builder);
+    if (st.theme) parts.push('Theme „' + st.theme + '“');
+    if (st.plugins && st.plugins.length) parts.push(st.plugins.length + (st.plugins.length === 1 ? ' erkannte Erweiterung (' : ' erkannte Erweiterungen (') + st.plugins.slice(0, 5).join(', ') + (st.plugins.length > 5 ? ' …' : '') + ')');
+    if (st.cachePlugin) parts.push('Cache über ' + st.cachePlugin);
+    else if (st.cms) parts.push('kein Cache-Plugin erkannt');
+    if (st.cdn) parts.push('ausgeliefert über ' + st.cdn);
+    if (!st.cms && !st.builder) parts.unshift('kein bekannter Baukasten erkannt (eigene Programmierung oder statische Seite)');
+    return parts.join(', ') + '.';
+}
+
+/* Vollständiger Report als Antwort auf den Website-Check: Überblick je Bereich (SEO, GEO, Ladezeit,
+   Sicherheit), Aufbau der Website mit technischen Ursachen und ein unverbindlicher Angebotsvorschlag. */
+function reportMail(opts) {
+    const R = require('./recommend.js');
+    const b = BLOCKS.anfrage;
+    const report = opts.report || {};
+    const findings = opts.findings || [];
+    const name = opts.name || 'Ihre Website';
+    const vars = { name, met: report.met, total: report.total, count: findings.length };
+    const rec = R.recommend(report, findings);
+    const fixOf = (id) => (findings.find((f) => f.id === id) || {}).fix;
+    const body = [b.greeting, '', fill(report.total ? b.intro : b.introUnmeasured, vars), ''];
+
+    if (findings.length) body.push('Das Wichtigste zuerst:', '', ...findingLines(findings, 3, true), '');
+    body.push('DER CHECK IM ÜBERBLICK', '');
+    rec.sections.forEach((s, i) => {
+        if (!s.total) return;
+        body.push((i + 1) + '. ' + s.title + ': ' + s.met + ' von ' + s.total + ' erfüllt');
+        if (s.missing.length) s.missing.forEach((m) => body.push('   – ' + m.label + (fixOf(m.id) ? ': ' + fixOf(m.id) : '')));
+        else body.push('   Alles erfüllt.');
+        body.push('');
+    });
+    const g = report.diagnosis;
+    if (g) {
+        body.push((rec.sections.filter((s) => s.total).length + 1) + '. Aufbau der Website');
+        const st = stackText(g.stack);
+        if (st) body.push('   ' + st.charAt(0).toUpperCase() + st.slice(1));
+        if (g.pain && g.pain.headline) body.push('   ' + g.pain.headline + (g.pain.level !== 'ok' && g.pain.text ? ' ' + g.pain.text : ''));
+        (g.causes || []).slice(0, 4).forEach((c) => body.push('   – ' + c.title + ': ' + c.evidence + ' Lösung: ' + c.fix));
+        body.push('');
+    }
+
+    // Unverbindlicher Vorschlag mit Preisen aus dem Preismodell
+    const offer = offerDraft({ name, selection: rec.selection, at: opts.at });
+    const q = offer.quote;
+    body.push('MEIN VORSCHLAG FÜR ' + name.toUpperCase(), '');
+    rec.reasons.forEach((r) => body.push('– ' + r));
+    body.push('');
+    const e = Offer.euro;
+    q.lines.forEach((l) => body.push('   ' + l.label + ': ' + (l.month !== undefined ? e(l.month) + ' / Monat' : l.included ? 'inklusive' : (l.from ? 'ab ' : '') + e(l.once) + ' einmalig')));
+    body.push('', '   ' + [q.once ? 'Summe einmalig: ' + (q.from ? 'ab ' : '') + e(q.once) + ' netto' : '', q.month ? 'monatlich ' + e(q.month) + ' netto' : ''].filter(Boolean).join(' · '), '   ' + BLOCKS.paket.vat);
+    if (q.promo) body.push('   ' + fill(BLOCKS.paket.promoNote, { until: q.promoUntil.toLocaleDateString('de-DE'), promoMonth: e(Offer.PROMO.month), months: q.promoMonths, regularMonth: e(q.regularMonth), term: q.term }));
+    body.push('', 'Das ist ein unverbindlicher Vorschlag auf Basis der Messung. Den genauen Umfang und das verbindliche Angebot klären wir in einem kurzen Gespräch.', '');
+    body.push(b.outro, '', SIGNATURE);
+    return { subject: fill(b.subject, vars), body: body.join('\n'), selection: rec.selection, quote: { once: q.once, month: q.month, from: !!q.from, promo: !!q.promo, lines: q.lines.map((l) => l.label) }, rebuild: rec.rebuild };
+}
+
 /* Angebot aus der Planer-Auswahl (Preise aus offer-rules.js) oder Antwort auf eine allgemeine Anfrage. */
 function offerDraft(opts) {
     const name = opts.name || 'Ihren Betrieb';
@@ -181,4 +243,4 @@ function buildCase(target, report, findings, psi, fmt) {
     };
 }
 
-module.exports = { SITE, AREA, BLOCKS, SIGNATURE, BOOKING_URL, fill, teaserLink, replyDraft, offerDraft, buildCase };
+module.exports = { SITE, AREA, BLOCKS, SIGNATURE, BOOKING_URL, fill, teaserLink, replyDraft, reportMail, stackText, offerDraft, buildCase };

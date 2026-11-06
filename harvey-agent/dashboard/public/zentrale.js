@@ -166,6 +166,12 @@
             [/^c:/.test(l.id) ? h('a', { class: 'link', href: '/akte/cloud/' + l.id.slice(2), target: '_blank', rel: 'noopener' }, 'Akte') : null, l.tel ? h('a', { class: 'link', href: l.tel }, 'Anrufen') : null, l.wa ? h('a', { class: 'link', href: l.wa, target: '_blank', rel: 'noopener noreferrer' }, 'WhatsApp') : null]]));
         // Dringende Support-Tickets von Bestandskunden
         (data.tickets || []).filter((t) => t.status !== 'erledigt' && t.priority === 'hoch').slice(0, 3).forEach((t) => next.push(['Support', t.client + ': ' + t.summary + (t.check ? (t.check.ok ? ' (Seite von hier erreichbar)' : ' (Störung bestätigt)') : ''), () => go('agenten')]));
+        // Website-Anfragen: Herkunft, Akte und vorbereitete Antwort
+        (data.outbox || []).filter((m) => m.type === 'antwort' && m.meta && m.meta.leadId && ['entwurf', 'freigegeben'].includes(m.status)).slice(0, 5).forEach((m) => {
+            next.push(['Anfrage', (m.meta.client || m.to) + ' · ' + (m.meta.inquiry === 'paket' ? 'Paket-Anfrage' : 'Website-Check') + ' · über ' + (m.meta.source || 'unbekannt') + (m.meta.offer && m.meta.offer.quote ? ' · Angebot: ' + m.meta.offer.quote.lines.join(' + ') : '') + ' · Report und Angebot bereit', null,
+                [h('a', { class: 'link', href: '/akte/cloud/' + m.meta.leadId, target: '_blank', rel: 'noopener' }, 'Akte'),
+                    h('button', { type: 'button', class: 'link', onclick: () => { open.add(m.id); renderOutbox(); go('zentrale', 'postausgang'); } }, 'Antwort')]]);
+        });
         // Cal.com: neue, verschobene und abgesagte Termine mit fertigem Entwurf zur Freigabe
         const openMail = (id) => () => { if (id) open.add(id); renderOutbox(); go('zentrale', 'postausgang'); };
         const STATE = { gebucht: 'Neuer Termin', verschoben: 'Verschoben', abgesagt: 'Abgesagt' };
@@ -257,6 +263,7 @@
         const meta = e.type === 'mahnung' && m.stage ? STAGE[m.stage] + ' zu ' + m.invoice
             : e.type === 'akquise' ? 'Kontaktweg: ' + (e.contactAllowed || 'unbekannt')
             : e.type === 'nachfass' ? 'Nachfass Stufe ' + m.stage + ' · Angebot vor ' + m.days + ' Tagen · endet automatisch bei Antwort oder Termin'
+            : e.type === 'antwort' && m.leadId ? (m.inquiry === 'paket' ? 'Paket-Anfrage' : 'Website-Check') + ' von der Website · über ' + (m.source || 'unbekannt') + (m.offer && m.offer.quote ? ' · Vorschlag: ' + m.offer.quote.lines.join(' + ') + ' (' + [m.offer.quote.once ? (m.offer.quote.from ? 'ab ' : '') + m.offer.quote.once.toLocaleString('de-DE') + ' €' : '', m.offer.quote.month ? m.offer.quote.month + ' €/Mtl.' : ''].filter(Boolean).join(' + ') + ' netto), bitte prüfen' : '') + (m.at ? ' · ' + new Date(m.at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '') + ' · Akte: /akte/cloud/' + m.leadId
             : e.type === 'antwort' ? 'Eingeordnet als ' + (m.category || '–') + (m.summary ? ': ' + m.summary : '')
             : review ? '★'.repeat(m.stars || 0) + ' · ' + (m.location || '') + (m.comment ? ' · „' + m.comment.slice(0, 220) + '“' : ' · ohne Text') + ' · wird öffentlich im Google-Profil angezeigt'
             : post ? (linkedin ? 'LinkedIn · Sie posten selbst: Text wird kopiert, danach in LinkedIn einfügen' : 'Google-Unternehmensprofil MW IT-SERVICES · wird öffentlich als Neuigkeit angezeigt') + ' · ' + body.value.length + ' Zeichen'
@@ -387,7 +394,7 @@
         $('#cnt-inq').textContent = r.rows.length ? String(r.rows.filter((x) => x.status === 'neu').length || '') : '';
         list.replaceChildren(...(r.rows.length ? r.rows.map((x) => sysRow(x.status === 'neu' ? 'warn' : x.status === 'auftrag' ? 'good' : 'off',
             x.name + ' · ' + (KINDS[x.kind] || x.kind),
-            [x.url ? x.url.replace(/^https?:\/\//, '').replace(/\/$/, '') : null, x.email, x.measured ? x.open + ' offene Punkte' : null, x.source ? 'über ' + x.source.source + (x.source.campaign ? ' / ' + x.source.campaign : '') : null].filter(Boolean).join(' · '),
+            [x.url ? x.url.replace(/^https?:\/\//, '').replace(/\/$/, '') : null, x.email, x.measured ? x.open + ' offene Punkte' : null, 'über ' + (x.source ? x.source.source + (x.source.campaign ? ' / ' + x.source.campaign : '') : 'direkt (ohne Kennung)')].filter(Boolean).join(' · '),
             (LEAD_STATE[x.status] || x.status) + ' · ' + ago(x.createdAt),
             h('span', { class: 'btns' },
                 h('a', { class: 'btn btn-sm btn-primary', href: '/akte/cloud/' + x.id, target: '_blank', rel: 'noopener' }, 'Akte'),
@@ -922,7 +929,7 @@
         load();
     });
     /* ---------- Marketing ---------- */
-    const LP = { 'webdesign-augsburg': 'Webdesign Augsburg', 'webdesign-muenchen': 'Webdesign München', 'website-fuer-maler': 'Website für Maler', 'website-fuer-handwerksbetriebe': 'Website für Handwerksbetriebe' };
+    const LP = { 'webdesign-augsburg': 'Webdesign Augsburg', 'webdesign-langweid': 'Webdesign Langweid', 'webdesign-muenchen': 'Webdesign München', 'website-fuer-maler': 'Website für Maler', 'website-fuer-handwerksbetriebe': 'Website für Handwerksbetriebe' };
     const CSTATE = { entwurf: 'Entwurf', aktiv: 'läuft', pausiert: 'pausiert', beendet: 'beendet' };
     const BRAND = [['positioning', 'Positionierung'], ['promise', 'Versprechen'], ['audience', 'Zielgruppe'], ['proof', 'Belege'], ['tone', 'Tonalität'], ['colors', 'Farben & Schrift']];
     const n1 = (n, one, many) => (n || 0) + ' ' + ((n || 0) === 1 ? one : many);

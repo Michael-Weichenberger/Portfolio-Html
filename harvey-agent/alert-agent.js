@@ -24,6 +24,9 @@ const Cloud = require('./core/cloud.js');
 const Notify = require('./core/notify.js');
 const Events = require('./core/events.js');
 const Run = require('./core/runlog.js');
+const Outbox = require('./core/outbox.js');
+const Drafts = require('./core/drafts.js');
+const DatastoreSave = (box) => Store.save('outbox', box);
 const Offer = require('../offer-rules.js');
 
 const HOT = Number(process.env.HARVEY_HOT_SCORE) || 60;
@@ -42,6 +45,51 @@ function scoreInbound(r) {
     if (r.phone) { s += 10; why.push('Telefonnummer angegeben'); }
     if (r.message && r.message.length > 80) { s += 5; why.push('ausführliche Nachricht'); }
     return { score: Math.min(100, s), why };
+}
+
+/* Herkunft lesbar: „Instagram / bf26-insta“, „Google“, „direkt (ohne Kennung)“ */
+const SRC_LABEL = { instagram: 'Instagram', google: 'Google', facebook: 'Facebook', linkedin: 'LinkedIn', website: 'eigene Unterseite', email: 'E-Mail', signatur: 'Mail-Signatur' };
+function sourceText(raw) {
+    const s = parse(raw);
+    if (!s || !s.source) return 'direkt (ohne Kennung)';
+    return (SRC_LABEL[s.source] || s.source) + (s.campaign ? ' · ' + s.campaign : '') + (s.medium ? ' (' + s.medium + ')' : '');
+}
+
+/* Vorbereitete Antwort aus dem Website-Check / Planer als Entwurf in den Postausgang.
+   Einmal je Anfrage: Wurde der Entwurf verworfen oder gesendet, legt Kasi ihn nicht neu an. */
+async function replyDrafts() {
+    const rows = await Cloud.query("SELECT id, kind, name, email, subject, body, source, report, findings, created_at FROM leads WHERE kind IN ('anfrage','paket') AND status = 'neu' AND created_at > ? ORDER BY created_at",
+        [new Date(Date.now() - 14 * 86400000).toISOString()]);
+    const box = Outbox.all();
+    let n = 0;
+    for (const r of rows) {
+        const key = 'anfrage:' + r.id;
+        if (!r.email) continue;
+        // Website-Check: vollständiger Report (SEO, GEO, Ladezeit, Sicherheit, Aufbau) mit Angebotsvorschlag
+        let mail = { subject: r.subject, body: r.body }, offer = null;
+        const report = parse(r.report);
+        if (r.kind === 'anfrage' && report && report.points) {
+            const m = Drafts.reportMail({ name: r.name, report, findings: parse(r.findings) || [], at: r.created_at });
+            mail = { subject: m.subject, body: m.body };
+            offer = { selection: m.selection, quote: m.quote, rebuild: m.rebuild };
+        }
+        if (!mail.body) continue;
+        const meta = { leadId: r.id, inquiry: r.kind, client: r.name, source: sourceText(r.source), at: r.created_at, offer, v: 2 };
+        const old = box.find((e) => e.key === key);
+        if (old) {
+            // ältere, noch unbearbeitete Entwürfe einmal auf den neuen Report bringen
+            if (old.status === 'entwurf' && (!old.meta || old.meta.v !== 2) && (old.history || []).length <= 1) {
+                Object.assign(old, { subject: mail.subject, body: mail.body, meta: { ...old.meta, ...meta }, updatedAt: new Date().toISOString() });
+                old.history.push({ at: new Date().toISOString(), action: 'auf vollständigen Report aktualisiert' });
+                DatastoreSave(box);
+                n++;
+            }
+            continue;
+        }
+        Outbox.add({ key, type: 'antwort', to: r.email, subject: mail.subject || 'Ihre Anfrage bei MW IT-SERVICES', body: mail.body, ref: r.id, contactAllowed: 'einwilligung', meta });
+        n++;
+    }
+    return n;
 }
 
 function latestScout() {
@@ -71,6 +119,8 @@ async function main() {
             fresh.push(item);
         }
     } catch (err) { cloudOk = false; console.log('! Web-Dashboard nicht abrufbar: ' + err.message); }
+    let drafted = 0;
+    if (cloudOk) { try { drafted = await replyDrafts(); } catch (err) { console.log('! Antwort-Entwürfe nicht angelegt: ' + err.message); } }
 
     const scout = latestScout();
     if (scout) {
@@ -89,10 +139,10 @@ async function main() {
         console.log('🔥 ' + h.name + ' · ' + h.score + ' Punkte · ' + h.why.join(', ') + (r.sent.length ? ' · gemeldet per ' + r.sent.join(', ') : Notify.channels().length ? ' · Meldung fehlgeschlagen: ' + r.errors.join('; ') : ' · kein Handy-Kanal eingerichtet'));
     }
     const all = [...newHot, ...hot].slice(0, 30);
-    const summary = fresh.length + ' neue Leads bewertet, ' + newHot.length + ' heiß' + (Notify.channels().length ? '' : ' (Handy-Hinweis nicht eingerichtet)');
+    const summary = fresh.length + ' neue Leads bewertet, ' + newHot.length + ' heiß' + (drafted ? ', ' + drafted + (drafted === 1 ? ' Antwort' : ' Antworten') + ' im Postausgang' : '') + (Notify.channels().length ? '' : ' (Handy-Hinweis nicht eingerichtet)');
     console.log(summary);
     Run.done('alert', { ok: cloudOk, summary, data: { seen: [...seen].slice(-3000), hot: all, checkedAt: new Date().toISOString() } });
 }
 
 if (require.main === module) main().catch((err) => { console.error('✗ ' + err.message); process.exit(1); });
-module.exports = { main, scoreInbound };
+module.exports = { main, scoreInbound, sourceText };

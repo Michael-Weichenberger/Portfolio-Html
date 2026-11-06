@@ -30,7 +30,7 @@ const Offer = require('../offer-rules.js');
 const args = process.argv.slice(2);
 const SITE = 'https://mw-itservices.de';
 const OUT = path.join(__dirname, 'out', 'marketing');
-const PAGES = ['webdesign-augsburg', 'webdesign-muenchen', 'website-fuer-maler', 'website-fuer-handwerksbetriebe'];
+const PAGES = ['webdesign-augsburg', 'webdesign-langweid', 'webdesign-muenchen', 'website-fuer-maler', 'website-fuer-handwerksbetriebe'];
 
 const link = (campaign, content, hash) => SITE + '/?utm_source=instagram&utm_medium=paid-social&utm_campaign=' + campaign + (content ? '&utm_content=' + content : '') + (hash || '');
 
@@ -245,8 +245,10 @@ li{padding-left:56px;position:relative;margin:12px 0}
 li:before{content:"";position:absolute;left:0;top:20px;width:28px;height:3px;background:linear-gradient(90deg,#8C4A25,#DF9A67)}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:24px;font:600 30px/1.2 system-ui,"Segoe UI",sans-serif;color:#F0C9A6;position:relative;border-top:1px solid rgba(240,201,166,.2);padding-top:36px}
 .foot small{font-weight:500;color:#B9A898;font-size:26px}
+.badge{display:inline-flex;align-items:center;gap:16px;margin:0 0 36px;padding:14px 26px;border:1px solid rgba(223,154,103,.45);border-radius:999px;background:rgba(45,32,24,.7);font:600 ${story ? 30 : 27}px/1 system-ui,"Segoe UI",sans-serif;letter-spacing:.06em;color:#F0C9A6;position:relative}
+.badge:before{content:"";width:16px;height:16px;border-radius:50%;background:#7BD88F;box-shadow:0 0 0 6px rgba(123,216,143,.18)}
 </style><div class="ring"></div><div class="brand">MW IT-SERVICES</div>
-<div><h1>${esc(ad.title)}</h1><ul>${ad.points.map((p) => '<li>' + esc(p) + '</li>').join('')}</ul></div>
+<div>${ad.badge ? '<div class="badge">' + esc(ad.badge) + '</div>' : ''}<h1>${esc(ad.title)}</h1><ul>${ad.points.map((p) => '<li>' + esc(p) + '</li>').join('')}</ul></div>
 <div class="foot"><span>${esc(ad.footer)}</span><small>mw-itservices.de</small></div>`;
 }
 

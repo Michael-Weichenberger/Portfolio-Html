@@ -81,6 +81,7 @@ function draftFor(kind, d) {
         const c = Drafts.buildCase({ id: d.id, name: d.name }, d.report || {}, d.findings || [], d.psi, VisRules.fmt);
         return { subject: c.subject, body: c.letter, priority: c.priority, callOpener: c.callOpener };
     }
+    if (d.report && d.report.points) return Drafts.reportMail({ name: d.name, report: d.report, findings: d.findings });
     return Drafts.replyDraft({ name: d.name, report: d.report, findings: d.findings });
 }
 
