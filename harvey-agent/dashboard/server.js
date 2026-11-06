@@ -171,6 +171,7 @@ function state() {
 function marketingState() {
     let m = Store.load('marketing');
     if (!m || !m.brand) { m = require('../marketing-agent.js').defaults(); Store.save('marketing', m); }
+    if (!m.strategy) { m.strategy = { text: require('../marketing-agent.js').strategyDefault(), updatedAt: null }; Store.save('marketing', m); }
     const run = (require('../core/runlog.js').all().marketing) || {};
     const clients = Store.load('clients').map((c) => ({ id: c.id, company: c.company, careSince: c.careSince || null, reviewAskedAt: c.reviewAskedAt || null, reference: c.reference === true }));
     return { ...m, run: { lastRun: run.lastRun || null, summary: run.summary || '', ...(run.data || {}) }, clients };
@@ -348,6 +349,13 @@ async function api(req, res, url) {
             if (Array.isArray(body.claims)) m.brand.claims = body.claims.map((x) => String(x).slice(0, 160)).filter(Boolean).slice(0, 8);
             Store.save('marketing', m);
             return send(res, 200, { ok: true });
+        }
+        if (parts[1] === 'strategy') {
+            if (body.reset === true) m.strategy = { text: require('../marketing-agent.js').strategyDefault(), updatedAt: null };
+            else if (typeof body.text === 'string') m.strategy = { text: body.text.slice(0, 20000), updatedAt: new Date().toISOString() };
+            else return send(res, 400, { error: 'Text fehlt' });
+            Store.save('marketing', m);
+            return send(res, 200, m.strategy);
         }
         if (parts[1] === 'campaign' && parts[2]) {
             const c = m.campaigns.find((x) => x.id === parts[2]);

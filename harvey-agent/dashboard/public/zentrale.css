@@ -431,6 +431,8 @@ legend { font-size: 13px; font-weight: 600; color: var(--copper-hi); margin-bott
 .brand-form { display: grid; gap: 10px; }
 .brand-form textarea { width: 100%; min-height: 0; height: auto; resize: vertical; }
 .brand-form .btns { justify-content: flex-end; }
+.strategy-form textarea { min-height: 320px; line-height: 1.6; font-size: 14px; }
+.strategy-form .btns #strategy-msg { margin-right: auto; }
 .table-wrap { overflow-x: auto; }
 .mkt-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
 .mkt-table th, .mkt-table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -709,3 +711,4 @@ kbd { font: 600 11px/1 var(--font); padding: 4px 7px; border-radius: 6px; backgr
 .pill.t-nachfass { background: rgba(240, 201, 166, 0.1); color: var(--copper-pale); }
 .pill.t-antwort { background: var(--good-lo); color: var(--good); }
 .pill.t-bewertung { background: var(--warn-lo); color: var(--warn); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

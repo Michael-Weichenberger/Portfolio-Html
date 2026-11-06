@@ -34,10 +34,50 @@ const PAGES = ['webdesign-augsburg', 'webdesign-muenchen', 'website-fuer-maler',
 
 const link = (campaign, content, hash) => SITE + '/?utm_source=instagram&utm_medium=paid-social&utm_campaign=' + campaign + (content ? '&utm_content=' + content : '') + (hash || '');
 
+/* Ausgangs-Strategie: nur belegte Fakten, Zahlen und Ziele trägt Michael selbst ein */
+function strategyDefault() {
+    const until = new Date(Offer.PROMO.until).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return [
+        'ZIEL',
+        '- Mehr eigene Anfragen von Handwerksbetrieben über Website, Google und Instagram.',
+        '- Ziel je Monat (bitte eintragen): … Anfragen, … Erstgespräche, … Aufträge.',
+        '',
+        'ZIELGRUPPE',
+        '- Inhaber und Geschäftsführer von Handwerksbetrieben (2 bis 50 Mitarbeitende).',
+        '- Zuerst Raum Augsburg und München, bundesweit per Video-Call.',
+        '- Am besten passend: Maler und Betriebe mit veralteter oder ohne Website.',
+        '',
+        'ANGEBOT',
+        '- Einstieg: kostenloser Website-Check auf mw-itservices.de.',
+        '- Kern: Website „Digital Starter“ plus Pflege & Local SEO.',
+        '- Aktion: Black-Friday-Paket bis ' + until + '.',
+        '- Danach: Büro-Digitalisierung (Formulare, Mail- und Termin-Abläufe) für Bestandskunden.',
+        '',
+        'KANÄLE',
+        '- Google: Unternehmensprofil pflegen, Unterseiten Augsburg, München, Maler, Handwerksbetriebe ausbauen.',
+        '- Instagram: Beiträge mit Kennung bewerben, Kasi zeigt, welcher Beitrag Anfragen bringt.',
+        '- Persönlich: Empfehlungen und Bewertungen nach abgeschlossenen Projekten, nur im Gespräch oder mit Einwilligung.',
+        '- Kaltakquise nur per Brief oder Besuch, keine Werbe-Mails ohne Einwilligung.',
+        '',
+        'ROUTINE',
+        '- Wöchentlich: Beiträge für Google-Profil und LinkedIn freigeben, Anfragen nachfassen.',
+        '- Alle 2 bis 4 Wochen: Search Console prüfen (schnelle Gewinne, Vergleich der letzten 28 Tage).',
+        '- Monatlich: Kampagnen auswerten, schwächste Anzeige stoppen, Ausgaben eintragen.',
+        '',
+        'NICHT ANBIETEN (Vertrag PhoenixOne)',
+        '- Keine KI-Audits, Firmen-KIs oder KI-Agenten als Dienstleistung ohne vorherige Zustimmung.',
+        '- Keine Kunden oder Interessenten von PhoenixOne ansprechen.',
+        '',
+        'NOTIZEN',
+        '- '
+    ].join('\n');
+}
+
 function defaults() {
     const p = Offer.PROMO;
     const until = new Date(p.until).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
     return {
+        strategy: { text: strategyDefault(), updatedAt: null },
         brand: {
             positioning: 'Websites und digitale Büro-Abläufe für Handwerksbetriebe, von einem gelernten Maler und Lackierer, der heute Software entwickelt.',
             promise: 'Mehr Anfragen, weniger Büro. Festpreis, schlüsselfertig, rund 30 Minuten Ihr Aufwand.',
@@ -278,4 +318,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch((err) => { console.error('✗ ' + err.message); Run.done('marketing', { ok: false, summary: err.message }); process.exit(1); });
-module.exports = { defaults, link };
+module.exports = { defaults, link, strategyDefault };

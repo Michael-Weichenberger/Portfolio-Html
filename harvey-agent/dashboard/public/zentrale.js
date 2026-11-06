@@ -992,6 +992,12 @@
                 h('a', { class: 'btn btn-sm btn-ghost', href: 'https://mw-itservices.de/' + p.slug + '/', target: '_blank', rel: 'noopener noreferrer' }, 'Öffnen'));
         }));
 
+        const sf = $('#strategy-form');
+        if (!sf.dataset.dirty && m.strategy) {
+            sf.elements.text.value = m.strategy.text || '';
+            $('#strategy-meta').textContent = m.strategy.updatedAt ? 'Zuletzt gespeichert ' + new Date(m.strategy.updatedAt).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Vorschlag von Kasi, noch nicht von Ihnen bearbeitet';
+        }
+
         const form = $('#brand-form');
         if (!form.dataset.dirty) {
             form.replaceChildren(...BRAND.map(([k, label]) => h('label', { class: 'row row-top' }, h('span', { text: label }), (() => { const t = h('textarea', { name: k, rows: '2' }); t.value = m.brand[k] || ''; return t; })())),
@@ -1059,6 +1065,16 @@
         try { await api('marketing/client/' + id, body); toast('Gespeichert'); load(); } catch (err) { toast(err.message, true); }
     }
     $('#brand-form').addEventListener('input', () => { $('#brand-form').dataset.dirty = '1'; });
+    $('#strategy-form').addEventListener('input', () => { $('#strategy-form').dataset.dirty = '1'; $('#strategy-msg').textContent = 'Nicht gespeichert'; });
+    $('#strategy-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = ev.target;
+        try { await api('marketing/strategy', { text: f.elements.text.value }); delete f.dataset.dirty; $('#strategy-msg').textContent = 'Gespeichert'; load(); } catch (err) { $('#strategy-msg').textContent = err.message; }
+    });
+    $('#strategy-reset').addEventListener('click', async () => {
+        if (!confirm('Den Vorschlag von Kasi laden? Ihr gespeicherter Text wird dabei ersetzt.')) return;
+        try { await api('marketing/strategy', { reset: true }); delete $('#strategy-form').dataset.dirty; $('#strategy-msg').textContent = 'Vorschlag geladen'; load(); } catch (err) { $('#strategy-msg').textContent = err.message; }
+    });
     $('#brand-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const f = ev.target;
