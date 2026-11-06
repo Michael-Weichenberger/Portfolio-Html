@@ -4,11 +4,13 @@
 
    npm run schedule:install    einrichten
    npm run schedule:remove     wieder entfernen
+   npm run zentrale:stop       Zentrale beenden (ohne automatischen Neustart)
 
    Richtet ein:
    1. Aufgabe „Kasi Zentrale“ in der Windows-Aufgabenplanung: startet die
       Zentrale beim Anmelden unsichtbar im Hintergrund (ohne Konsolenfenster)
-      und startet sie neu, falls sie abstürzt (bis zu 3-mal, im Minutenabstand).
+      und startet sie nach einem Absturz nach 5 Sekunden neu (bei mehr als
+      5 Abstürzen in 10 Minuten erst nach 5 Minuten Pause).
    2. Verknüpfung „Kasi“ auf dem Desktop: öffnet Kasi als eigenes App-Fenster
       (Microsoft Edge, sonst Standardbrowser). Läuft die Zentrale gerade nicht,
       startet die Verknüpfung sie vorher.
@@ -29,6 +31,7 @@ const URL = 'http://127.0.0.1:' + PORT + '/';
 const DIR = path.join(ROOT, 'data', 'launcher');
 const START = path.join(DIR, 'kasi-hintergrund.vbs');
 const OPEN = path.join(DIR, 'kasi-oeffnen.vbs');
+const STOP = path.join(DIR, 'stopp');
 const LOG = path.join(ROOT, 'data', 'zentrale.log');
 const ICON = path.join(ROOT, '..', 'assets', 'favicon_io', 'favicon.ico');
 const DESKTOP = path.join(os.homedir(), 'Desktop', 'Kasi.lnk');
@@ -39,17 +42,49 @@ function edgePath() {
     return ['C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'].find((p) => fs.existsSync(p)) || '';
 }
 
-/* Startet node unsichtbar; Ausgabe ins Log. Läuft die Zentrale schon, beendet sich der zweite Start von selbst. */
+/* Startet node unsichtbar; Ausgabe ins Log. Läuft die Zentrale schon, beendet sich der zweite Start von selbst (Code 0).
+   Endet node mit einem Fehler (Absturz, Prozess beendet), startet das Skript die Zentrale nach 5 Sekunden neu.
+   Schutz gegen Dauerschleifen: mehr als 5 Abstürze in 10 Minuten → 5 Minuten Pause.
+   Absichtlich beenden: npm run zentrale:stop (legt data/launcher/stopp an und beendet node). */
 function startScript() {
     const cmd = 'cmd /c ""' + process.execPath + '" "' + path.join(ROOT, 'dashboard', 'server.js') + '" >> "' + LOG + '" 2>&1"';
     return [
-        "' Kasi: Zentrale unsichtbar starten (von autostart.js erzeugt)",
+        "' Kasi: Zentrale unsichtbar starten und nach Absturz neu starten (von autostart.js erzeugt)",
         'Set sh = CreateObject("WScript.Shell")',
+        'Set fs = CreateObject("Scripting.FileSystemObject")',
         'sh.CurrentDirectory = ' + vbsStr(ROOT),
-        // warten, solange die Zentrale läuft: so bleibt die Aufgabe aktiv und Windows startet sie nach einem Absturz neu
-        'rc = sh.Run(' + vbsStr(cmd) + ', 0, True)',
-        'WScript.Quit rc'
+        'stopFile = ' + vbsStr(STOP),
+        'If fs.FileExists(stopFile) Then fs.DeleteFile stopFile',
+        'crashes = 0 : since = Timer',
+        'Do',
+        '  rc = sh.Run(' + vbsStr(cmd) + ', 0, True)',
+        '  If rc = 0 Or fs.FileExists(stopFile) Then Exit Do',
+        '  If Abs(Timer - since) > 600 Then crashes = 0 : since = Timer',
+        '  crashes = crashes + 1',
+        '  Set f = fs.OpenTextFile(' + vbsStr(LOG) + ', 8, True)',
+        '  f.WriteLine Now & " Zentrale beendet (Code " & rc & "), Neustart #" & crashes',
+        '  f.Close',
+        '  If crashes > 5 Then',
+        '    WScript.Sleep 300000',
+        '    crashes = 0 : since = Timer',
+        '  Else',
+        '    WScript.Sleep 5000',
+        '  End If',
+        '  If fs.FileExists(stopFile) Then Exit Do',
+        'Loop',
+        'If fs.FileExists(stopFile) Then fs.DeleteFile stopFile',
+        'WScript.Quit 0'
     ].join('\r\n') + '\r\n';
+}
+
+/* Zentrale absichtlich beenden, ohne dass der Neustart greift */
+function stop() {
+    fs.mkdirSync(DIR, { recursive: true });
+    fs.writeFileSync(STOP, new Date().toISOString() + '\n');
+    try {
+        ps('$c = Get-NetTCPConnection -LocalPort ' + PORT + ' -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) { Stop-Process -Id $c.OwningProcess -Force; "beendet" } else { "lief nicht" }');
+        console.log('Kasi-Zentrale beendet. Starten: Desktop-Verknüpfung „Kasi“ oder nächste Anmeldung.');
+    } catch (err) { console.log('✗ ' + err.message); }
 }
 
 /* Öffnet Kasi; startet die Zentrale vorher, falls sie nicht antwortet */
@@ -117,6 +152,6 @@ function remove() {
 
 if (require.main === module) {
     if (process.platform !== 'win32') { console.log('Der Autostart ist für Windows gebaut. Sonst: node dashboard/server.js beim Anmelden starten.'); process.exit(0); }
-    try { process.argv.includes('--remove') ? remove() : install(); } catch (err) { console.error('✗ ' + err.message); process.exit(1); }
+    try { process.argv.includes('--stop') ? stop() : process.argv.includes('--remove') ? remove() : install(); } catch (err) { console.error('✗ ' + err.message); process.exit(1); }
 }
-module.exports = { install, remove };
+module.exports = { install, remove, stop };

@@ -37,6 +37,7 @@
     "daily": "node daily.js",
     "schedule:install": "node autostart.js --install",
     "schedule:remove": "node autostart.js --remove",
+    "zentrale:stop": "node autostart.js --stop",
     "onboarding": "node onboarding-agent.js",
     "buchhaltung": "node accounting-agent.js",
     "beitraege": "node content-agent.js",
