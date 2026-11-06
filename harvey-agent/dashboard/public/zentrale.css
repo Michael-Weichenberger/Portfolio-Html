@@ -409,6 +409,7 @@ legend { font-size: 13px; font-weight: 600; color: var(--copper-hi); margin-bott
 .bar { height: 8px; border-radius: 4px; background: rgba(240, 201, 166, .1); overflow: hidden; }
 .bar i { display: block; height: 100%; background: linear-gradient(90deg, #8C4A25, #DF9A67); border-radius: 4px; }
 .bars b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.sc-drop { color: var(--bad, #E08A7A); }
 .gnums { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; font-size: 13px; color: var(--text-2); }
 .gnums b { font-size: 1.15rem; color: var(--text); margin-right: 3px; }
 .campaign { border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; background: rgba(10, 7, 5, .18); }

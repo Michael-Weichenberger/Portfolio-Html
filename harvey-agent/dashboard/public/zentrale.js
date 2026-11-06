@@ -176,7 +176,7 @@
                     mail ? h('button', { type: 'button', class: 'link', onclick: openMail(mail.id) }, 'Freigeben') : null]]);
         });
         ag.preps.filter((p) => Date.parse(p.at) > Date.now() - 3600000 && Date.parse(p.at) < Date.now() + 36 * 3600000).forEach((p) => next.push(['Termin ' + hm(p.at), p.name + ' · Hauptpunkt: ' + p.headline + ' · Vorlage: harvey-agent/' + p.file, () => go('termine')]));
-        ag.list.forEach((a) => (a.notes || []).filter((n) => /Nachfass-Brief|nicht erreichbar|SSL|Domain .* läuft|defekte Links|Cal.com-Webhook prüfen/.test(n)).slice(0, 3).forEach((n) => next.push([a.name, n, () => go('agenten')])));
+        ag.list.forEach((a) => (a.notes || []).filter((n) => /Nachfass-Brief|nicht erreichbar|SSL|Domain .* läuft|defekte Links|Cal.com-Webhook prüfen|Google-Klicks eingebrochen|Schneller Gewinn bei Google/.test(n)).slice(0, 3).forEach((n) => next.push([a.name, n, () => go('agenten')])));
         if (k.outbox) next.push(['Postausgang', k.outbox + (k.outbox === 1 ? ' Mail wartet' : ' Mails warten') + ' auf Ihre Freigabe.', () => go('zentrale', 'postausgang')]);
         data.invoices.filter((i) => i.paused).forEach((i) => next.push(['Klären', i.client + ' hat zu ' + i.number + ' geantwortet. Mahnwesen pausiert.', () => go('finanzen')]));
         data.leads.filter((l) => l.status === 'antwort').forEach((l) => next.push(['Antwort', l.name + ' hat geantwortet.', () => go('leads')]));
@@ -1033,6 +1033,20 @@
             parts.push(h('h3', { text: 'Google-Suche (28 Tage)' }), h('p', { class: 'gnums' }, h('span', {}, h('b', { text: String(t.clicks) }), ' Klicks'), h('span', {}, h('b', { text: String(t.impressions) }), ' Einblendungen'), t.position ? h('span', {}, h('b', { text: String(t.position).replace('.', ',') }), ' Ø Position') : null));
             if (g.search.queries.length) parts.push(h('table', { class: 'mkt-table' }, h('thead', {}, h('tr', {}, ...['Suchbegriff', 'Klicks', 'Einbl.', 'Pos.'].map((x) => h('th', { scope: 'col', text: x })))),
                 h('tbody', {}, ...g.search.queries.slice(0, 10).map((q) => h('tr', {}, h('th', { scope: 'row', text: q.key }), h('td', { text: String(q.clicks) }), h('td', { text: String(q.impressions) }), h('td', { text: q.position ? String(q.position).replace('.', ',') : '–' }))))));
+            const c = g.search.compare;
+            if (c) {
+                const ch = (x) => (x == null ? '' : ' (' + (x > 0 ? '+' : '') + x + ' %)');
+                parts.push(h('p', { class: 'muted small' + (c.drop ? ' sc-drop' : '') }, 'Gegenüber den 28 Tagen davor: ' + c.clicks.before + ' → ' + c.clicks.now + ' Klicks' + ch(c.clicks.change) + ', ' + c.impressions.before + ' → ' + c.impressions.now + ' Einblendungen' + ch(c.impressions.change) + '.' + (c.drop ? ' Deutlicher Einbruch.' : '')));
+                if (c.losers.length) parts.push(h('p', { class: 'muted small', text: 'Weniger Klicks auf: ' + c.losers.map((l) => (l.page.replace(/^https?:\/\/[^/]+/, '') || '/') + ' (' + l.before + ' → ' + l.now + ')').join(', ') }));
+            }
+            parts.push(h('h3', { text: 'Schnelle Gewinne (90 Tage)' }));
+            const qw = g.search.quickWins || [];
+            parts.push(qw.length ? h('table', { class: 'mkt-table' }, h('thead', {}, h('tr', {}, ...['Suchbegriff', 'Pos.', 'Einbl.', 'Was tun'].map((x) => h('th', { scope: 'col', text: x })))),
+                h('tbody', {}, ...qw.map((q) => h('tr', {}, h('th', { scope: 'row', text: q.key }), h('td', { text: String(q.position).replace('.', ',') }), h('td', { text: String(q.impressions) }), h('td', { class: 'small', text: q.hint })))))
+                : h('p', { class: 'muted small', text: 'Noch keine. Hier erscheinen Suchbegriffe auf Position 8 bis 15 mit vielen Einblendungen. Die Search Console braucht dafür einige Wochen Daten.' }));
+            const lc = g.search.lowCtr || [];
+            if (lc.length) parts.push(h('p', { class: 'muted small', text: 'Seite 1, aber kaum Klicks (Titel und Beschreibung prüfen): ' + lc.map((q) => '„' + q.key + '“ Pos. ' + String(q.position).replace('.', ',') + ', ' + q.ctr.toString().replace('.', ',') + ' %').join(' · ') }));
+            if (g.search.insightNote) parts.push(h('p', { class: 'muted small', text: 'Auswertung unvollständig: ' + g.search.insightNote }));
         } else parts.push(h('p', { class: 'muted small', text: 'Search Console: ' + (g.searchNote || 'keine Daten') }));
         if (g.profile) {
             const m = g.profile.metrics;

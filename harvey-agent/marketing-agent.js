@@ -140,6 +140,17 @@ async function google() {
         if (site) {
             out.search = { site, from: iso(from), to: iso(to), totals: await Google.searchTotals(site, iso(from), iso(to)),
                 queries: await Google.searchBy(site, iso(from), iso(to), 'query', 20), pages: await Google.searchBy(site, iso(from), iso(to), 'page', 15) };
+            // Schnelle Gewinne (90 Tage) und Vergleich mit den 28 Tagen davor
+            const Seo = require('./core/seo-insights.js');
+            try {
+                const q90 = await Google.searchBy(site, iso(new Date(to.getTime() - 89 * 86400000)), iso(to), 'query', 500);
+                out.search.quickWins = Seo.quickWins(q90);
+                out.search.lowCtr = Seo.lowCtr(q90);
+                const pTo = new Date(from.getTime() - 86400000), pFrom = new Date(pTo.getTime() - 27 * 86400000);
+                const [prevTotals, prevPages, curPages] = await Promise.all([Google.searchTotals(site, iso(pFrom), iso(pTo)),
+                    Google.searchBy(site, iso(pFrom), iso(pTo), 'page', 200), Google.searchBy(site, iso(from), iso(to), 'page', 200)]);
+                out.search.compare = { from: iso(pFrom), to: iso(pTo), ...Seo.compare(out.search.totals, prevTotals, curPages, prevPages) };
+            } catch (err) { out.search.insightNote = err.message; }
         } else out.searchNote = 'mw-itservices.de ist in der Search Console nicht hinterlegt oder nicht freigegeben.';
     } catch (err) { out.searchNote = err.message; }
     try {
@@ -150,7 +161,7 @@ async function google() {
             const m = (d) => d.toISOString().slice(0, 7);
             out.profile.keywords = await Google.searchKeywords(loc, m(new Date(Date.now() - 95 * 86400000)), m(new Date(Date.now() - 32 * 86400000)));
         } catch (err) { out.profile.keywordsNote = err.message; }
-    } catch (err) { out.profileNote = err.message; }
+    } catch (err) { out.profileNote = /429|[Qq]uota/.test(err.message) ? 'Google hat den Zugriff auf das Unternehmensprofil noch nicht freigeschaltet (Antrag möglich ab etwa Januar 2027, wenn das Profil 60 Tage aktiv ist).' : err.message; }
     return out;
 }
 
@@ -245,6 +256,9 @@ async function main() {
     let googleData = { connected: false };
     try { googleData = await google(); } catch (err) { notes.push('Google: ' + err.message); }
     if (googleData.searchNote) notes.push('Search Console: ' + googleData.searchNote);
+    const sc = googleData.search || {};
+    if (sc.compare && sc.compare.drop) notes.push('Google-Klicks eingebrochen: ' + sc.compare.clicks.now + ' statt ' + sc.compare.clicks.before + ' (' + sc.compare.clicks.change + ' %)' + (sc.compare.losers.length ? ' · am stärksten: ' + sc.compare.losers.slice(0, 2).map((l) => l.page.replace(/^https?:\/\/[^/]+/, '') || '/').join(', ') : ''));
+    (sc.quickWins || []).slice(0, 3).forEach((q) => notes.push('Schneller Gewinn bei Google: „' + q.key + '“ auf Position ' + String(q.position).replace('.', ',') + ' mit ' + q.impressions + ' Einblendungen'));
     if (googleData.profileNote) notes.push('Google-Profil: ' + googleData.profileNote);
     pages.filter((p) => !p.ok).forEach((p) => notes.push('Unterseite /' + p.slug + '/ nicht erreichbar (' + (p.status || 'keine Antwort') + ')'));
     const rem = reminders();

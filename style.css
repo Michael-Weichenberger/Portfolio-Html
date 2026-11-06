@@ -628,9 +628,13 @@ h2 em { font-style: normal; color: var(--copper-dark); }
     box-shadow: 0 10px 30px rgba(22, 17, 14, .4);
     transition: background-position .6s var(--ease);
 }
-.bf-card:hover .bf-cta { background-position: 100% 0; }
+.bf-cta { width: 100%; border: 0; cursor: pointer; font-family: inherit; }
+.bf-cta:hover, .bf-cta:focus-visible { background-position: 100% 0; }
+.bf-cta:focus-visible, .bf-alt:focus-visible { outline: 2px solid var(--copper-pale); outline-offset: 3px; }
+.bf-alt { display: block; margin-top: 14px; text-align: center; font-size: .86rem; font-weight: 600; color: rgba(244,240,232,.78); text-decoration: underline; text-decoration-color: rgba(223,154,103,.5); text-underline-offset: 4px; }
+.bf-alt:hover { color: var(--copper-pale); }
 .bf-cta .ico { transition: transform .3s var(--ease); }
-.bf-card:hover .bf-cta .ico { transform: translateX(4px); }
+.bf-cta:hover .ico { transform: translateX(4px); }
 
 /* --------------------------------------------------------------------------
    7. LEISTUNGEN
@@ -694,6 +698,10 @@ h2 em { font-style: normal; color: var(--copper-dark); }
 .price-from { font-size: .82rem; font-style: italic; color: var(--text-soft); }
 .price-num { font-family: var(--font-display); font-size: clamp(2rem, 2.6vw, 2.6rem); line-height: 1; letter-spacing: -.03em; }
 .price-unit { font-size: .85rem; color: var(--text-muted); margin: 6px 0 16px; }
+.service-acts { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.service-acts .link-arrow { border: 0; padding: 0; background-color: transparent; cursor: pointer; font: inherit; }
+.service-alt { font-size: .82rem; color: var(--text-soft); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+.service-alt:hover { color: var(--copper-mid); }
 
 /* --------------------------------------------------------------------------
    8. 3D-TILT (Werte kommen aus script.js, Ruhezustand ist flach)
@@ -729,6 +737,7 @@ h2 em { font-style: normal; color: var(--copper-dark); }
     .service-row:hover .service-price, .service-row:focus-within .service-price { border-left-color: var(--line-dark); }
     .service-row:hover .price-num, .service-row:focus-within .price-num { color: var(--copper-pale); }
     .service-row:hover .link-arrow, .service-row:focus-within .link-arrow { color: var(--copper-bright); }
+    .service-row:hover .service-alt, .service-row:focus-within .service-alt { color: var(--text-on-dark-muted); }
     .service-row:hover .service-points li::before { background: var(--copper-bright); }
 }
 .service-row .tilt-glare { background: radial-gradient(circle 380px at var(--gx, 50%) var(--gy, 50%), rgba(223, 154, 103, .16), transparent 65%); }
@@ -1802,6 +1811,7 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
     .service-row.is-tilting { padding-left: 20px; padding-right: 20px; }
     .service-price { padding-left: 0; padding-top: 20px; border-left: 0; border-top: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; }
     .price-unit { margin: 0 auto 0 0; padding: 0; }
+    .service-acts { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-top: 6px; }
 
 
     .project-grid { grid-template-columns: 1fr; }

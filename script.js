@@ -258,6 +258,20 @@
             goTo(STEP_OF[name] || 1);
         }));
 
+        // Direkt anfragen: Auswahl still übernehmen, Formular öffnen, kein Sprung zum Planer
+        const requestWith = (pairs, only) => {
+            if (only) {
+                // nur dieser Baustein: übrige Bereiche zurücksetzen
+                form.querySelectorAll('input[type="checkbox"]').forEach((c) => { c.checked = false; });
+                ['base', 'care'].forEach((n) => { const i = form.querySelector('input[type="radio"][name="' + n + '"][value="none"]'); if (i) i.checked = true; });
+            }
+            pairs.forEach(([name, value]) => { const input = form.querySelector('input[name="' + name + '"][value="' + value + '"]'); if (input) input.checked = true; });
+            render();
+            Booking.open(plannerSummaryText.replace(/^Planer:/, 'Direktanfrage:').replace(' | einmalig 0 € + ', ' | '), plannerSelection);
+        };
+        $$('[data-request]').forEach((btn) => btn.addEventListener('click', () => requestWith([btn.dataset.request.split('=')], true)));
+        $$('[data-request-promo]').forEach((btn) => btn.addEventListener('click', () => requestWith([['base', PROMO.base], ['care', PROMO.care]], true)));
+
         // Aktion übernehmen
         const promoEls = $$('[data-promo]');
         if (!promoActive()) promoEls.forEach((el) => { el.hidden = true; });
