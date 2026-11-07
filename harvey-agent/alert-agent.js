@@ -26,6 +26,7 @@ const Events = require('./core/events.js');
 const Run = require('./core/runlog.js');
 const Outbox = require('./core/outbox.js');
 const Drafts = require('./core/drafts.js');
+const Audit = require('./core/audit.js');
 const DatastoreSave = (box) => Store.save('outbox', box);
 const Offer = require('../offer-rules.js');
 
@@ -58,7 +59,7 @@ function sourceText(raw) {
 /* Vorbereitete Antwort aus dem Website-Check / Planer als Entwurf in den Postausgang.
    Einmal je Anfrage: Wurde der Entwurf verworfen oder gesendet, legt Kasi ihn nicht neu an. */
 async function replyDrafts() {
-    const rows = await Cloud.query("SELECT id, kind, name, email, subject, body, source, report, findings, created_at FROM leads WHERE kind IN ('anfrage','paket') AND status = 'neu' AND created_at > ? ORDER BY created_at",
+    const rows = await Cloud.query("SELECT id, kind, name, url, email, subject, body, source, report, findings, created_at FROM leads WHERE kind IN ('anfrage','paket') AND status = 'neu' AND created_at > ? ORDER BY created_at",
         [new Date(Date.now() - 14 * 86400000).toISOString()]);
     const box = Outbox.all();
     let n = 0;
@@ -68,20 +69,30 @@ async function replyDrafts() {
         // Website-Check: vollständiger Report (SEO, GEO, Ladezeit, Sicherheit, Aufbau) mit Angebotsvorschlag
         let mail = { subject: r.subject, body: r.body }, offer = null;
         const report = parse(r.report);
+        const old = box.find((e) => e.key === key);
+        const fresh = !old || (old.status === 'entwurf' && (!old.meta || old.meta.v !== 3) && !(old.history || []).some((h) => /bearbeitet|geändert|freigegeben/.test(h.action)));
+        if (!fresh) continue;
+        let audit = null, auditNote = null;
         if (r.kind === 'anfrage' && report && report.points) {
-            const m = Drafts.reportMail({ name: r.name, report, findings: parse(r.findings) || [], at: r.created_at });
+            // Tiefenprüfung: alle Unterseiten, strukturierte Daten, Texte (dauert 5 bis 60 Sekunden)
+            if (r.url) {
+                try { audit = await Promise.race([Audit.audit(r.url), new Promise((_, rej) => setTimeout(() => rej(new Error('Zeitüberschreitung')), 120000))]); }
+                catch (err) { auditNote = err.message; console.log('! Tiefenprüfung ' + r.name + ': ' + err.message); }
+            }
+            const m = Drafts.reportMail({ name: r.name, report, findings: parse(r.findings) || [], at: r.created_at, audit });
             mail = { subject: m.subject, body: m.body };
             offer = { selection: m.selection, quote: m.quote, rebuild: m.rebuild };
         }
         if (!mail.body) continue;
-        const meta = { leadId: r.id, inquiry: r.kind, client: r.name, source: sourceText(r.source), at: r.created_at, offer, v: 2 };
-        const old = box.find((e) => e.key === key);
+        const meta = { leadId: r.id, inquiry: r.kind, client: r.name, source: sourceText(r.source), at: r.created_at, offer, audit: Audit.counts(audit), auditNote, v: 3 };
         if (old) {
-            // ältere, noch unbearbeitete Entwürfe einmal auf den neuen Report bringen
-            if (old.status === 'entwurf' && (!old.meta || old.meta.v !== 2) && (old.history || []).length <= 1) {
-                Object.assign(old, { subject: mail.subject, body: mail.body, meta: { ...old.meta, ...meta }, updatedAt: new Date().toISOString() });
-                old.history.push({ at: new Date().toISOString(), action: 'auf vollständigen Report aktualisiert' });
-                DatastoreSave(box);
+            // ältere, noch unbearbeitete Entwürfe einmal auf den neuen Report bringen (frisch laden: die Prüfung dauert)
+            const now = Outbox.all();
+            const cur = now.find((e) => e.key === key);
+            if (cur && cur.status === 'entwurf' && (cur.history || []).length === (old.history || []).length) {
+                Object.assign(cur, { subject: mail.subject, body: mail.body, meta: { ...cur.meta, ...meta }, updatedAt: new Date().toISOString() });
+                cur.history.push({ at: new Date().toISOString(), action: 'auf vollständigen Report aktualisiert' });
+                DatastoreSave(now);
                 n++;
             }
             continue;

@@ -36,7 +36,7 @@ function sections(report) {
         missing: s.signals.filter((x) => x.ok === false) }));
 }
 
-function recommend(report, findings) {
+function recommend(report, findings, audit) {
     const missing = new Set((findings || []).map((f) => f.id));
     (report.points || []).forEach((p) => (p.signals || []).forEach((s) => { if (s.ok === false) missing.add(s.id); }));
     const ok = (id) => (report.points || []).some((p) => (p.signals || []).some((s) => s.id === id && s.ok === true));
@@ -59,6 +59,12 @@ function recommend(report, findings) {
     else { sel.care = 'tech'; reasons.push('Die Seite ist in gutem Zustand, es reicht die technische Wartung.'); }
     if (gaps('geo') >= 2) { sel.extras.push('geo'); reasons.push(gaps('geo') + ' Lücken bei der KI-Suche.'); }
     if (missing.has('maps')) { sel.extras.push('gbp'); reasons.push('Kein Google-Unternehmensprofil verknüpft.'); }
+    if (audit) {
+        const c = audit.crawl;
+        if (c.broken.length) { reasons.push(c.broken.length + (c.broken.length === 1 ? ' tote Seite oder kaputter Link' : ' tote Seiten oder kaputte Links') + ' gefunden.'); if (sel.care === 'tech' || sel.care === 'none') sel.care = 'care'; }
+        if (c.thin.length >= Math.max(3, Math.ceil(c.checked / 2))) reasons.push(c.thin.length + ' von ' + c.checked + ' Seiten haben wenig Text: Die Leistungsseiten brauchen mehr Inhalt, damit Google sie zu Suchen wie „Leistung + Ort“ zeigt.');
+        if (audit.rich.absent.some((x) => /^(Firmendaten|FAQ)/.test(x)) && !sel.extras.includes('geo')) { sel.extras.push('geo'); reasons.push('Für Google und KI-Assistenten fehlen strukturierte Daten (' + audit.rich.absent.map((x) => x.split(' (')[0]).join(', ') + ').'); }
+    }
     if (!rebuild) reasons.unshift('Kein Neubau nötig: Die Grundlage stimmt, die Lücken lassen sich auf der bestehenden Seite schließen.');
 
     return { selection: Offer.normalize(sel), rebuild, reasons, sections: sec, stack };

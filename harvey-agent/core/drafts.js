@@ -121,6 +121,59 @@ function stackText(st) {
     return parts.join(', ') + '.';
 }
 
+/* Abschnitte aus der Tiefenprüfung (core/audit.js): alle Unterseiten, Rich Results, Texte */
+function auditLines(a, n) {
+    const out = [];
+    const list = (arr, max = 5) => arr.slice(0, max).join(', ') + (arr.length > max ? ' und ' + (arr.length - max) + ' weitere' : '');
+    const c = a.crawl;
+    out.push(n + '. Alle Unterseiten geprüft (' + c.checked + ' Seiten' + (c.more ? ', weitere vorhanden' : '') + ')');
+    const lines = [];
+    if (c.broken.length) lines.push('Tote Seiten oder kaputte Links (' + c.broken.length + '): ' + list(c.broken.map((b) => b.url + ' (' + b.status + (b.from.length ? ', verlinkt von ' + b.from[0] : '') + ')'), 4) + '. Lösung: Links korrigieren oder die Adresse auf eine passende Seite umleiten.');
+    if (c.redirects.length) lines.push('Interne Links über Umleitungen (' + c.redirects.length + '): ' + list(c.redirects, 3) + '. Lösung: direkt auf die Zieladresse verlinken.');
+    if (c.noTitle.length) lines.push('Seiten ohne Titel: ' + list(c.noTitle) + '.');
+    if (c.noDescription.length) lines.push('Seiten ohne Meta-Beschreibung (' + c.noDescription.length + '): ' + list(c.noDescription) + '.');
+    if (c.badDescription.length) lines.push('Beschreibung zu kurz oder zu lang (' + c.badDescription.length + '): ' + list(c.badDescription, 3) + '. Ideal sind 120 bis 160 Zeichen.');
+    if (c.noH1.length) lines.push('Seiten ohne Hauptüberschrift (H1): ' + list(c.noH1) + '.');
+    if (c.manyH1.length) lines.push('Seiten mit mehreren Hauptüberschriften: ' + list(c.manyH1) + '.');
+    if (c.dupTitles.length) lines.push('Gleicher Titel auf mehreren Seiten (' + c.dupTitles.length + '×): „' + c.dupTitles[0].text + '“ auf ' + list(c.dupTitles[0].pages, 3) + '. Lösung: Jede Seite bekommt einen eigenen Titel mit ihrer Leistung.');
+    if (c.dupDescriptions.length) lines.push('Gleiche Beschreibung auf mehreren Seiten (' + c.dupDescriptions.length + '×).');
+    if (c.noAlt) lines.push(c.noAlt + ' von ' + c.images + ' Bildern ohne Bildbeschreibung (alt). Google und Screenreader wissen nicht, was darauf zu sehen ist.');
+    if (c.thin.length) lines.push('Seiten mit wenig Text (unter 250 Wörtern, ' + c.thin.length + ' von ' + c.checked + '): ' + list(c.thin, 4) + '. Lösung: je Leistung erklären, was genau gemacht wird, wo, wie lange es dauert und was es ungefähr kostet.');
+    if (c.noindex.length) lines.push('Seiten, die Google nicht aufnehmen soll (noindex): ' + list(c.noindex) + '. Prüfen, ob das gewollt ist.');
+    if (!lines.length) lines.push('Keine Probleme gefunden: alle Seiten erreichbar, Titel, Beschreibungen und Überschriften vollständig.');
+    lines.forEach((l) => out.push('   – ' + l));
+    out.push('');
+
+    // Strukturierte Daten zusammengefasst je Art
+    out.push((n + 1) + '. Strukturierte Daten für Google (Rich Results)');
+    const byKind = {};
+    a.rich.found.forEach((f) => {
+        const k = f.kind.split(' (')[0];
+        const e = byKind[k] || (byKind[k] = { n: 0, missing: new Set(), rec: new Set() });
+        e.n++; f.missing.forEach((m) => e.missing.add(m)); f.recommended.forEach((m) => e.rec.add(m));
+    });
+    Object.entries(byKind).forEach(([k, e]) => out.push('   ' + (e.missing.size ? '✗ ' : '✓ ') + k + (e.n > 1 ? ' (' + e.n + '×)' : '') + (e.missing.size ? ': es fehlt ' + [...e.missing].join(', ') : '') + (() => { const recs = [...e.rec].filter((x) => !/^Hinweis:/.test(x)); const notes = [...e.rec].filter((x) => /^Hinweis:/.test(x)); return (recs.length ? (e.missing.size ? '; ' : ': ') + 'empfohlen: ' + recs.join(', ') : '') + (notes.length ? '. ' + notes.join(' ').replace(/^Hinweis: /, '') : ''); })()));
+    a.rich.absent.forEach((x) => out.push('   ✗ Fehlt: ' + x));
+    if (a.rich.errors) out.push('   ✗ ' + a.rich.errors + ' fehlerhafte Datenblöcke, die Google nicht lesen kann.');
+    if (!a.rich.found.length && !a.rich.absent.length) out.push('   Keine strukturierten Daten gefunden.');
+    out.push('');
+
+    // Texte wie Yoast
+    const t = a.text;
+    if (t) {
+        out.push((n + 2) + '. Texte und Lesbarkeit');
+        if (t.readability) out.push('   – Lesbarkeit: ' + t.readability.score + ' Punkte (' + t.readability.level + '), im Schnitt ' + String(t.readability.asl).replace('.', ',') + ' Wörter je Satz' + (t.readability.longShare > 20 ? ', ' + t.readability.longShare + ' % der Sätze sind länger als 20 Wörter' : '') + '.' + (t.readability.score < 45 ? (t.readability.asl < 12 ? ' Die Sätze sind kurz, aber viele lange Fachwörter machen es schwer. Einfachere Wörter oder kurze Erklärungen helfen Kunden und KI-Assistenten.' : ' Kürzere Sätze und einfachere Wörter machen die Texte für Kunden und KI-Assistenten leichter verständlich.') : ''));
+        out.push('   – Interne Verlinkung: im Schnitt ' + t.avgLinks + ' Links je Seite zu anderen eigenen Seiten' + (t.fewLinks.length ? '; zu wenige auf ' + list(t.fewLinks, 3) : '') + '.');
+        if (t.trade || t.city) {
+            const marks = Object.entries(t.placement).map(([where, v]) => where + ' ' + (v.trade === false || v.city === false ? '✗' : '✓')
+                + (v.trade === false && v.city === false ? ' (Leistung und Ort fehlen)' : v.trade === false ? ' (Leistung fehlt)' : v.city === false ? ' (Ort fehlt)' : ''));
+            out.push('   – Leistung „' + (t.trade || '–') + '“ und Ort „' + (t.city || '–') + '“ auf der Startseite: ' + marks.join(', ') + '.');
+        }
+        out.push('');
+    }
+    return out;
+}
+
 /* Vollständiger Report als Antwort auf den Website-Check: Überblick je Bereich (SEO, GEO, Ladezeit,
    Sicherheit), Aufbau der Website mit technischen Ursachen und ein unverbindlicher Angebotsvorschlag. */
 function reportMail(opts) {
@@ -130,7 +183,7 @@ function reportMail(opts) {
     const findings = opts.findings || [];
     const name = opts.name || 'Ihre Website';
     const vars = { name, met: report.met, total: report.total, count: findings.length };
-    const rec = R.recommend(report, findings);
+    const rec = R.recommend(report, findings, opts.audit);
     const fixOf = (id) => (findings.find((f) => f.id === id) || {}).fix;
     const body = [b.greeting, '', fill(report.total ? b.intro : b.introUnmeasured, vars), ''];
 
@@ -152,6 +205,7 @@ function reportMail(opts) {
         (g.causes || []).slice(0, 4).forEach((c) => body.push('   – ' + c.title + ': ' + c.evidence + ' Lösung: ' + c.fix));
         body.push('');
     }
+    if (opts.audit) body.push(...auditLines(opts.audit, rec.sections.filter((s) => s.total).length + (g ? 2 : 1)));
 
     // Unverbindlicher Vorschlag mit Preisen aus dem Preismodell
     const offer = offerDraft({ name, selection: rec.selection, at: opts.at });

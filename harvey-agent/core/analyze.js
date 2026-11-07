@@ -369,4 +369,4 @@ async function analyzeSite(target, opts = {}) {
     };
 }
 
-module.exports = { normalizeTarget, isPublicHost, analyzeStructure, runPageSpeed, analyzeSite, parseRobots };
+module.exports = { normalizeTarget, isPublicHost, analyzeStructure, runPageSpeed, analyzeSite, parseRobots, get, readText, decode, stripTags, attrs };
