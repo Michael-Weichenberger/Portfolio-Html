@@ -284,6 +284,14 @@ async function remove(db, id) {
 }
 
 /* Öffentlicher Teaser für ?check=<id>, nur wenn im Dashboard freigegeben. */
+async function markOpened(db, id) {
+    const r = await db.prepare("SELECT kind FROM leads WHERE id = ? AND published = 1").bind(id).first();
+    if (!r || r.kind !== 'akquise') return;
+    const day = now().slice(0, 10);
+    const seen = await db.prepare("SELECT 1 FROM activities WHERE lead_id = ? AND type = 'opened' AND at >= ? LIMIT 1").bind(id, day).first();
+    if (!seen) await log(db, id, 'opened', 'Persönlicher Report aus dem Brief geöffnet');
+}
+
 async function publicReport(db, id) {
     const r = await db.prepare('SELECT report FROM leads WHERE id = ? AND published = 1').bind(id).first();
     return r && r.report ? JSON.parse(r.report) : null;
@@ -345,4 +353,4 @@ async function exportAll(db) {
     return { exportedAt: now(), leads: results, activities: acts };
 }
 
-module.exports = { STATUSES, KINDS, PROJECT_STEPS, makeId, evaluate, draftFor, insert, list, counts, overview, get, update, remove, publicReport, exportAll, log, bookingEvent };
+module.exports = { STATUSES, KINDS, PROJECT_STEPS, makeId, evaluate, draftFor, insert, list, counts, overview, get, update, remove, publicReport, markOpened, exportAll, log, bookingEvent };

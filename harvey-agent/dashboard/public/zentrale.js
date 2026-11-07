@@ -18,7 +18,7 @@
     const TYPE = { mahnung: 'Mahnung', akquise: 'Akquise', angebot: 'Angebot', nachfass: 'Nachfass', antwort: 'Antwort', report: 'Bericht', bewertung: 'Bewertung', support: 'Support', willkommen: 'Willkommen', beitrag: 'Beitrag', sonstiges: 'Mail' };
     const STAGE = { 1: 'Erinnerung', 2: 'Zahlungsaufforderung', 3: 'Letzte Mahnung' };
     const MAIL_STATE = { entwurf: 'Entwurf', freigegeben: 'freigegeben', gesendet: 'gesendet' };
-    const LEAD_STATE = { neu: 'neu', gemessen: 'gemessen', angeschrieben: 'angeschrieben', antwort: 'Antwort erhalten', termin: 'Termin', kunde: 'Kunde', abgelegt: 'abgelegt', gesendet: 'Angebot raus', auftrag: 'Kunde', in_arbeit: 'in Arbeit' };
+    const LEAD_STATE = { neu: 'neu', gemessen: 'gemessen', 'brief-bereit': 'Brief bereit', angeschrieben: 'angeschrieben', antwort: 'Antwort erhalten', termin: 'Termin', kunde: 'Kunde', abgelegt: 'abgelegt', gesendet: 'Angebot raus', auftrag: 'Kunde', in_arbeit: 'in Arbeit' };
 
     let data = null;
     let agenda = null;
@@ -189,6 +189,12 @@
         data.invoices.filter((i) => i.paused).forEach((i) => next.push(['Klären', i.client + ' hat zu ' + i.number + ' geantwortet. Mahnwesen pausiert.', () => go('finanzen')]));
         data.leads.filter((l) => l.status === 'antwort').forEach((l) => next.push(['Antwort', l.name + ' hat geantwortet.', () => go('leads')]));
         if (fresh.length) next.push(['Akquise', fresh.length + ' neue Betriebe mit Bedarf gefunden.', () => go('leads')]);
+        const ready = data.leads.filter((l) => l.status === 'brief-bereit' && l.letter);
+        if (ready.length) {
+            const day = ready.map((l) => l.letter.file.split('/')[2]).sort().pop();
+            next.push(['Briefe', ready.length + (ready.length === 1 ? ' Brief liegt' : ' Briefe liegen') + ' zum Drucken bereit. Anschriften prüfen, drucken, einwerfen, dann als versendet markieren.', () => go('leads'),
+                [h('a', { class: 'link', href: '/out/briefe/' + day + '/alle-briefe.pdf', target: '_blank', rel: 'noopener' }, 'Alle drucken')]]);
+        }
         const overdueNoDraft = data.invoices.filter((i) => i.status === 'gestellt' && i.overdueDays > 0 && !i.proposed && !i.paused).length;
         if (overdueNoDraft) next.push(['Finanzen', overdueNoDraft + ' überfällige Rechnungen, nächste Mahnstufe noch nicht erreicht.', () => go('finanzen')]);
         $('#next').replaceChildren(...(next.length ? next.slice(0, 9).map(([tag, text, fn, links]) => h('li', { class: /^Heiß/.test(tag) ? 'is-hot' : null },
@@ -449,6 +455,16 @@
                 h('div', {}, h('dt', { text: 'Signale' }), h('dd', { text: l.total ? l.met + '/' + l.total : '–' })),
                 h('div', {}, h('dt', { text: 'Priorität' }), h('dd', { text: l.priority || '–' })),
                 h('div', {}, h('dt', { text: 'Kontaktweg' }), h('dd', { text: l.contactAllowed || 'brief' }))),
+            l.status === 'brief-bereit' && l.letter ? h('p', { class: 'small ' + (l.letter.address && l.letter.address.street ? 'muted' : 'bad'), text: l.letter.address && l.letter.address.street
+                ? 'An: ' + [l.letter.address.company || l.name, l.letter.address.street, (l.letter.address.zip || '') + ' ' + (l.letter.address.city || '')].join(', ') + ' (bitte prüfen)'
+                : 'Anschrift nicht gefunden: im Brief ergänzen' }) : null,
+            l.status === 'brief-bereit' && l.letter ? h('div', { class: 'tile-foot' },
+                h('a', { class: 'btn btn-primary btn-sm', href: '/' + l.letter.file, target: '_blank', rel: 'noopener' }, 'Brief (PDF)'),
+                h('button', { type: 'button', class: 'btn btn-sm', onclick: async (ev) => {
+                    if (!confirm('Brief an ' + l.name + ' als versendet markieren? Nach 14 Tagen erinnert Kasi an Nachfass-Brief oder Besuch.')) return;
+                    ev.currentTarget.disabled = true;
+                    try { await api('lead/' + encodeURIComponent(l.domain) + '/sent', {}); toast('Als versendet markiert'); load(); } catch (err) { toast(err.message, true); }
+                } }, 'Versendet')) : null,
             l.caseFile ? h('div', { class: 'tile-foot' },
                 h('a', { class: 'btn btn-primary btn-sm', href: '/akte/local/' + caseId(l.caseFile), target: '_blank', rel: 'noopener' }, 'Gesprächsakte'),
                 h('a', { class: 'btn btn-sm btn-ghost', href: 'https://' + l.domain + '/', target: '_blank', rel: 'noopener noreferrer' }, 'Website'))
@@ -1028,7 +1044,7 @@
             : [h('li', { class: 'is-empty', text: 'Noch keine Kunden. Nach dem ersten Auftrag erscheinen sie hier.' })]));
     }
     const EVT = { check: 'Website-Check gestartet', planer: 'Planer geöffnet', anfrage: 'Anfrage gesendet', tel: 'Telefon angetippt', mail: 'Mail angetippt', whatsapp: 'WhatsApp', instagram: 'Instagram', termin: 'Erstgespräch' };
-    const SRC = { direkt: 'direkt / Lesezeichen', google: 'Google', suche: 'andere Suchmaschine', instagram: 'Instagram', facebook: 'Facebook', linkedin: 'LinkedIn', ki: 'KI-Assistent', verweis: 'andere Website', signatur: 'Mail-Signatur', website: 'eigene Unterseiten' };
+    const SRC = { direkt: 'direkt / Lesezeichen', google: 'Google', suche: 'andere Suchmaschine', instagram: 'Instagram', facebook: 'Facebook', linkedin: 'LinkedIn', ki: 'KI-Assistent', verweis: 'andere Website', signatur: 'Mail-Signatur', website: 'eigene Unterseiten', brief: 'Brief (QR-Code)', kurzlink: 'Kurzadresse /check', empfehlung: 'Empfehlung' };
     const bars = (rows, label, max) => h('ul', { class: 'bars' }, ...rows.map(([k, n]) => h('li', {},
         h('span', { class: 'bar-label', text: label(k) }), h('span', { class: 'bar' }, h('i', { style: 'width:' + Math.max(3, Math.round(n / (max || 1) * 100)) + '%' })), h('b', { text: String(n) }))));
     function renderVisits(v) {

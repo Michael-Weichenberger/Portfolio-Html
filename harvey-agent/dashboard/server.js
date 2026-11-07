@@ -412,7 +412,7 @@ async function api(req, res, url) {
             followup: ['followup-agent.js', []], termine: ['appointment-agent.js', ['--days', '3']], watch: ['watch-agent.js', ['--links']], report: ['watch-agent.js', ['--report']], roi: ['watch-agent.js', ['--quarter']],
             inbox: ['inbox-agent.js', []], alert: ['alert-agent.js', []], geo: ['geo-agent.js', []], reviews: ['reviews-agent.js', []], daily: ['daily.js', []],
             onboarding: ['onboarding-agent.js', []], buchhaltung: ['accounting-agent.js', []], beitraege: ['content-agent.js', ['--force']],
-            marketing: ['marketing-agent.js', []], anzeigenbilder: ['marketing-agent.js', ['--creatives']] };
+            marketing: ['marketing-agent.js', []], anzeigenbilder: ['marketing-agent.js', ['--creatives']], briefe: ['brief-agent.js', ['--limit', '10']] };
         const job = jobs[parts[1]];
         if (!job) return send(res, 404, { error: 'unbekannt' });
         if (parts[1] === 'daily') {
@@ -435,6 +435,16 @@ async function api(req, res, url) {
         const acc = await require('../core/bank.js').finish(String(body.code || ''));
         Activity.log('good', '✓ Bank verbunden · ' + acc.length + ' Konto/Konten');
         return send(res, 200, { accounts: acc.length });
+    }
+    if (parts[0] === 'lead' && parts[1] && parts[2] === 'sent') {
+        // Brief eingeworfen oder persönlich abgegeben: Nachfass-Erinnerung startet (followup-agent, nach 14 Tagen)
+        const leads = Store.load('leads');
+        const l = leads.find((x) => x.domain === String(parts[1]).toLowerCase());
+        if (!l) return send(res, 404, { error: 'Betrieb nicht gefunden' });
+        Object.assign(l, { status: 'angeschrieben', contactedAt: new Date().toISOString() });
+        Store.save('leads', leads);
+        Activity.log('good', '✓ Brief versendet · ' + (l.name || l.domain));
+        return send(res, 200, { ok: true });
     }
     if (parts[0] === 'lead' && parts[1] === 'add') {
         const domain = String(body.domain || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
@@ -493,6 +503,11 @@ const server = http.createServer(async (req, res) => {
             const p = path.join(ROOT, 'out', 'video', vid[1], vid[2]);
             if (!fs.existsSync(p)) return send(res, 404, 'Nicht gefunden', 'text/plain; charset=utf-8');
             return send(res, 200, fs.readFileSync(p), vid[2].endsWith('.md') ? 'text/plain; charset=utf-8' : 'video/webm');
+        }
+        const letter = url.pathname.match(/^\/out\/briefe\/(\d{4}-\d{2}-\d{2})\/([a-z0-9.-]{3,120}\.pdf)$/i);
+        if (letter) {
+            const p = path.join(ROOT, 'out', 'briefe', letter[1], letter[2]);
+            return fs.existsSync(p) ? send(res, 200, fs.readFileSync(p), 'application/pdf') : send(res, 404, 'Nicht gefunden', 'text/plain; charset=utf-8');
         }
         const ad = url.pathname.match(/^\/out\/marketing\/([a-z0-9-]{2,40})\/([a-z0-9-]{2,40}-(?:feed|story))\.png$/);
         if (ad) {

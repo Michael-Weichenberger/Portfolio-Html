@@ -202,12 +202,13 @@ async function handleCalWebhook(request, env) {
     return json({ ok: true, id });
 }
 
-async function handleReport(url, env, cors) {
+async function handleReport(url, env, cors, ctx) {
     const id = String(url.searchParams.get('id') || '');
     if (!env.DB || !/^[a-z0-9-]{3,90}$/.test(id)) return json({ error: 'not_found' }, 404, cors.headers);
     const report = await store.publicReport(env.DB, id);
     if (!report) return json({ error: 'not_found' }, 404, cors.headers);
-    return json(report, 200, { 'Cache-Control': 'public, max-age=300', ...cors.headers });
+    if (ctx) ctx.waitUntil(store.markOpened(env.DB, id).catch(() => {}));
+    return json(report, 200, { 'Cache-Control': 'private, max-age=300', ...cors.headers });
 }
 
 export default {
@@ -227,6 +228,6 @@ export default {
 
         if (route === 'GET /analyze') return handleAnalyze(url, env, ctx, cors);
         if (route === 'POST /lead') return handleLead(request, env, cors);
-        return handleReport(url, env, cors);
+        return handleReport(url, env, cors, ctx);
     }
 };

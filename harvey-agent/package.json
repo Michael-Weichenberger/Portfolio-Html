@@ -26,6 +26,7 @@
     "termine": "node appointment-agent.js",
     "buchungen": "node bookings-agent.js",
     "audit": "node core/audit.js",
+    "briefe": "node brief-agent.js",
     "watch": "node watch-agent.js",
     "report": "node watch-agent.js --report",
     "roi": "node watch-agent.js --quarter",
@@ -53,6 +54,7 @@
     "imapflow": "^1.7.8",
     "mailparser": "^3.14.2",
     "nodemailer": "^6.10.1",
-    "playwright-core": "^1.64.1"
+    "playwright-core": "^1.64.1",
+    "qrcode": "^1.5.4"
   }
 }

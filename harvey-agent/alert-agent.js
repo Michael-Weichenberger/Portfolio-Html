@@ -49,7 +49,7 @@ function scoreInbound(r) {
 }
 
 /* Herkunft lesbar: „Instagram / bf26-insta“, „Google“, „direkt (ohne Kennung)“ */
-const SRC_LABEL = { instagram: 'Instagram', google: 'Google', facebook: 'Facebook', linkedin: 'LinkedIn', website: 'eigene Unterseite', email: 'E-Mail', signatur: 'Mail-Signatur' };
+const SRC_LABEL = { instagram: 'Instagram', google: 'Google', facebook: 'Facebook', linkedin: 'LinkedIn', website: 'eigene Unterseite', email: 'E-Mail', signatur: 'Mail-Signatur', brief: 'Brief (QR-Code)', kurzlink: 'Kurzadresse /check', empfehlung: 'Empfehlung' };
 function sourceText(raw) {
     const s = parse(raw);
     if (!s || !s.source) return 'direkt (ohne Kennung)';
@@ -130,6 +130,21 @@ async function main() {
             fresh.push(item);
         }
     } catch (err) { cloudOk = false; console.log('! Web-Dashboard nicht abrufbar: ' + err.message); }
+    // Briefaktion: Betrieb hat den persönlichen Report geöffnet
+    if (cloudOk) {
+        try {
+            const since = prev.checkedAt || new Date(Date.now() - 3 * 86400000).toISOString();
+            const opened = await Cloud.query("SELECT a.lead_id, a.at, l.name, l.url FROM activities a JOIN leads l ON l.id = a.lead_id WHERE a.type = 'opened' AND a.at > ? ORDER BY a.at", [since]);
+            const local = Store.load('leads');
+            for (const o of opened) {
+                if (seen.has('o:' + o.lead_id + ':' + o.at.slice(0, 10))) continue;
+                seen.add('o:' + o.lead_id + ':' + o.at.slice(0, 10));
+                const l = local.find((x) => x.letter && x.letter.cloudId === o.lead_id);
+                if (l) { l.reportOpenedAt = o.at; Store.save('leads', local); }
+                fresh.push({ id: 'o:' + o.lead_id, at: o.at, name: (l && l.name) || o.name, url: o.url, score: 75, why: ['Hat den Report aus Ihrem Brief geöffnet', 'Jetzt vorbeischauen oder Nachfass-Brief'], kind: 'brief', inbound: false, tel: null, wa: null });
+            }
+        } catch (err) { console.log('! Brief-Aufrufe nicht abrufbar: ' + err.message); }
+    }
     let drafted = 0;
     if (cloudOk) { try { drafted = await replyDrafts(); } catch (err) { console.log('! Antwort-Entwürfe nicht angelegt: ' + err.message); } }
 

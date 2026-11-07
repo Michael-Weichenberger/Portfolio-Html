@@ -43,7 +43,7 @@ const SIGNATURE_HTML = '<table cellpadding="0" cellspacing="0" border="0" style=
     + '<tr><td style="padding:0 0 12px 0;font-size:14px;line-height:20px;">Viele Grüße</td></tr>'
     + '<tr><td style="padding:0 0 10px 0;"><a href="https://mw-itservices.de/?utm_source=email&amp;utm_medium=signatur&amp;utm_campaign=signatur" target="_blank"><img src="https://mw-itservices.de/assets/mail/signatur.gif" width="400" height="104" alt="Michael Weichenberger · MW IT-SERVICES · Websites &amp; Digitalisierung fürs Handwerk" style="display:block;width:400px;height:104px;border:0;"></a></td></tr>'
     + '<tr><td style="font-size:13px;line-height:20px;color:#5B4A3E;"><b style="color:#2D2018;">Michael Weichenberger</b> · MW IT-SERVICES<br>'
-    + '<a href="tel:+4915292610572" style="color:#8C4A25;text-decoration:none;">+49 1529 2610572</a> · <a href="mailto:info@mw-itservices.de" style="color:#8C4A25;text-decoration:none;">info@mw-itservices.de</a> · '
+    + '<a href="tel:+4915292402665" style="color:#8C4A25;text-decoration:none;">+49 1529 2402665</a> · <a href="mailto:info@mw-itservices.de" style="color:#8C4A25;text-decoration:none;">info@mw-itservices.de</a> · '
     + '<a href="https://mw-itservices.de/?utm_source=email&amp;utm_medium=signatur&amp;utm_campaign=signatur" style="color:#8C4A25;text-decoration:none;">mw-itservices.de</a><br>Deuringer Straße 1 · 86462 Langweid am Lech</td></tr></table>';
 
 /* Text → HTML: Signatur-Block am Ende durch die HTML-Signatur ersetzen, Links klickbar */

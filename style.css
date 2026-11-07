@@ -1253,6 +1253,8 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
     background: var(--bg-card);
 }
 .review-cta p { flex: 1; min-width: 240px; color: var(--text-muted); font-size: .95rem; }
+.referral-cta { margin-bottom: 16px; }
+.referral-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .review-cta strong { color: var(--text-main); }
 .review-stars { display: inline-flex; gap: 3px; color: var(--copper-mid); font-size: 1rem; }
 .faq-list { border-top: 1px solid var(--line-strong); }
